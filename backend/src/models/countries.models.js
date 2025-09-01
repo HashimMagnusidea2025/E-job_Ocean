@@ -50,7 +50,13 @@ const countrySchema = new mongoose.Schema({
   updated_at: { type: Date },
   flag: { type: String },
   wikiDataId: { type: String }
-});
+},
+ {
+    timestamps: false,
+    collection: "countries" //  force Atlas collection name
+  }
+
+);
 
 const CountryModel = mongoose.model("Country", countrySchema);
 

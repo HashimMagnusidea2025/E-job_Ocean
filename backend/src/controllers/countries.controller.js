@@ -20,7 +20,7 @@ export const getAllCountry = async (req, res) => {
 
         const country = await CountryModel.find();
         res.status(200).json({ success: true,  country })
-        console.log(country);
+       
         
     } catch (error) {
         res.status(500).json({ success: false, message: error.message })

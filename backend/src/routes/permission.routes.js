@@ -17,4 +17,7 @@ permissionRoutes.put('/permission-update', PermissionsController.UpdatePermissio
 
 permissionRoutes.delete('/permission-delete/:id', PermissionsController.DeletePermission)
 
+
+permissionRoutes.put('/permission-toggle/:id', PermissionsController.TogglePermission);
+
 export default permissionRoutes 

@@ -7,7 +7,8 @@ import {
   getUsers,
   getUserByEmail,
   updateUser,
-  deleteUser
+  deleteUser,
+ getFreeUsers
 } from "../controllers/user.controller.js";
 
 
@@ -20,6 +21,10 @@ router.get('/email',getUserByEmail)
 
 // Create a new user (optional route)
 // GET /users/:id
+
+
+router.get('/free-users', getFreeUsers)
+
 router.get('/:id', async (req, res) => {
   try {
     const user = await UserModel.findById(req.params.id);
@@ -33,7 +38,7 @@ router.get('/:id', async (req, res) => {
 });
 
 
-// change 8-7
+
 router.put("/:id", updateUser);
 
 // Delete user by ID
