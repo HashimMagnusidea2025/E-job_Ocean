@@ -1,0 +1,224 @@
+import './style/style.css';
+// import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Navbar from './components/layout/navbar/navbar';
+import Footer from './components/layout/footer/footer';
+import Home from './pages/home/home';
+import Placementapge from './pages/PlacementProgrampage/PlacementProgram';
+import WebinarsPage from './pages/Webinars/Webinars';
+import HallOfFamepage from './pages/HallOfFamepage/HallOfFamepage';
+import LiveMentorShipPage from './pages/LiveMentorshippage/Live Mentorshippage';
+import CoursesPage from './pages/coursespage/coursespage';
+import ComboIncludesPage from './pages/comboIncludespage/comboIncludespage';
+
+import EmployerDashboard from './components/employerDashboard/employerDashboard';
+// import ViewPublicProfile from './components/seekerDashboard/View-Public-Profile';
+import AboutUs from './pages/AboutUs/AboutUspage';
+import BlogsPage from './pages/Blogspage/Blogspage';
+import BlogDetailsPage from './pages/Blogspage/blogdetailpage.jsx';
+import BlogDetailsPage2 from './pages/Blogspage/blogdetailpage2.jsx';
+import Dashboard from './components/AdminDashboard/Admindashborard';
+import CaFreshersForm from './components/layout/section/CaFreshersForm/CaFreshersForm';
+import Login from './components/layout/section/login/login';
+
+
+
+import JobSeekerRegister from './components/layout/JobSeekerRegister/JobSeekerRegister.jsx';
+import CompanyRegister from './components/layout/CompanyRegister/CompanyRegister.jsx';
+
+
+// seeker dashborad inner file //
+import ProfileForm from './components/seekerDashboard/editProfile.jsx';
+import BuildResume from './components/seekerDashboard/BuildResume.jsx';
+import PrintResume from './components/seekerDashboard/PrintResume.jsx';
+import ViewPublicProfile from './components/seekerDashboard/View-Public-Profile';
+import MyJobAplications from './components/seekerDashboard/myJobAplications.jsx';
+import MYJobAlerts from './components/seekerDashboard/MyJobAlerts.jsx';
+import MyMessages from './components/seekerDashboard/MyMessages.jsx';
+import MyFevoriteJob from './components/seekerDashboard/myFevoriteJobs.jsx';
+import MyFollowings from './components/seekerDashboard/myFollowings.jsx';
+
+// Employer dashoard inner file //
+import EditAccountDetails from './components/employerDashboard/editAccountDetails.jsx';
+import CompanyPublicProfile from './components/employerDashboard/companyPublicProfile.jsx';
+import PostAJob from './components/employerDashboard/postAJob.jsx';
+import ManageJobs from './components/employerDashboard/ManageJobs.jsx';
+import PurchasedCvsPackage from './components/employerDashboard/CvsSearchPackages.jsx';
+import PaymentHistory from './components/employerDashboard/paymentHistory.jsx';
+import UnlockedUsers from './components/employerDashboard/unlockedUsers.jsx';
+import CompanyFollowers from './components/employerDashboard/companyFollowers.jsx';
+
+// Admin dashoard inner file //
+import AdminDash from './components/AdminDashboard/admin-dash.jsx';
+import RolesPage from './components/AdminDashboard/rolepage/rolepage';
+import UsersPage from './components/AdminDashboard/userspage/userspage';
+import PermissionsPage from './components/AdminDashboard/PermissionsPage/PermissionsPage';
+import CourseCategoryPage from './components/AdminDashboard/OurCoursesCategory/OurCoursesCategory.jsx';
+import GeneralSettings from './components/AdminDashboard/generalSettings/generalSettings.jsx';
+import ProfessionalCategoryPage from './components/AdminDashboard/ProfessionalCategory/ProfessionalCategory.jsx';
+import LocationPage from './components/AdminDashboard/location/location.jsx';
+import SkillsCategoryPage from './components/AdminDashboard/SkillsCategory/SkillsCategory.jsx';
+import CareerCategoryPage from './components/AdminDashboard/CareerLevelCategory/CareerLevelCategory.jsx';
+import FunctionalAreaCategory from './components/AdminDashboard/FunctionalAreaCategory/FunctionalAreaCategory.jsx';
+import JobTypeCategoryPage from './components/AdminDashboard/jobTypeCategory/jobTypeCategory.jsx';
+import JobShiftCategoryPage from './components/AdminDashboard/jobShiftCategory/jobShiftCategory.jsx';
+import DegreeLevelCategoryPage from './components/AdminDashboard/DegreeLevelCategory/DegreeLevelCategory.jsx';
+import CompanyCategoryPage from './components/AdminDashboard/CompanyCategory/CompanyCategory.jsx';
+import OwnershipCategoryPage from './components/AdminDashboard/OwnershipCategory/OwnershipCategory.jsx';
+import NoofOfficeCategoryPage from './components/AdminDashboard/NoofOfficeCategory/NoofOfficeCategory.jsx';
+import NoofEmployeescCategoryPage from './components/AdminDashboard/noofemployeescategory/NoofEmployeescCategory.jsx'
+import EstabilishedInategoryPage from './components/AdminDashboard/EstabilishedInCategory/EstabilishedInCategory.jsx';
+import CAFresherListPage from './components/AdminDashboard/CAFresherListPage/CAFresherListPage.jsx'
+
+// Create Company
+import CreateCompany from './components/AdminDashboard/createCompany/createCompany.jsx';
+
+import {
+  ProtectedAdminRoute,
+  ProtectedSeekerRoute,
+  ProtectedEmployerRoute,
+} from "./ProtectedAdminRoute.jsx";
+
+import Dash from './components/seekerDashboard/dash.jsx';
+import EmployerDash from './components/employerDashboard/employerdash.jsx';
+
+
+
+// import SeekerDashboard from './components/seekerDashboard/seekerDashboard';
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<><Home /></>} />
+        <Route path='/courses' element={<><CoursesPage /></>} />
+        <Route path="/placement-program" element={<><Placementapge /></>} />
+        <Route path="/webinars" element={<><WebinarsPage /></>} />
+        <Route path="/hall-of-fame" element={<><Navbar /><HallOfFamepage /><Footer /></>} />
+        <Route path='/live-mentorship' element={<><Navbar /><LiveMentorShipPage /><Footer /></>} />
+        <Route path='/combo-page' element={<><Navbar /><ComboIncludesPage /><Footer /></>} />
+        <Route path='/About-Us' element={<><Navbar /><AboutUs /><Footer /></>} />
+        <Route path='/blogs-page' element={<><BlogsPage /></>} />
+        <Route path='/blogs' element={<><BlogDetailsPage/></>}/>
+        <Route path='/blogs/:id' element={<><BlogDetailsPage2/></>}/>
+
+        {/* <Route path='/seeker-dashboard' element={<><Navbar /><SeekerDashboard /><Footer /></>} /> */}
+        {/* <Route path='/employer-dashboard' element={<><Navbar /><EmployerDashboard /><Footer /></>} /> */}
+
+
+        {/* <Route
+          path="/seeker-dashboard"
+          element={
+            <ProtectedSeekerRoute>
+              <Navbar />
+              <SeekerDashboard />
+            </ProtectedSeekerRoute>
+          }
+        /> */}
+
+        {/* Seeker-dashboard  Routes */}
+        <Route path='/seeker-dashboard' element={<>
+          <ProtectedSeekerRoute>
+            <Dash />
+          </ProtectedSeekerRoute>
+        </>} />
+        {/* Seeker-dashboard inner Routes */}
+        <Route path='/seeker-dashboard/my-profile' element={<><ProfileForm /></>} />
+        <Route path='/seeker-dashboard/build-resume' element={<><BuildResume /></>} />
+        <Route path='/seeker-dashboard/resume' element={<><PrintResume /></>} />
+        <Route path='/seeker-dashboard/view-Public-Profile' element={<><ViewPublicProfile /></>} />
+        <Route path='/seeker-dashboard/my-job-applications' element={<><MyJobAplications /></>} />
+        <Route path='/seeker-dashboard/my-favourite-jobs' element={<><MyFevoriteJob /></>} />
+        <Route path='/seeker-dashboard/my-alerts' element={<><MYJobAlerts /></>} />
+        <Route path='/seeker-dashboard/my-messages' element={<><MyMessages /></>} />
+        <Route path='/seeker-dashboard/my-followings' element={<><MyFollowings /></>} />
+
+
+        {/* <Route
+          path="/Employer-dashboard"
+          element={
+            <ProtectedEmployerRoute>
+              <Navbar />
+              <EmployerDashboard />
+            </ProtectedEmployerRoute>
+          }
+        /> */}
+        <Route path='/employer-dashboard' element={<>
+          <ProtectedEmployerRoute>
+            <EmployerDash />
+          </ProtectedEmployerRoute></>} />
+        {/* Employer-dashboard inner Routes */}
+
+        <Route path="/employer-dashboard/edit/company-profile" element={<EditAccountDetails />} />
+        <Route path='/employer-dashboard/company-profile' element={<><CompanyPublicProfile /></>} />
+        <Route path='/employer-dashboard/post-job' element={<><PostAJob /></>} />
+        <Route path='/employer-dashboard/posted-jobs' element={<><ManageJobs /></>} />
+        <Route path='/employer-dashboard/company-packages' element={<><PurchasedCvsPackage /></>} />
+        <Route path='/employer-dashboard/list-payment-history' element={<><PaymentHistory /></>} />
+        <Route path='/employer-dashboard/unloced-seekers' element={<><UnlockedUsers /></>} />
+        <Route path='/employer-dashboard/company-messages' element={<></>} />
+        <Route path='/employer-dashboard/company-followers' element={<><CompanyFollowers /></>} />
+
+
+        <Route
+          path="/admin-dashboard"
+          element={
+            <ProtectedAdminRoute>
+              <Dashboard />
+            </ProtectedAdminRoute>
+          }
+        />
+        {/* Admin-dashboard inner Routes */}
+
+        <Route path='/admin-dash' element={<><AdminDash /></>} />
+        <Route path='/admin-dashboard/ca-fresher-list' element={<><CAFresherListPage/></>}/>
+
+        <Route path='/admin-dashboard/role-list' element={<><RolesPage /></>} />
+        <Route path='/admin-dashboard/user-list' element={<><UsersPage /></>} />
+        <Route path='/admin-dashboard/permission-list' element={<><PermissionsPage /></>} />
+        <Route path='/admin-dashboard/course-category' element={<><CourseCategoryPage /></>} />
+        <Route path='/admin-dashboard/general-settings' element={<><GeneralSettings /></>} />
+        {/* <Route path='/admin-dashboard/navigation-menu' element={<><UsersPage /></>} /> */}
+        {/* <Route path='/admin-dashboard/CMS-page' element={<><UsersPage /></>} /> */}
+        {/* <Route path='/admin-dashboard/gallery-category' element={<><UsersPage /></>} /> */}
+        {/* <Route path='/admin-dashboard/FAQ-category' element={<><UsersPage /></>} /> */}
+        <Route path='/admin-dashboard/proffessional-category' element={<><ProfessionalCategoryPage /></>} />
+        <Route path='/admin-dashboard/location-category' element={<><LocationPage /></>} />
+        <Route path='/admin-dashboard/skills-category' element={<><SkillsCategoryPage /></>} />
+        <Route path='/admin-dashboard/career-level-category' element={<><CareerCategoryPage /></>} />
+        <Route path='/admin-dashboard/functional-area-category' element={<><FunctionalAreaCategory /></>} />
+        <Route path='/admin-dashboard/job-type-category' element={<><JobTypeCategoryPage /></>} />
+        <Route path='/admin-dashboard/job-shift-category' element={<><JobShiftCategoryPage /></>} />
+        <Route path='/admin-dashboard/degree-level-category' element={<><DegreeLevelCategoryPage /></>} />
+
+        {/* Company profile Routes */}
+        <Route path='/admin-dashboard/create-company' element={<><CreateCompany/></>}/>
+        <Route path='/admin-dashboard/company-category' element={<><CompanyCategoryPage /></>} />
+        <Route path='/admin-dashboard/ownership-category' element={<><OwnershipCategoryPage /></>} />
+        <Route path='/admin-dashboard/no-of-office-category' element={<><NoofOfficeCategoryPage /></>} />
+        <Route path='/admin-dashboard/no-of-employees-category' element={<><NoofEmployeescCategoryPage /></>} />
+        <Route path='/admin-dashboard/established-in-category' element={<><EstabilishedInategoryPage /></>} />
+
+
+        {/* <Route path='/admin-dashboard/course-management' element={<><UsersPage /></>} /> */}
+
+        {/* Founded Year */}
+
+        <Route path='/company-Information/:id' element={<EditAccountDetails />} />
+        <Route path='/job-seeker-register' element={<><Navbar /><JobSeekerRegister /></>} />
+        <Route path='/company-register' element={<><Navbar /><CompanyRegister /></>} />
+        <Route path='/login' element={<><Login /></>} />
+        <Route path='/CA-register' element={<><CaFreshersForm /></>} />
+
+
+
+
+
+
+      </Routes>
+
+    </BrowserRouter>
+  );
+}
+
+export default App;

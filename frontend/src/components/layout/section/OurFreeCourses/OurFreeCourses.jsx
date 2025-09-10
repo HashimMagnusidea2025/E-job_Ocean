@@ -1,0 +1,87 @@
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+
+import { OurFreeCoursesCrds } from "../../../cards/cards";
+import banner1 from "../../../../media/png/MASTERCLASS.png";
+
+const courses = [
+    {
+        title: "Investment Banking MasterClass",
+        image: banner1,
+        trainer: "CA Saurabh Bansal",
+        hours: "15+ Hrs",
+        price: "₹3499/-",
+    },
+    {
+        title: "IND AS & IFRS MasterClass",
+        image: banner1,
+        trainer: "CA Rakshit Mittal",
+        hours: "20+ Hrs",
+        price: "₹3499/-",
+    },
+    {
+        title: "AI & ChatGPT For Finance MasterClass",
+        image: banner1,
+        trainer: "Inderjeet & Archit",
+        hours: "20+ Hrs",
+        price: "₹2499/-",
+    },
+    {
+        title: "Audit Master Class",
+        image: banner1,
+        trainer: "CA Archit Agarwal",
+        hours: "30+ Hrs",
+        price: "₹3499/-",
+    },
+    {
+        title: "Audit Master Class",
+        image: banner1,
+        trainer: "CA Archit Agarwal",
+        hours: "30+ Hrs",
+        price: "₹3499/-",
+    },
+];
+
+export default function OurFreeCourses() {
+    return (
+        <div className="py-12 px-4 bg-white font-[Poppins]">
+            <div className="container mx-auto">
+                <div className="flex sm:flex-row justify-between items-start sm:items-center mb-6 px-4 sm:px-8 gap-4">
+                    <h2 className="text-[23px] sm:text-[40px] font-bold leading-tight">
+                        Our <span className="text-[#339ca0]">Free Courses</span>
+                    </h2>
+                    <button className="bg-gradient-to-r from-[#339ca0] to-black text-white px-4 py-2 text-[18px] sm:text-[18px] rounded font-medium transition-all hover:bg-gray-800">
+                        View All
+                    </button>
+                </div>
+            </div>
+
+            <Swiper
+                className="max-w-[1920px]"
+                spaceBetween={30}
+                slidesPerView={1}
+                navigation={true}
+                breakpoints={{
+                    640: { slidesPerView: 1.2 },
+                    768: { slidesPerView: 2 },
+                    1024: { slidesPerView: 3 },
+                    1280: { slidesPerView: 4 },
+                    1920: { slidesPerView: 5 },
+                }}
+                modules={[Navigation]}
+            >
+                {courses.map((course, index) => (
+                    <SwiperSlide key={index}>
+                        <OurFreeCoursesCrds
+                            title={course.title}
+                            image={course.image}
+                            trainer={course.trainer}
+                        />
+                    </SwiperSlide>
+                ))}
+            </Swiper>
+        </div>
+    );
+}
