@@ -1,0 +1,36 @@
+import mongoose from 'mongoose';
+
+
+const CommentSchema = mongoose.Schema({
+
+
+    name: { type: String },
+    email: { type: String },
+
+    comment: {
+        type: String,
+        required: true
+    },
+
+    id: { type: Number, required: true },
+    
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+    },
+    type: {
+        type: String,
+         required: true
+    },
+    CommentCount: {
+        type: Number
+    },
+
+    otp: { type: String }, // guest user  OTP
+    otpVerified: { type: Boolean, default: false },
+
+    createdAt: { type: Date, default: Date.now },
+})
+
+const CommentModel = mongoose.model('Comment', CommentSchema);
+export default CommentModel;

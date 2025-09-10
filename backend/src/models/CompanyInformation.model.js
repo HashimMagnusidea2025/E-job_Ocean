@@ -29,9 +29,21 @@ const CompanyInformationSchema = new mongoose.Schema({
       pinterest: { type: String },
     },
     address: {
-      country: { type: String },
-      state: { type: String },
-      city: { type: String },
+       country: { 
+    type: Number,  // Changed to Number to match Country model
+    ref: 'Country',
+    required: true 
+  },
+  state: { 
+    type: Number,  // Changed to Number to match State model
+    ref: 'State',
+    required: true 
+  },
+  city: { 
+    type: String,  // Keep as String to match City model
+    ref: 'City',
+    required: true 
+  },
       companyAddress: { type: String },
       companyLocation: { type: String },
     }

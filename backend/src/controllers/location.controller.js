@@ -21,7 +21,7 @@ export const getAllLocation = async (req, res) => {
 
         const location= await LocationModel.find();
         res.status(200).json({ success: true,  location })
-        console.log(location);
+        
         
     } catch (error) {
         res.status(500).json({ success: false, message: error.message })

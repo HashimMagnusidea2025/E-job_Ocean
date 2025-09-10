@@ -87,7 +87,7 @@ export const getActiveCompanyCategories = async (req, res) => {
     try {
         const categories = await CompanyCategoryModel.find({ status: "active"});
         res.json(categories);
-        console.log(categories);
+        
         
     } catch (err) {
         res.status(500).json({ message: err.message });

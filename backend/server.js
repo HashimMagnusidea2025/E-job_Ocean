@@ -14,7 +14,7 @@ import CMSRouter from './src/routes/CMS.Routes.js';
 import generalSettingsRoute from './src/routes/generalsettings.Routes.js';
 import CountryRouter from './src/routes/countries.Routes.js';
 import StateRouter from './src/routes/State.Routes.js';
-import CityRouter from './src/routes/city.Routes.js'
+import CityRouter from './src/routes/city.Routes.js';
 import ProfessionalCategoryRouter from './src/routes/ProfessionalCategory.Routes.js';
 import filterOptionRouter from "./src/routes/filterOption.Routes.js";
 import LocationRouter from './src/routes/location.Routes.js';
@@ -33,6 +33,11 @@ import OwnershipCategoryRouter from './src/routes/OwnershipCategory.Routes.js'
 import NoofOfficeCategoryRouter from './src/routes/NoofOfficeCategory.Routes.js';
 import NoofEmployeesCategoryRouter from './src/routes/NoofEmployeesCategory.Routes.js';
 // import FoundedYearCategoryRouter from './src/routes/FoundedYearCategory.Routes.js';
+
+
+
+import LikeRoute from './src/module/blogs/likes.Routes.js';
+import CommentRuter from './src/module/comment/comment.Routes.js';
 
 
 
@@ -90,6 +95,9 @@ server.use('/api/established-in-category', EstablishedInCategoryRouter)
 // server.use('/api/founded-year-category', FoundedYearCategoryRouter)
 
 
+
+server.use('/api/blogs/like', LikeRoute);
+server.use('/api/comment', CommentRuter);
 
 
 
