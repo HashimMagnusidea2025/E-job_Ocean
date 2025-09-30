@@ -1,5 +1,5 @@
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation } from "swiper/modules";
+import { Navigation,Autoplay } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import shubhangijain from '../../../../media/png/ca-shubhangi-jain.png'
@@ -85,6 +85,10 @@ export default function IndustryExperts() {
             <Swiper spaceBetween={20}
                 slidesPerView={1}
                 navigation={true}
+                autoplay={{
+                        delay: 3000, // 3 second baad slide change hoga
+                        disableOnInteraction: false, // user click kare to bhi autoplay continue rahega
+                    }}
                 breakpoints={{
                     640: { slidesPerView: 1.2 },
                     768: { slidesPerView: 2 },
@@ -94,7 +98,7 @@ export default function IndustryExperts() {
                 }}
 
                 className="relative container mx-auto"
-                modules={[Navigation]}>
+                modules={[Navigation,Autoplay]}>
                 {experts.map((expert, index) => (
                     <SwiperSlide key={index}>
                         <div className="bg-[#9e5c00] text-white border border-white rounded-xl overflow-hidden text-center pb-5 relative">

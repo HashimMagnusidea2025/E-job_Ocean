@@ -53,50 +53,50 @@ export default function Navbar() {
 
 
 
-   // Load user data & listen for external updates
-   useEffect(() => {
-     const loadUserData = async () => {
-       const userData = localStorage.getItem("user");
-       if (userData) {
-         const parsedUser = JSON.parse(userData);
-         setUser(parsedUser);
-         setIsLoggedIn(!!localStorage.getItem("token"));
- 
-         try {
-           if (parsedUser.roleID?.name === "Employer") {
-             // 🔹 Employer -> fetch company logo
-             const response = await getCompanyLogo();
-             if (response.success) {
-               const fullLogoUrl = `http://localhost:5000${response.logo}`;
-               setProfileImage(fullLogoUrl);
-               console.log("Employer Logo URL:", fullLogoUrl);
-             } else {
-               setProfileImage(null);
-             }
-           } else if (parsedUser.roleID?.name === "seeker") {
-             const response = await getCompanyLogo();
-             const fullLogoUrl = `http://localhost:5000${response.logo}`;
-             setProfileImage(fullLogoUrl);
-           } else if (parsedUser.roleID?.name === "superadmin") {
-             // 🔹 Superadmin -> use default logo
-             setProfileImage(logo);
-           }
- 
-           console.log("Parsed User Data:", parsedUser);
-         } catch (error) {
-           console.error("Error fetching logo/profile:", error);
-           setProfileImage(null);
-         }
-       }
- 
-     };
- 
-     loadUserData(); // On initial load
-     window.addEventListener("userUpdated", loadUserData);
-     return () => {
-       window.removeEventListener("userUpdated", loadUserData);
-     };
-   }, []);
+  // Load user data & listen for external updates
+  useEffect(() => {
+    const loadUserData = async () => {
+      const userData = localStorage.getItem("user");
+      if (userData) {
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
+        setIsLoggedIn(!!localStorage.getItem("token"));
+
+        try {
+          if (parsedUser.roleID?.name === "Employer") {
+            // 🔹 Employer -> fetch company logo
+            const response = await getCompanyLogo();
+            if (response.success) {
+              const fullLogoUrl = `http://localhost:5000${response.logo}`;
+              setProfileImage(fullLogoUrl);
+              console.log("Employer Logo URL:", fullLogoUrl);
+            } else {
+              setProfileImage(null);
+            }
+          } else if (parsedUser.roleID?.name === "seeker") {
+            const response = await getCompanyLogo();
+            const fullLogoUrl = `http://localhost:5000${response.logo}`;
+            setProfileImage(fullLogoUrl);
+          } else if (parsedUser.roleID?.name === "superadmin") {
+            // 🔹 Superadmin -> use default logo
+            setProfileImage(logo);
+          }
+
+          console.log("Parsed User Data:", parsedUser);
+        } catch (error) {
+          console.error("Error fetching logo/profile:", error);
+          setProfileImage(null);
+        }
+      }
+
+    };
+
+    loadUserData(); // On initial load
+    window.addEventListener("userUpdated", loadUserData);
+    return () => {
+      window.removeEventListener("userUpdated", loadUserData);
+    };
+  }, []);
 
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
@@ -116,7 +116,7 @@ export default function Navbar() {
     navigate("/login");
   };
 
-   const getImageSource = () => {
+  const getImageSource = () => {
     return profileImage; // Just return profileImage, no fallback
   };
 
@@ -171,16 +171,17 @@ export default function Navbar() {
 
             <li><Link to="/placement-program" className="hover:text-[#339ca0]">PLACEMENT PROGRAM</Link></li>
             <li><Link to="/webinars" className="hover:text-[#339ca0]">WEBINARS</Link></li>
-            <li><Link to="/hall-of-fame" className="hover:text-[#339ca0]">HALL OF FAME</Link></li>
-            <li><Link to="/live-mentorship" className="hover:text-[#339ca0]">LIVE MENTORSHIP</Link></li>
-
+            <li><Link to="/hall-of-fame" className="hover:text-[#339ca0]">LIVE MENTORSHIP</Link></li>
+            {/* <li><Link to="/live-mentorship" className="hover:text-[#339ca0]">LIVE MENTORSHIP</Link></li> */}
+            <li>
+              <Link to="/placement-program"><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">JOBS</li></Link></li>
             <li className="relative">
               <span onClick={toggleMoreDropdown} className="cursor-pointer hover:text-[#339ca0] p-4">MORE</span>
               {showMoreDropdown && (
                 <div className="absolute left-[-130px] top-[28px] mt-1 w-[250px] bg-white border shadow-xl z-50 p-6 rounded-lg text-sm">
                   <ul className="space-y-3">
                     <li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">WHATSAPP GROUPS</li>
-                    <li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">JOBS</li>
+
                     <li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">TESTIMONIALS</li>
                     <li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">BECOME A MENTOR</li>
                     <li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">HIRE FORM US</li>
@@ -206,9 +207,9 @@ export default function Navbar() {
                   onClick={() => setShowProfile(prev => !prev)}
                 >
                   {profileImage ? (
-                    <img 
-                      src={getImageSource()} 
-                      alt="Profile" 
+                    <img
+                      src={getImageSource()}
+                      alt="Profile"
                       className="w-10 h-10 rounded-full object-cover"
                     />
                   ) : (
@@ -220,52 +221,52 @@ export default function Navbar() {
                 </button>
 
                 {showProfile && (
-                            <div className="absolute right-0 mt-2 w-60 bg-white border rounded-md shadow-md z-10">
-                              <div className="flex items-center gap-3 p-3 border-b">
-                                <div>
-                                  <div className='flex gap-2 items-center'>
-                                    <img
-                                      src={profileImage }
-                                      alt="Profile"
-                                      className="h-8 w-8 rounded-full object-cover"
-                                      onError={(e) => {
-                                        e.target.src = "/img/person-avtar.png";
-                                      }}
-                                    />
-                                    <p className="font-medium text-sm">
-                                      {user ? `${user.firstName} ${user.lastName}` : "Admin"}
-                                    </p>
-                                  </div>
-                
-                                  <p className="text-xs text-gray-500">  {user?.email || "@example.com"}</p>
-                                </div>
-                              </div>
-                              <ul className="text-sm text-gray-700">
-                                <li
-                                  onClick={() => {
-                                    const roleName = user?.roleID?.name?.toLowerCase();
-                                    if (roleName === "seeker") navigate("/seeker-dashboard");
-                                    else if (roleName === "employer") navigate("/employer-dashboard");
-                                    else if (roleName === "superadmin") navigate("/admin-dash");
-                                    else navigate("/");
-                                    setShowProfile(false);
-                                  }}
-                                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
-                                >
-                                  <FaUser /> Profile
-                                </li>
-                                {/* <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2">
+                  <div className="absolute right-0 mt-2 w-60 bg-white border rounded-md shadow-md z-10">
+                    <div className="flex items-center gap-3 p-3 border-b">
+                      <div>
+                        <div className='flex gap-2 items-center'>
+                          <img
+                            src={profileImage}
+                            alt="Profile"
+                            className="h-8 w-8 rounded-full object-cover"
+                            onError={(e) => {
+                              e.target.src = "/img/person-avtar.png";
+                            }}
+                          />
+                          <p className="font-medium text-sm">
+                            {user ? `${user.firstName} ${user.lastName}` : "Admin"}
+                          </p>
+                        </div>
+
+                        <p className="text-xs text-gray-500">  {user?.email || "@example.com"}</p>
+                      </div>
+                    </div>
+                    <ul className="text-sm text-gray-700">
+                      <li
+                        onClick={() => {
+                          const roleName = user?.roleID?.name?.toLowerCase();
+                          if (roleName === "seeker") navigate("/seeker-dashboard");
+                          else if (roleName === "employer") navigate("/employer-dashboard");
+                          else if (roleName === "superadmin") navigate("/admin-dash");
+                          else navigate("/");
+                          setShowProfile(false);
+                        }}
+                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+                      >
+                        <FaUser /> Profile
+                      </li>
+                      {/* <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2">
                                   <FaEnvelope /> Messages
                                 </li> */}
-                                <li
-                                  onClick={handleLogout}
-                                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2 text-red-500"
-                                >
-                                  <FaSignOutAlt /> Logout
-                                </li>
-                              </ul>
-                            </div>
-                          )}
+                      <li
+                        onClick={handleLogout}
+                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2 text-red-500"
+                      >
+                        <FaSignOutAlt /> Logout
+                      </li>
+                    </ul>
+                  </div>
+                )}
               </div>
             )}
           </ul>

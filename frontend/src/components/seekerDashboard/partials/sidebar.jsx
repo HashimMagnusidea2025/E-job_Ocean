@@ -28,6 +28,11 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
     }));
   };
 
+  const handleAddWebinarClick = () => {
+    // Redirect to backend Google OAuth route
+    window.location.href = "http://localhost:8000/google/auth?redirect=/admin-dashboard/add-webinar";
+  };
+
   const handleLinkClick = (path, keepOpen = false) => {
     if (isMobile && !keepOpen) {
       onSidebarToggle();
@@ -80,8 +85,67 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
   const AdminItems = [
     { path: "/", icon: <FaHome />, label: "Home" },
     { path: "/admin-dash", icon: <FaHome />, label: "Dashboard" },
-    {path:"/admin-dashboard/ca-fresher-list", label:"CA Fresher List", icon :<GoDotFill size={12} className="dot" />},
+    { path: "/admin-dashboard/ca-fresher-list", label: "CA Fresher List", icon: <GoDotFill size={12} className="dot" /> },
     
+
+    {
+      icon: <FaUser />, label: "Job Post ",
+      children: [
+
+        {
+          path: "/admin-dashboard/job-post", icon: <GoDotFill size={12} className="dot" />,
+          label: " Add Job Post"
+        },
+       
+
+      ]
+    },
+    {
+      icon: <FaUser />, label: " Registrations List",
+      children: [
+
+        {
+          path: "/admin-dashboard/webinar-registration-list", icon: <GoDotFill size={12} className="dot" />,
+          label: "Webinar Registration List"
+        },
+        {
+          path: "/admin-dashboard/one-to-one-registration-list", icon: <GoDotFill size={12} className="dot" />,
+          label: "One To One Registration"
+        },
+
+      ]
+    },
+    
+    {
+      icon: <FaUser />, label: "Speakers",
+      children: [
+
+        {
+          path: "/admin-dashboard/add-speakers", icon: <GoDotFill size={12} className="dot" />,
+          label: " Add Speakers"
+        },
+        {
+          path: "/admin-dashboard/add-one-to-one", icon: <GoDotFill size={12} className="dot" />,
+          label: " Add One To One"
+        },
+        {
+          path: "/admin-dashboard/one-to-one-list", icon: <GoDotFill size={12} className="dot" />,
+          label: "One To One List"
+        },
+
+      ]
+    },
+    {
+      icon: <FaUser />, label: "Webinars",
+      children: [
+
+        {
+          path: "/admin-dashboard/add-webinar", icon: <GoDotFill size={12} className="dot" />,
+          label: " Add Webinars"
+        },
+
+      ]
+    },
     {
       icon: <FaUser />, label: "User Management",
       children: [
@@ -93,7 +157,7 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
           path: "/admin-dashboard/role-list", icon: <GoDotFill size={12} className="dot" />,
           label: "Role List"
         },
-         {
+        {
           path: "/admin-dashboard/permission-list", icon: <GoDotFill size={12} className=" dot" />,
           label: "Permission List"
         },
@@ -112,7 +176,7 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
     {
       icon: <IoMdSettings />, label: "Master Settings",
       children: [
-       
+
         {
           path: "/admin-dashboard/company-category", icon: <GoDotFill size={12} className=" dot" />,
           label: "Company Category"
@@ -124,7 +188,7 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
         { path: "/admin-dashboard/no-of-office-category", icon: <GoDotFill size={12} className=" dot" />, label: "No of Office Category" },
         { path: "/admin-dashboard/no-of-employees-category", icon: <GoDotFill size={12} className=" dot" />, label: "No of Employees Category" },
         { path: "/admin-dashboard/established-in-category", icon: <GoDotFill size={12} className=" dot" />, label: "Established In Category" },
-       
+
         {
           path: "/admin-dashboard/course-category", icon: <GoDotFill size={12} className=" dot" />,
           label: "Course Category"
@@ -138,8 +202,8 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
           label: "Navigation Menu"
         },
         {
-          path: "/admin-dashboard/CMS-page", icon: <GoDotFill size={12} className=" dot" />,
-          label: "CMS Page"
+          path: "/admin-dashboard/cms-page", icon: <GoDotFill size={12} className=" dot" />,
+          label: "CMS Page Category"
         },
         {
           path: "/admin-dashboard/gallery-category", icon: <GoDotFill size={12} className=" dot" />,
@@ -216,6 +280,7 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
               </span>
               {isOpen ? <FaAngleUp size={20} /> : <FaAngleDown size={20} />}
             </button>
+
             {isOpen && (
               <ul className="ml-7 mt-1 space-y-1">
                 {renderMenu(item.children, item.label)}

@@ -9,63 +9,36 @@ import { Link } from "react-router-dom";
 import { useQuery } from '@tanstack/react-query';
 import hero31 from "../../media/jpg/31.jpg";
 import { FaRegCommentDots } from "react-icons/fa";
-const categories = [
-    "All",
-    "Articleship",
-    "Big 4",
-    "Top CA Firms",
-    "CA Jobs",
-    "Industrial Training",
-    "Auditing",
-];
 
-// const blogs = [
-//     {
-//         id: 1,
-//         category: "Big 4",
-//         title: "Top 20 Transfer Pricing Interview Questions You Must Prepare For Big 4 & MNC Roles",
-//         des: "Transfer pricing (TP) is one of the most sought-after and technical domains in tax. If you’re preparing for roles in Big 4s or global MNCs...",
-//         image: hero31,
-//         path: "/blogs"
-//     },
-//     {
-//         id: 2,
-//         category: "CA Jobs",
-//         title: "Salary in FDD for CA Freshers: Real Talk About Money, Pressure & Growth",
-//         des: "You’ve finally cleared your CA finals. The moment you waited years for. And now… things are going in different directions...",
-//         image: hero31,
-//         path: "/"
-//     },
-//     {
-//         id: 3,
-//         category: "CA Jobs",
-//         title: "SAP FICO Salary for CA Freshers: What You Really Need to Know",
-//         des: "So you’ve finally cleared CA. The lectures, mock tests, the stress-eating Maggi at 3 am—it’s all done. And now you’re here...",
-//         image: hero31,
-//     },
-//     {
-//         id: 4,
-//         category: "Auditing",
-//         title: "Financial Controller Salary as a CA: What You Deserve and What You Can Expect",
-//         des: "Let’s be honest—when we hear “Financial Controller,” most of us picture a senior finance guy with decades of experience...",
-//         image: hero31,
-//     },
-// ];
+
 
 export default function BlogsPage() {
 
-    const [posts, setPosts] = useState([]);
+    const [posts, setPosts] = useState(null);
 
 
-
+    const [categories, setCategories] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [searchQuery, setSearchQuery] = useState("");
 
-    // const filteredBlogs = blogs.filter(
-    //     (blog) =>
-    //         (selectedCategory === "All" || blog.category === selectedCategory) &&
-    //         blog.title.toLowerCase().includes(searchQuery.toLowerCase())
-    // );
+    useEffect(() => {
+        axios
+            .get("https://blog.ejobocean.com/wp-json/wp/v2/categories")
+            .then((res) => {
+
+                const apiCategories = res.data.map((cat) => ({
+                    id: cat.id,
+                    name: cat.name,
+                    description: cat.description,
+                }));
+
+
+                setCategories([{ id: 0, name: "All" }, ...apiCategories]);
+            })
+            .catch((err) => console.error("Error fetching categories:", err));
+    }, []);
+
+
 
 
     useEffect(() => {
@@ -74,7 +47,6 @@ export default function BlogsPage() {
             .then((res) => {
                 setPosts(res.data);
                 console.log(res.data);
-
             })
             .catch((err) => {
                 console.error("Error fetching posts:", err);
@@ -82,7 +54,24 @@ export default function BlogsPage() {
     }, []);
 
 
-    
+    const filteredPosts = posts?.filter((post) => {
+        const title = post.title?.rendered?.toLowerCase() || "";
+        const description = post.excerpt?.rendered?.toLowerCase() || "";
+
+
+        const categoryMatch =
+            selectedCategory === "All" ||
+            post._embedded?.["wp:term"]?.[0]?.some(
+                (cat) => cat.name === selectedCategory || cat.description === selectedCategory
+            );
+
+        const searchMatch =
+            title.includes(searchQuery.toLowerCase()) ||
+            description.includes(searchQuery.toLowerCase());
+
+        return categoryMatch && searchMatch;
+    });
+
 
 
 
@@ -92,6 +81,7 @@ export default function BlogsPage() {
 
 
             {/* Hero Section */}
+
             <section className="container mx-auto text-white text-center py-28">
                 <h2 className="text-3xl md:text-[50px] font-extrabold tracking-wide">
                     E-JOB OCEAN BLOGS
@@ -101,26 +91,30 @@ export default function BlogsPage() {
                 </p>
             </section>
 
-            {/* Blog Section */}
+
             <div className="w-full bg-white">
                 <section className="container mx-auto py-12 px-4 ">
 
 
-                    {/* Filter Tabs */}
-                    <div className="flex flex-wrap gap-2 mb-6 items-center">
+                    <div className="flex flex-wrap gap-2 mb-6 items-center justify-center">
 
-                        {categories.map((cat) => (
-                            <button
-                                key={cat}
-                                className={`px-4 py-2 rounded-md text-sm ${selectedCategory === cat
-                                    ? "bg-gray-800 text-white"
-                                    : "text-gray-700 border border-gray-300"
-                                    }`}
-                                onClick={() => setSelectedCategory(cat)}
-                            >
-                                {cat}
-                            </button>
-                        ))}
+                        <div className="flex flex-wrap gap-2 mb-6 items-center">
+                            {categories.map((cat) => (
+                                <button
+                                    key={cat.id}
+                                    className={`px-4 py-2 rounded-md text-sm ${selectedCategory === cat.name
+                                        ? "bg-gray-800 text-white"
+                                        : "text-gray-700 border border-gray-300"
+                                        }`}
+                                    onClick={() => setSelectedCategory(cat.name)}
+                                >
+                                    {cat.name}
+                                </button>
+                            ))}
+
+
+                        </div>
+
 
                         {/* Search */}
                         <input
@@ -132,37 +126,45 @@ export default function BlogsPage() {
                         />
                     </div>
 
-                    {/* Title */}
                     <h2 className="text-2xl font-semibold mb-6">All Blog Posts</h2>
 
-                    {/* Blog Cards */}
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {posts.map((value) => (
-                            <BlogsPostCards
-                                key={value.id}
-                                id={value.id}
-                                img={
-                                    value._embedded?.["wp:featuredmedia"]?.[0]?.media_details?.sizes
-                                        ?.pixwell_280x210?.source_url
-                                }
-                                title={<span dangerouslySetInnerHTML={{ __html: value.title.rendered }} />}
-                                description={value.excerpt.rendered}
-
-
-                                button="Read More"
-                            />
-                        ))}
-
-                        {/* {filteredBlogs.map((blog) => (
-                            <BlogsPostCards
-                                key={blog.id}
-                                img={blog.image}
-                                title={blog.title}
-                                description={blog.des}
-                                button="Read More"
-                            />
-                        ))} */}
+                        {!posts ? (
+                            <div className="col-span-full flex justify-center items-center h-64">
+                                <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
+                            </div>
+                        ) : filteredPosts.length > 0 ? (
+                            filteredPosts.map((value) => (
+                                <BlogsPostCards
+                                    key={value.id}
+                                    id={value.id}
+                                    img={
+                                        value._embedded?.["wp:featuredmedia"]?.[0]
+                                            ?.media_details?.sizes?.pixwell_280x210
+                                            ?.source_url
+                                    }
+                                    title={
+                                        <span
+                                            dangerouslySetInnerHTML={{
+                                                __html: value.title.rendered,
+                                            }}
+                                        />
+                                    }
+                                    description={value.excerpt.rendered}
+                                    button="Read More"
+                                    type="blogs"
+                                    Commentbtn={true}
+                                    Viewbtn={true}
+                                />
+                            ))
+                        ) : (
+                            <p className="col-span-full text-center text-gray-600">
+                                No blogs found matching your search.
+                            </p>
+                        )}
                     </div>
+
                 </section>
             </div>
 

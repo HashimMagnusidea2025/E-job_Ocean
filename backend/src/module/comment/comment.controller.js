@@ -70,7 +70,7 @@ export const PostComment = async (req, res) => {
         if (!req.user) return res.status(401).json({ msg: "Login required" });
 
         const newComment = new CommentModel({
-            id: Number(id), // <--  store blogId
+            id: Number(id), // <- ---  store blogId
             type,
             user: req.user._id,
             comment,
@@ -79,7 +79,7 @@ export const PostComment = async (req, res) => {
 
         await newComment.save();
 
-        // ✅ Get updated count after saving
+        //  Get updated count  saving
         const updatedCount = await CommentModel.countDocuments({ id: Number(id), type, otpVerified: true });
 
         res.status(201).json({
@@ -101,14 +101,26 @@ export const GetCommentsByBlog = async (req, res) => {
         const { type } = req.query;
 
         const blogId = Number(id);
-        const comments = await CommentModel.find({ id: blogId, type, otpVerified: true })
+        const comments = await CommentModel.find({
+            id: blogId,
+            type,
+            otpVerified: true
+        })
+            .populate("user", "name email") // agar user login hai
+            .sort({ createdAt: -1 });
 
         const commentCount = await CommentModel.countDocuments({ id: blogId, type, otpVerified: true });
-        console.log(commentCount);
+
+        //  Add likedByUser flag
+        const userId = req.user?._id?.toString();
 
         res.status(200).json({
             count: commentCount,
-            comments,
+            comments: comments.map(c => ({
+                ...c.toObject(),
+                likesCount: c.likes.length,
+                likedByUser: userId ? c.likes.includes(userId) : false
+            }))
         });
 
 
@@ -117,3 +129,34 @@ export const GetCommentsByBlog = async (req, res) => {
     }
 
 }
+
+
+export const LikeComment = async (req, res) => {
+
+
+    try {
+        if (!req.user) return res.status(401).json({ msg: "Login required" });
+
+        const { commentId } = req.body;
+        const comment = await CommentModel.findById(commentId);
+        if (!comment) return res.status(404).json({ msg: "Comment not found" });
+
+        const userId = req.user._id;
+
+        // ✅ Sirf ek baar like allow
+        if (!comment.likes.includes(userId)) {
+            comment.likes.push(userId);
+            await comment.save();
+        }
+        res.status(200).json({
+            msg: "Like status updated",
+            likesCount: comment.likes.length,
+            likedByUser: comment.likes.includes(userId)
+        });
+
+    } catch (err) {
+        res.status(500).json({ msg: err.message });
+    }
+}
+
+

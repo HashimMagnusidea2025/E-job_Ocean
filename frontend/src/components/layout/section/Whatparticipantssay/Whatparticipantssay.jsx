@@ -1,6 +1,6 @@
 import { FaQuoteLeft, FaQuoteRight, FaPlayCircle } from "react-icons/fa";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation } from "swiper/modules";
+import { Navigation, } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import MamtaJangra from '../../../../media/jpg/MamtaJangra.jpg';
@@ -57,11 +57,12 @@ export default function Testimonials() {
                     spaceBetween={20}
                     slidesPerView={1}
                     navigation={true}
+                    
                     breakpoints={{
                         640: { slidesPerView: 1.2 },
                         768: { slidesPerView: 2 },
-                        1024: { slidesPerView: 3 }, 
-                        1280: { slidesPerView: 3 },
+                        1024: { slidesPerView: 3 },
+                        1280: { slidesPerView: 4 },
                         1920: { slidesPerView: 4 },
                     }}
                     modules={[Navigation]}
@@ -69,7 +70,7 @@ export default function Testimonials() {
                 >
                     {testimonials.map((item, index) => (
                         <SwiperSlide key={index}>
-                            <div className="h-[480px] bg-white border border-gray-300 rounded-lg w-[300px] sm:w-[330px] shadow transition-all hover:shadow-lg mx-auto">
+                            <div className="h-[480px] bg-white border border-gray-300 rounded-lg w-[300px] sm:w-[300px] shadow transition-all hover:shadow-lg mx-auto">
                                 <div className="relative">
                                     <img
                                         src={item.image}

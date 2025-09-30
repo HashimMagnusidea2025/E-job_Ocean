@@ -8,12 +8,27 @@ import { FaXTwitter } from "react-icons/fa6"; // X (Twitter)
 import { MdEmail, MdShare } from "react-icons/md";
 import { FaFacebook, FaTwitter, FaInstagram, FaTelegram } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import { CommentCards } from "../../components/ui/cards/cards.jsx";
+import { CommentCards, ReactShareButton } from "../../components/ui/cards/cards.jsx";
+import {
+    EmailShareButton,
+    EmailIcon,
+    FacebookShareButton,
+    FacebookIcon,
+    WhatsappIcon,
 
+    TelegramIcon,
+    TelegramShareButton,
+    TwitterShareButton,
+    TwitterIcon,
+    PinterestShareButton,
+    PinterestIcon,
+    WhatsappShareButton,
+
+} from "react-share";
 import axioss from "axios";
 
-import { LikeButton } from "../../components/ui/button/button";
-
+import { LikeButton, FacebookButton, XTwitterButton, PinterestButton, EmailButton, ShareButton, LinkedinButton } from "../../components/ui/button/button";
+import { CommentList, FollowSocials, SubscribeNow, Categories, LatestPost } from "../../components/ui/cards/cards.jsx";
 
 
 import { useParams } from "react-router";
@@ -22,7 +37,26 @@ export default function BlogDetailsPage2({ blogs }) {
     const [posts, setPosts] = useState([]);
     const [likeCount, setLikeCount] = useState(0);
     const { id } = useParams();
+    const [liked, setLiked] = useState(false);
+    const [comments, setComments] = useState([]);
+    const [commentCount, setCommentCount] = useState(0);
+
     const type = "blogs";
+
+    useEffect(() => {
+
+        const fetchComments = async () => {
+
+            try {
+                const res = await axios.get(`/comment/${id}?type=${type}`);
+                setComments(res.data.comments);
+                setCommentCount(res.data.count);
+            } catch (err) {
+                console.error("Error fetching comments:", err);
+            }
+        };
+        fetchComments();
+    }, [id, type]);
 
 
     const [isLoggedIn, setIsLoggedIn] = useState(false);;
@@ -33,17 +67,13 @@ export default function BlogDetailsPage2({ blogs }) {
         }
     }, []);
 
-    // Fetch current like count on mount
+    // ✅ Fetch Like Count
     useEffect(() => {
         const fetchLikeCount = async () => {
             try {
                 const res = await axios.get(`/blogs/like/likes/${id}/${type}`);
                 setLikeCount(res.data.totalCount);
             } catch (err) {
-                if (err.response?.data?.message?.includes("already liked")) {
-                    // Ignore silently
-                    return;
-                }
                 console.error(err.response?.data || err.message);
             }
         };
@@ -52,6 +82,7 @@ export default function BlogDetailsPage2({ blogs }) {
 
 
     useEffect(() => {
+
         axios.get("https://blog.ejobocean.com/wp-json/wp/v2/posts?_embed&per_page=6&page=1")
 
             .then((res) => {
@@ -85,12 +116,38 @@ export default function BlogDetailsPage2({ blogs }) {
 
 
 
+    // Like functionality yaha
+    // ✅ Handle Like
+    const handleLike = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await axios.post(
+                "/blogs/like",
+                { blogId: id, type },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            if (res.data.totalCount !== undefined) {
+                setLikeCount(res.data.totalCount);
+                setLiked(true);
+            }
+        } catch (err) {
+            console.error(err.response?.data || err.message);
+        }
+    };
+
+
+
+    const shareUrl = window.location.href;
+
 
     return (
         <div className="w-full font-[Poppins] bg-gray-50">
             <Navbar />
 
             <div className="font-[Poppins] bg-gray-50">
+                <ReactShareButton facebook twitter pinterest email whatsapp telegram />
+
 
                 {/* Hero Section */}
 
@@ -153,32 +210,26 @@ export default function BlogDetailsPage2({ blogs }) {
 
                             <div className="flex flex-wrap gap-3">
                                 <div className="flex items-center gap-2">
-                                    <h5>{likeCount}</h5>
                                     <LikeButton
                                         blogId={postDetilas.id}
                                         type={type}
+                                        likeCount={likeCount}
                                         setLikeCount={setLikeCount}
+                                        onClick={handleLike}
                                     />
                                 </div>
 
-                                <a href="#" className="flex items-center gap-2 px-4 py-2 bg-[#1877F2] text-white rounded-md hover:bg-[#145dbf]">
-                                    <FaFacebookF /> Share
-                                </a>
-                                <a href="#" className="flex items-center gap-2 px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800">
-                                    <FaXTwitter />
-                                </a>
-                                <a href="#" className="flex items-center gap-2 px-6 py-2 bg-[#E60023] text-white rounded-md hover:bg-[#b3001b]">
-                                    <FaPinterestP /> Pin
-                                </a>
-                                <a href="#" className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700">
-                                    <MdEmail />
-                                </a>
-                                <a href="#" className="flex items-center gap-2 px-4 py-2 bg-[#6cc644] text-white rounded-md hover:bg-[#57a436]">
-                                    <MdShare />
-                                </a>
-                                <a href="#" className="flex items-center gap-2 px-4 py-2 bg-[#0077b5] text-white rounded-md hover:bg-[#005983]">
-                                    <FaLinkedinIn />
-                                </a>
+                                <ReactShareButton
+                                    facebook
+                                    twitter
+                                    pinterest
+                                    email
+                                    linkedin
+                                    desktopClass="hidden lg:flex flex gap-2 rounded-md" />
+
+
+
+
                             </div>
                             <div className="prose max-w-none mt-6">
                                 <div dangerouslySetInnerHTML={{
@@ -196,135 +247,16 @@ export default function BlogDetailsPage2({ blogs }) {
                                         .replace(/<tr>/g, '<tr class="">')
                                         .replace(/<a /g, '<a class="text-[#339ca0] text-[20px] hover:underline" ')
                                 }} />
+
+
                             </div>
-                            <p className="text-gray-700 leading-relaxed mb-4">
-                                India's role in the global accounting outsourcing landscape is
-                                evolving...
-                            </p>
-                            <p className="text-gray-700 leading-relaxed mb-4">
-                                At the heart of this growth story lies India's core advantages...
-                            </p>
-                            <p className="text-gray-700 leading-relaxed mb-4">
-                                Looking ahead, the outlook for accounting outsourcing remains
-                                promising...
-                            </p>
 
 
-                        </div>
-
-
-                    </div>
-
-                    {/* Sidebar */}
-                    <div className="space-y-6">
-                        <div className="bg-white shadow-md rounded-2xl p-5">
-                            <h3 className="text-lg font-semibold mb-4">Follow Socials</h3>
-                            <div className="flex flex-col space-y-3">
-                                <a href="#" className="flex gap-4 px-4 py-2 bg-[#1877F2] hover:bg-[#145DBF] text-white rounded-lg text-center">
-                                    <span>
-                                        <FaFacebook size={25} />
-                                    </span>
-                                    <span>
-                                        Facebook
-                                    </span>
-                                </a>
-                                <a href="#" className="flex gap-4 px-4 py-2 bg-[#1DA1F2] hover:bg-[#0d8ddb] text-white rounded-lg text-center">
-                                    <span >
-                                        <FaTwitter size={25} />
-                                    </span>
-                                    <span>
-                                        Twitter
-                                    </span>
-                                </a>
-                                <a href="#" className="flex gap-4 px-4 py-2 bg-gradient-to-r from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white rounded-lg text-center">
-                                    <span>
-                                        <FaInstagram size={25} />
-                                    </span>
-                                    <span>
-                                        Instagram
-                                    </span>
-                                </a>
-                                <a href="#" className="flex gap-4 px-4 py-2 bg-[#0088cc] hover:bg-[#006b99] text-white rounded-lg text-center">
-                                    <span>
-                                        <FaTelegram size={25} />
-                                    </span>
-                                    <span>
-                                        Telegram
-                                    </span>
-                                </a>
-                            </div>
-                        </div>
-
-                        <div className="bg-white shadow-md rounded-2xl p-5">
-                            <div >
-                                <h3 className="mb-4 text-lg font-semibold text-gray-800">
-                                    LATEST POSTS
-                                </h3>
-
-                                <div className=" flex flex-col gap-5">
-                                    {posts.map((value) => (
-                                        <Link
-                                            key={value.id}
-                                            to={`/blogs/${value.id}`}
-                                            className="flex items-start gap-3 rounded-lg bg-white p-3 shadow-sm hover:shadow-md transition"
-                                        >
-
-
-                                            <img
-                                                src={value._embedded?.["wp:featuredmedia"]?.[0]?.media_details?.sizes
-                                                    ?.pixwell_280x210?.source_url}
-                                                alt="Author"
-                                                className="h-28 w-32 rounded-md object-cover object-center"
-                                            />
-
-                                            <div className="flex flex-col">
-                                                <p className="text-sm font-medium text-gray-800 leading-snug  cursor-pointer">
-                                                    <span dangerouslySetInnerHTML={{ __html: value.title.rendered }} />
-                                                </p>
-                                                <div className="mt-2 flex items-center text-xs text-gray-500">
-                                                    <IoMdTime className="mr-1 h-4 w-4" />
-                                                    <span dangerouslySetInnerHTML={{ __html: value.date.split("T")[0] }} />
-                                                </div>
-                                            </div>
-
-
-                                        </Link>
-
-                                    ))}
-
-
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="w-full p-5">
-
-                            <h3 className="mb-4 text-lg font-semibold text-gray-800">CATEGORIES</h3>
-
-
-                            <ul className="space-y-3">
-                                <li className="flex items-center justify-between border-b border-dotted border-gray-300 pb-1">
-                                    <span className="text-gray-700 hover:text-indigo-600 cursor-pointer">Article</span>
-                                    <span className="rounded bg-gray-800 px-2 py-0.5 text-xs font-medium text-white">22</span>
-                                </li>
-                                <li className="flex items-center justify-between border-b border-dotted border-gray-300 pb-1">
-                                    <span className="text-gray-700 hover:text-indigo-600 cursor-pointer">Interview</span>
-                                    <span className="rounded bg-gray-800 px-2 py-0.5 text-xs font-medium text-white">11</span>
-                                </li>
-                                <li className="flex items-center justify-between border-b border-dotted border-gray-300 pb-1">
-                                    <span className="text-gray-700 hover:text-indigo-600 cursor-pointer">Story</span>
-                                    <span className="rounded bg-gray-800 px-2 py-0.5 text-xs font-medium text-white">25</span>
-                                </li>
-                                <li className="flex items-center justify-between border-b border-dotted border-gray-300 pb-1">
-                                    <span className="text-gray-700 hover:text-indigo-600 cursor-pointer">Uncategorized</span>
-                                    <span className="rounded bg-gray-800 px-2 py-0.5 text-xs font-medium text-white">1</span>
-                                </li>
-                            </ul>
                         </div>
                         <CommentCards
                             isLoggedIn={isLoggedIn}   /// if user login ///
                             blogId={postDetilas.id}
-                            type= "blogs"
+                            type="blogs"
                             title="Leave a Reply"
                             des={
                                 <p className="text-sm text-gray-600 mb-4">
@@ -335,23 +267,52 @@ export default function BlogDetailsPage2({ blogs }) {
                             checkbox="Save my name, email, and website in this browser for the next time I comment."
                         />
 
+                        <CommentList comments={comments} commentCount={commentCount} setComments={setComments} />
 
-                         <div className="bg-white shadow-md rounded-2xl p-5">
-                            <h3 className="text-lg font-semibold mb-4">Subscribe Now</h3>
-                            <input
-                                type="name"
-                                placeholder="Your name"
-                                className="w-full px-4 py-2 border rounded-lg mb-3"
-                            />
-                            <input
-                                type="email"
-                                placeholder="Your email"
-                                className="w-full px-4 py-2 border rounded-lg mb-3"
-                            />
-                            <button className="w-full bg-green-600 text-white py-2 rounded-lg">
-                                Subscribe
-                            </button>
-                        </div> 
+
+                    </div>
+
+                    {/* Sidebar */}
+                    <div className="space-y-6">
+                        <FollowSocials />
+
+
+
+                        <div className="bg-white shadow-md rounded-2xl p-5">
+                            <div>
+                                <h3 className="mb-4 text-lg font-semibold text-gray-800">
+                                    LATEST POSTS
+                                </h3>
+
+                                <div className="flex flex-col gap-5">
+                                    {posts.map((value, idss) => (
+                                        <Link
+                                            key={idss}
+                                            to={`/blogs/${value.id}`}
+                                            className="flex items-start gap-3 rounded-lg bg-white p-3 shadow-sm hover:shadow-md transition"
+                                        >
+                                            <LatestPost
+                                                key={value.id}
+                                                id={value.id}
+                                                img={
+                                                    value._embedded?.["wp:featuredmedia"]?.[0]?.media_details?.sizes
+                                                        ?.pixwell_280x210?.source_url
+                                                }
+                                                title={value.title.rendered}
+                                                date={value.date.split("T")[0]}
+                                            />
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <Categories />
+
+
+                        <SubscribeNow />
                     </div>
                 </div>
             </div>

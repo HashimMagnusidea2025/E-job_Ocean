@@ -13,14 +13,21 @@ const CommentSchema = mongoose.Schema({
     },
 
     id: { type: Number, required: true },
-    
+
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
     },
+    // ✅ store users who liked this comment
+    likes: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User"
+        }
+    ],
     type: {
         type: String,
-         required: true
+        required: true
     },
     CommentCount: {
         type: Number

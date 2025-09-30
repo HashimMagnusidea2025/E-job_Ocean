@@ -4,7 +4,7 @@ import swaggerUi from "swagger-ui-express";
 import { swaggerDocs } from "./src/config/swagger.js";
 
 import express from 'express';
-import  connectDB  from './src/config/mongoose.js';
+import connectDB from './src/config/mongoose.js';
 import UserRouter from './src/routes/user.Routes.js';
 import AuthRoutes from './src/routes/auth.Routes.js';
 import roleRoutes from './src/routes/role.Routes.js';
@@ -34,11 +34,22 @@ import NoofOfficeCategoryRouter from './src/routes/NoofOfficeCategory.Routes.js'
 import NoofEmployeesCategoryRouter from './src/routes/NoofEmployeesCategory.Routes.js';
 // import FoundedYearCategoryRouter from './src/routes/FoundedYearCategory.Routes.js';
 
+import Googlerouter from './src/routes/googleAuth.js';
 
+import JObPostRouter from './src/module/jobPost/jobPost.Routes.js';
 
-import LikeRoute from './src/module/blogs/likes.Routes.js';
+import LikeRoute from './src/module/likes/likes.Routes.js';
 import CommentRuter from './src/module/comment/comment.Routes.js';
 
+// webinars file //
+
+import SpeakerRouter from './src/module/Speaker/Speaker.Routes.js';
+import WebinarRouter from './src/module/webinar/webinar.Routes.js';
+import WebinarRegistrationRoute from './src/module/webinarRegistration/webinarRegistration.Routes.js';
+import CMSPageRoutes from './src/module/CMSPage/CMS.Routes.js';
+import PaymentRouter from './src/module/Payment/Payment.Routes.js';
+
+import OneToOneRoute from './src/module/OneToOne/OneToOne.Routes.js';
 
 
 import cors from 'cors';
@@ -60,61 +71,72 @@ server.use("/api-docs", (req, res, next) => {
   next();
 }, swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 server.use(cors({
-  origin: 'http://localhost:5173', 
-  methods: ['GET', 'POST', 'PUT',"PATCH", 'DELETE'],
+  origin: 'http://localhost:5173',
+  methods: ['GET', 'POST', 'PUT', "PATCH", 'DELETE'],
   credentials: true
 }));
 
 server.use("/api/auth", AuthRoutes);
 server.use("/api/users", UserRouter);
-server.use("/api/roles", roleRoutes);         
+server.use("/api/roles", roleRoutes);
 server.use("/api/permissions", permissionRoutes);
 server.use('/api/course-category', Courserouter);
-server.use('/api/cmspage' ,CMSRouter);
+server.use('/api/cmspage', CMSRouter);
 server.use('/api/general-settings', generalSettingsRoute);
+server.use('/api/cms-page', CMSPageRoutes)
 server.use('/api/country', CountryRouter);
-server.use('/api/state',StateRouter);
+server.use('/api/state', StateRouter);
 server.use('/api/city', CityRouter);
-server.use('/api/professional-categories',ProfessionalCategoryRouter);
+server.use('/api/professional-categories', ProfessionalCategoryRouter);
 server.use('/api/location', LocationRouter);
 server.use('/api/CA-Fresher', CaFresherRouter);
 server.use('/api/Company-Information', CompanyInformationRouter)
 server.use("/api/skills-categories", skillsCategoryRoutes);
 server.use('/api/career-level-category', CareerLevelCategoryRouter);
 server.use('/api/functionalArea-Category', FunctionalAreaCategoryRouter);
-server.use('/api/job-Type-category',  jobTypeCategoryRouter);
+server.use('/api/job-Type-category', jobTypeCategoryRouter);
 server.use('/api/job-Shift-category', jobShiftCategoryRouter)
 server.use('/api/degree-Level-Category', DegreeLevelCategoryRouter);
 
 // Company profile //
 server.use('/api/company-category', CompanyCategoryRouter);
-server.use('/api/ownership-category' ,OwnershipCategoryRouter);
-server.use('/api/no-of-office-category',NoofOfficeCategoryRouter);
+server.use('/api/ownership-category', OwnershipCategoryRouter);
+server.use('/api/no-of-office-category', NoofOfficeCategoryRouter);
 server.use('/api/no-of-employees-category', NoofEmployeesCategoryRouter);
 server.use('/api/established-in-category', EstablishedInCategoryRouter)
 // server.use('/api/founded-year-category', FoundedYearCategoryRouter)
 
 
-
 server.use('/api/blogs/like', LikeRoute);
 server.use('/api/comment', CommentRuter);
 
+server.use('/api/speakers', SpeakerRouter);
+server.use('/api/webinars', WebinarRouter);
+server.use('/api/one-to-one',OneToOneRoute);
 
+server.use("/api/registrations", WebinarRegistrationRoute);
+server.use('/api/payment', PaymentRouter);
+
+server.use('/api/job-post',JObPostRouter)
+
+
+
+server.use('/api/google', Googlerouter)
 
 
 // filterOptionRoutes // 
 server.use("/api", filterOptionRouter);
 
 server.post("/test", (req, res) => {
-    console.log("Request body:", req.body);
-    res.send(req.body);
+  console.log("Request body:", req.body);
+  res.send(req.body);
 });
 
 
 server.listen(process.env.PORT, () => {
 
-    console.log("server running on Port", process.env.PORT);
-    connectDB()
+  console.log("server running on Port", process.env.PORT);
+  connectDB()
 
 })
 

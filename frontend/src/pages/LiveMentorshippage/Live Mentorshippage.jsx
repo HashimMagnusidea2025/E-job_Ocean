@@ -1,6 +1,8 @@
 import React from "react";
 
-import NikhilGreybg from '../../media/jpg/Nikhil-Grey-bg.jpg'
+import NikhilGreybg from '../../media/jpg/Nikhil-Grey-bg.jpg';
+
+
 
 const mentors = [
     {

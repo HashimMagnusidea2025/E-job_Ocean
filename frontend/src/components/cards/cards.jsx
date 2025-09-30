@@ -11,7 +11,7 @@ import { FaTimes } from "react-icons/fa";
 
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import { AutoScroll } from "@splidejs/splide-extension-auto-scroll";
-import "@splidejs/react-splide/css"; // basic Splide CSS
+import "@splidejs/react-splide/css"; 
 
 
 // 🔹 1. Partner Logo Marquee

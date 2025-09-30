@@ -1,0 +1,26 @@
+{
+  "type": "Compass Connections",
+  "version": {
+    "$numberInt": "1"
+  },
+  "connections": [
+    {
+      "id": "e9035af9-a9da-4c22-9118-588fba00a0d5",
+      "lastUsed": {
+        "$date": {
+          "$numberLong": "1758176722104"
+        }
+      },
+      "favorite": {
+        "name": "cluster0.5vhjvao.mongodb.net"
+      },
+      "savedConnectionType": "recent",
+      "connectionOptions": {
+        "connectionString": "mongodb+srv://hashimmagnusidea2025:hashimshaikh7276@cluster0.5vhjvao.mongodb.net/",
+        "oidc": {
+          "serializedState": "eyJvaWRjUGx1Z2luU3RhdGVWZXJzaW9uIjoxLCJzdGF0ZSI6W119"
+        }
+      }
+    }
+  ]
+}
