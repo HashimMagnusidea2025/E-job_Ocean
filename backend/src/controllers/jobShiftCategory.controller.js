@@ -79,3 +79,18 @@ export const deletejobShiftCategory = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
+
+
+// Get only Active jobShift Categories
+export const getActiveJobShiftCategories = async (req, res) => {
+    try {
+        const activeCategories = await jobShiftCategoryModel
+            .find({ status: "active" })   // sirf active filter
+            .sort({ createdAt: -1 });
+
+        res.json(activeCategories);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+

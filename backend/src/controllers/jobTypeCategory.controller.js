@@ -79,3 +79,16 @@ export const deletejobTypeCategory = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
+
+
+
+// Get only Active jobType Categories
+export const getActiveJobTypeCategories = async (req, res) => {
+    try {
+        const activeCategories = await jobTypeCategoryModel.find({ status: "active" }).sort({ createdAt: -1 });
+        res.json(activeCategories);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+

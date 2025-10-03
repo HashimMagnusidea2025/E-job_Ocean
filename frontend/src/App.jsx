@@ -78,6 +78,7 @@ import RegisterHallOfFame from './pages/HallOfFamepage/RegisterHallOfFame.jsx';
 import WebinarRegistrationList from './components/AdminDashboard/webinarRegistrationList/RegistrationList.jsx';
 import OneToOneRegistrationList from './components/AdminDashboard/OneToOneRegistrationList/OneToOneRegistrationList.jsx';
 import PaymentReceiptOneToOne from './components/ui/PaymentReceipt/PaymentReceiptOnetoOne.jsx';
+import PostAJobAdmin from './components/AdminDashboard/jobPostadmin/jobPostadmin.jsx'
 // Create Company
 import CreateCompany from './components/AdminDashboard/createCompany/createCompany.jsx';
 
@@ -95,7 +96,7 @@ import AddWebinarPage from './components/AdminDashboard/WebinarPage/WebinarPage.
 import OneToOneForm from './components/AdminDashboard/OneToOneForm/OneToOneForm.jsx';
 import OneToOneList from './components/AdminDashboard/OneToOneForm/OneToOneList.jsx';
 import CMSPage from './components/AdminDashboard/CMSPage/CMSPage.jsx';
-import JobPostForm from './components/AdminDashboard/JobPost/jobPostForm.jsx';
+import JobPostList from './components/AdminDashboard/JobPostList/JobPostList.jsx';
 
 // import SeekerDashboard from './components/seekerDashboard/seekerDashboard';
 
@@ -183,6 +184,8 @@ function App() {
         <Route path="/employer-dashboard/edit/company-profile" element={<EditAccountDetails />} />
         <Route path='/employer-dashboard/company-profile' element={<><CompanyPublicProfile /></>} />
         <Route path='/employer-dashboard/post-job' element={<><PostAJob /></>} />
+        
+
         <Route path='/employer-dashboard/posted-jobs' element={<><ManageJobs /></>} />
         <Route path='/employer-dashboard/company-packages' element={<><PurchasedCvsPackage /></>} />
         <Route path='/employer-dashboard/list-payment-history' element={<><PaymentHistory /></>} />
@@ -246,12 +249,15 @@ function App() {
         <Route path='/admin-dashboard/webinar-registration-list' element={<><WebinarRegistrationList /></>} />
         <Route path='/admin-dashboard/one-to-one-registration-list' element={<><OneToOneRegistrationList /></>} />
         <Route path="/one-to-one-receipt/:oneToOneId" element={<><Navbar /><PaymentReceiptOneToOne /><Footer /></>} />
-        <Route path='/admin-dashboard/job-post' element={<><JobPostForm /></>} />
+       <Route path="/admin-dashboard/post-job/:id" element={<PostAJobAdmin />} />
+        <Route path='/admin-dashboard/job-post' element={<><PostAJobAdmin /></>} />
+        
       
 
         <Route path='/admin-dashboard/add-one-to-one' element={<><OneToOneForm /></>} />
         <Route path='/admin-dashboard/one-to-one-list' element={<><OneToOneList /></>} />
         <Route path='/admin-dashboard/cms-page' element={<><CMSPage /></>} />
+         <Route path='/admin-dashboard/job-post-list' element={<><JobPostList /></>} />
 
 
 

@@ -79,3 +79,13 @@ export const deleteCareerLevelCategory = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
+
+// Get all active Career-Level Categories
+export const getActiveCareerLevelCategories = async (req, res) => {
+    try {
+        const categories = await CareerLevelCategoryModel.find({ status: "active" }).sort({ name: 1 });
+        res.json(categories);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};

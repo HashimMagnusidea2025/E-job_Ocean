@@ -4,7 +4,8 @@ import {
     getAlljobShiftCategories,
     getjobShiftCategoryById,
     updatejobShiftCategory,
-    deletejobShiftCategory
+    deletejobShiftCategory,
+    getActiveJobShiftCategories
 } from "../controllers/jobShiftCategory.controller.js";
 
 const jobShiftCategoryRouter = express.Router();
@@ -12,6 +13,7 @@ const jobShiftCategoryRouter = express.Router();
 // Create
 jobShiftCategoryRouter.post("/", createjobShiftCategory);
 
+jobShiftCategoryRouter.get("/active", getActiveJobShiftCategories);
 // Read all
 jobShiftCategoryRouter.get("/", getAlljobShiftCategories);
 

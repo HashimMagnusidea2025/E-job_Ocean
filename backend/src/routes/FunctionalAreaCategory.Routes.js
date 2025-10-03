@@ -4,13 +4,16 @@ import {
     getAllFunctionalAreaCategories,
     getFunctionalAreaCategoryById,
     updateFunctionalAreaCategory,
-    deleteFunctionalAreaCategory
+    deleteFunctionalAreaCategory,
+    getActiveFunctionalAreaCategories
 } from "../controllers/FunctionalAreaCategory.controller.js";
 
 const FunctionalAreaCategoryRouter = express.Router();
 
 // Create
 FunctionalAreaCategoryRouter.post("/", createFunctionalAreaCategory);
+
+FunctionalAreaCategoryRouter.get("/active", getActiveFunctionalAreaCategories);
 
 // Read all
 FunctionalAreaCategoryRouter.get("/", getAllFunctionalAreaCategories);

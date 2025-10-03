@@ -79,3 +79,18 @@ export const deleteSkillsCategory = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
+
+
+// Get only Active Skills Categories
+export const getActiveSkillsCategories = async (req, res) => {
+    try {
+        const activeCategories = await SkillsCategoryModel
+            .find({ status: "active" })   // sirf active
+            .sort({ createdAt: -1 });
+
+        res.json(activeCategories);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+

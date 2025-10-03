@@ -8,41 +8,59 @@ const JobPostSchema = mongoose.Schema({
         required: true
     },
     description: {
+        type: String,
+        required: true
+    },
+    benefits: {
         type: String
     },
-    details_des: {
-        type: String
-    },
-    no_of_opning: {
+    salaryFrom: {
         type: Number
     },
+    salaryTo: {
+        type: Number
+    },
+    salaryCurrency: {
 
-    qualification: {
+        type: String
+    },
+    salaryPeriod: {
         type: String
     },
 
-    experience: {
-        type: String
-    },
-    location: {
-        type: String
-    },
-    email: {
-       type: String
-    },
-    contact: {
-        type: String
-    },
-    name: {
-        type: String
-    },
+    hideSalary: { type: Boolean, default: false },
+
+    careerLevel: { type: mongoose.Schema.Types.ObjectId, ref: "CareerLevelCategory" },
+    functionalArea: { type: mongoose.Schema.Types.ObjectId, ref: "FunctionalAreaCategory" },
+    jobType: { type: mongoose.Schema.Types.ObjectId, ref: "jobTypeCategory" },
+    jobShift: { type: mongoose.Schema.Types.ObjectId, ref: "jobShiftCategory" },
+
+    positions: { type: Number },
+    expiryDate: { type: Date },
+    degreeLevel: { type: String },
+    experience: { type: String },
+    externalJob: { type: Boolean, default: false },
+    isFreelance: { type: Boolean, default: false },
+    isActive: { type: Boolean, default: true },
+
+    country: { ref: 'Country', type: Number, required: true },
+    state: { ref: 'State', type: Number, required: true },
+    city: { ref: 'City', type: Number, required: true },
+   
+    skills: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "SkillsCategory"
+        }
+    ],
+
     file_attach: {
         type: String
     },
 
-},{ timestamps: true })
+}, { timestamps: true })
 
 
-const JobPostModel = mongoose.model('job-post',JobPostSchema);
+const JobPostModel = mongoose.model('job-post', JobPostSchema);
 
 export default JobPostModel;

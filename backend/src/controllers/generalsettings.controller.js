@@ -6,7 +6,7 @@ export const getGeneralSettings = async (req, res) => {
     try {
         const setting = await generalSettingModel.findOne();
         res.json(setting)
-        console.log(setting);
+       
 
 
     } catch (error) {

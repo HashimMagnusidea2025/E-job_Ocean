@@ -80,3 +80,15 @@ export const deleteFunctionalAreaCategory = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
+
+
+// Get all active Functional Area Categories
+export const getActiveFunctionalAreaCategories = async (req, res) => {
+    try {
+        const categories = await FunctionalAreaCategoryModel.find({ status: "active" }).sort({ name: 1 });
+        res.json(categories);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+

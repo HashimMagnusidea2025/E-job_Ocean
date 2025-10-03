@@ -4,14 +4,15 @@ import {
     getAllCareerLevelCategories,
     getCareerLevelCategoryById,
     updateCareerLevelCategory,
-    deleteCareerLevelCategory
+    deleteCareerLevelCategory,
+    getActiveCareerLevelCategories
 } from "../controllers/CareerLevelCategory.controller.js";
 
 const CareerLevelCategoryRouter = express.Router();
 
 // Create
 CareerLevelCategoryRouter.post("/", createCareerLevelCategory);
-
+CareerLevelCategoryRouter.get("/active", getActiveCareerLevelCategories);
 // Read all
 CareerLevelCategoryRouter.get("/", getAllCareerLevelCategories);
 

@@ -14,6 +14,24 @@ export default function Navbar() {
   const [showProfile, setShowProfile] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
   const [user, setUser] = useState(null);
+  const [companyLogo, setCompanyLogo] = useState(null);
+
+  const fetchCompanyLogo = async () => {
+    try {
+      const response = await axios.get('/general-settings'); // ya aapke backend endpoint
+      if (response.data && response.data.logo) {
+        setCompanyLogo(`http://localhost:5000${response.data.logo}`);
+      }
+    } catch (error) {
+      console.error("Failed to fetch company logo:", error);
+      setCompanyLogo(null);
+    }
+  };
+  useEffect(() => {
+    fetchCompanyLogo();
+  }, []);
+
+
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -126,8 +144,13 @@ export default function Navbar() {
         <nav className="h-[70px] text-black px-10 flex items-center justify-between relative font-[Poppins] z-50">
           <div className="flex items-center">
             <Link to="/">
-              <img src={logo} alt="eJob Ocean Logo" className="h-8" />
+              <img
+                src={companyLogo || '/media/logo/ejob_ocean.png'}
+                alt="Company Logo"
+                className="h-8"
+              />
             </Link>
+
           </div>
 
           <div className="text-4xl cursor-pointer block md:hidden" onClick={toggleMenu}>
@@ -173,8 +196,10 @@ export default function Navbar() {
             <li><Link to="/webinars" className="hover:text-[#339ca0]">WEBINARS</Link></li>
             <li><Link to="/hall-of-fame" className="hover:text-[#339ca0]">LIVE MENTORSHIP</Link></li>
             {/* <li><Link to="/live-mentorship" className="hover:text-[#339ca0]">LIVE MENTORSHIP</Link></li> */}
-            <li>
-              <Link to="/placement-program"><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">JOBS</li></Link></li>
+            
+              <Link to="/placement-program">
+              <li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">JOBS</li>
+              </Link>
             <li className="relative">
               <span onClick={toggleMoreDropdown} className="cursor-pointer hover:text-[#339ca0] p-4">MORE</span>
               {showMoreDropdown && (

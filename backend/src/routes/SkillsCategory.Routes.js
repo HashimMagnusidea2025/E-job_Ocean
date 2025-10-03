@@ -4,13 +4,16 @@ import {
     getAllSkillsCategories,
     getSkillsCategoryById,
     updateSkillsCategory,
-    deleteSkillsCategory
+    deleteSkillsCategory,
+    getActiveSkillsCategories
 } from "../controllers/SkillsCategory.controller.js";
 
 const router = express.Router();
 
 // Create
 router.post("/", createSkillsCategory);
+
+router.get("/active", getActiveSkillsCategories);
 
 // Read all
 router.get("/", getAllSkillsCategories);

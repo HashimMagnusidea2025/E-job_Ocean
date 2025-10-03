@@ -86,7 +86,7 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
     { path: "/", icon: <FaHome />, label: "Home" },
     { path: "/admin-dash", icon: <FaHome />, label: "Dashboard" },
     { path: "/admin-dashboard/ca-fresher-list", label: "CA Fresher List", icon: <GoDotFill size={12} className="dot" /> },
-    
+
 
     {
       icon: <FaUser />, label: "Job Post ",
@@ -96,7 +96,11 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
           path: "/admin-dashboard/job-post", icon: <GoDotFill size={12} className="dot" />,
           label: " Add Job Post"
         },
-       
+        {
+          path: "/admin-dashboard/job-post-list", icon: <GoDotFill size={12} className="dot" />,
+          label: "Job Post List"
+        },
+
 
       ]
     },
@@ -115,7 +119,7 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
 
       ]
     },
-    
+
     {
       icon: <FaUser />, label: "Speakers",
       children: [

@@ -1,12 +1,12 @@
 import React from "react";
 import { useState, useEffect } from "react";
-import Layout from "../seekerDashboard/partials/layout";
-import axios from '../../utils/axios.js'
+import Layout from "../../seekerDashboard/partials/layout";
+import axios from '../../../utils/axios.js'
 import Swal from "sweetalert2";
 import Select from "react-select";
 import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-export default function PostAJob() {
+export default function PostAJobAdmin() {
     const { id } = useParams(); // job id
     const navigate = useNavigate();
     const [formData, setFormData] = useState({

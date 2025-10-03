@@ -4,13 +4,16 @@ import {
     getAlljobTypeCategories,
     getjobTypeCategoryById,
     updatejobTypeCategory,
-    deletejobTypeCategory
+    deletejobTypeCategory,
+    getActiveJobTypeCategories
 } from "../controllers/jobTypeCategory.controller.js";
 
 const jobTypeCategoryRouter = express.Router();
 
 // Create
 jobTypeCategoryRouter.post("/", createjobTypeCategory);
+
+jobTypeCategoryRouter.get("/active", getActiveJobTypeCategories);
 
 // Read all
 jobTypeCategoryRouter.get("/", getAlljobTypeCategories);

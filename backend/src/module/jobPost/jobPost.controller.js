@@ -18,26 +18,60 @@ export const createJobPost = async (req, res) => {
   }
 };
 
-// Get all Job Posts
+
+// Get all Job Posts with skill names
 export const getAllJobPosts = async (req, res) => {
   try {
-    const jobs = await JobPostModel.find();
+    const jobs = await JobPostModel.find()
+      .populate("skills", "name")  // populate skills with only the 'name' field
+      .populate("careerLevel", "name")
+      .populate("functionalArea", "name")
+      .populate("jobType", "name")
+      .populate("jobShift", "name");
+
     res.json(jobs);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
-// Get single Job Post
+// Get single Job Post with skill names
 export const getJobPost = async (req, res) => {
   try {
-    const job = await JobPostModel.findById(req.params.id);
+    const job = await JobPostModel.findById(req.params.id)
+      .populate("skills", "name")
+      .populate("careerLevel", "name")
+      .populate("functionalArea", "name")
+      .populate("jobType", "name")
+      .populate("jobShift", "name");
+
     if (!job) return res.status(404).json({ message: "Job not found" });
     res.json(job);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
+
+// // Get all Job Posts
+// export const getAllJobPosts = async (req, res) => {
+//   try {
+//     const jobs = await JobPostModel.find();
+//     res.json(jobs);
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
+
+// // Get single Job Post
+// export const getJobPost = async (req, res) => {
+//   try {
+//     const job = await JobPostModel.findById(req.params.id);
+//     if (!job) return res.status(404).json({ message: "Job not found" });
+//     res.json(job);
+//   } catch (err) {
+//     res.status(500).json({ message: err.message });
+//   }
+// };
 
 // Update Job Post
 export const updateJobPost = async (req, res) => {
@@ -55,6 +89,7 @@ export const updateJobPost = async (req, res) => {
 };
 
 // Delete Job Post
+
 export const deleteJobPost = async (req, res) => {
   try {
     const job = await JobPostModel.findByIdAndDelete(req.params.id);
