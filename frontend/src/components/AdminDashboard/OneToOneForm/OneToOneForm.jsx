@@ -4,7 +4,7 @@ import axios from "../../../utils/axios.js";
 import Layout from "../../seekerDashboard/partials/layout.jsx";
 import { FaPlus, FaMinus } from "react-icons/fa";
 
-export default function OneToOneForm() {
+export default function AdminOneToOneForm() {
     const navigate = useNavigate();
     const location = useLocation();
 

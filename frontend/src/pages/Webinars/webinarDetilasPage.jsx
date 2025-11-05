@@ -4,7 +4,8 @@ import axios from "../../utils/axios.js";
 import Navbar from "../../components/layout/navbar/navbar";
 import Footer from "../../components/layout/footer/footer";
 import { CommentList, FollowSocials, SubscribeNow, Categories, LatestPost } from "../../components/ui/cards/cards.jsx";
-
+const baseURL = import.meta.env.VITE_BACKEND_URL; // Vite
+// या CRA में: const baseURL = process.env.REACT_APP_BACKEND_URL;
 import { IoTimeSharp } from "react-icons/io5";
 import { FaCalendarAlt, FaUserTie } from "react-icons/fa";
 import { LuIndianRupee } from "react-icons/lu";
@@ -81,7 +82,7 @@ const WebinarDetailsPage = () => {
                                 <img
                                     src={
                                         webinar.Speaker?.profilePic
-                                            ? `http://localhost:5000/${webinar.Speaker.profilePic}`
+                                            ? `${baseURL}/${webinar.Speaker.profilePic}`
                                             : "/default-speaker.png"
                                     }
                                     alt={`${webinar.Speaker?.firstName} ${webinar.Speaker?.lastName}`}

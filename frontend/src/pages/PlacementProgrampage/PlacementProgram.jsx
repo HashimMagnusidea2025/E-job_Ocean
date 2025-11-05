@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-
+import { useState, useEffect, Suspense, lazy } from "react";
 import HeaderPalecment from '../../media/png/HeaderPalecment.png'
 
 import logo from '../../media/logo/ejob_ocean.png';
@@ -16,10 +16,25 @@ import HowWeWork from '../../components/layout/section/HowWeWork/HowWeWork';
 import WhoCanApply from '../../components/layout/section/WhoCanApply/WhoCanApply';
 import FAQSection from '../../components/layout/section/FAQSection/FAQSection';
 import { PlacementProgramSection } from '../../components/layout/section/AppDownloadSection/AppDownloadSection';
-
+import axios from '../../utils/axios.js'
 export default function Placementpage() {
 
+const [data, setData] = useState()
+    const fetchCompanydata = async () => {
+        try {
+            const response = await axios.get('/general-settings'); // backend endpoint
+            // console.log("✅ Full Response:", response);              // logs full Axios response object
+            // console.log("✅ Data Received:", response.data);          // logs only your actual data
 
+            setData(response.data);
+        } catch (error) {
+            console.error("❌ Failed to fetch company logo:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchCompanydata();
+    }, []);
 
     return (
         <div className="w-full">
@@ -33,7 +48,7 @@ export default function Placementpage() {
                     <div className="w-[60%] text-white flex justify-center ">
                         <div className="space-y-6 w-[80%]">
                             <h1 className="text-4xl sm:text-5xl md:text-[50px] font-bold leading-tight">
-                                eJob Ocean <br /> FREE Placement Program
+                               {data?.name} <br /> FREE Placement Program
                             </h1>
                             <h2 className="text-2xl font-semibold">Free Placement Assistance</h2>
                             <p className="text-lg font-medium">

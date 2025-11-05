@@ -5,9 +5,9 @@ import Layout from "../../seekerDashboard/partials/layout.jsx";
 import DataTable from "react-data-table-component";
 import { FaEdit, FaTrash, FaEye } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { useQuill } from "react-quilljs";
-import "quill/dist/quill.snow.css";
 
+const baseURL = import.meta.env.VITE_BACKEND_URL; // Vite
+// या CRA में: const baseURL = process.env.REACT_APP_BACKEND_URL;
 const WebinarPage = () => {
   const [webinars, setWebinars] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -17,7 +17,7 @@ const WebinarPage = () => {
   const [viewData, setViewData] = useState(null);
   const [filteredWebinars, setFilteredWebinars] = useState([]);
   const [searchText, setSearchText] = useState("");
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     WebinarTitle: "",
     WebinarSlug: "",
@@ -50,7 +50,7 @@ const WebinarPage = () => {
   }, []);
 
 
-  
+
 
   const fetchSpeakers = async () => {
     try {
@@ -250,19 +250,7 @@ const WebinarPage = () => {
     });
   };
 
-  const { quill, quillRef } = useQuill();
 
-  useEffect(() => {
-    if (quill) {
-      quill.on("text-change", () => {
-        setFormData((prev) => ({
-          ...prev,
-          Keywords: quill.root.innerHTML, // HTML store hoga
-          // Keywords: quill.getText()  // <- plain text chahiye toh ye use karo
-        }));
-      });
-    }
-  }, [quill, setFormData]);
 
   return (
     <Layout>
@@ -373,10 +361,12 @@ const WebinarPage = () => {
                 <div className="md:col-span-2">
                   <label className="block">
                     <span className="text-gray-700 font-medium">Keywords</span>
-                    <div
-                      ref={quillRef}
-                      className="mt-1 bg-white rounded border p-2 shadow-sm"
-                      style={{ minHeight: "150px" }}
+                    <textarea
+                      name="Keywords"
+                      value={formData.Keywords}
+                      placeholder="Keywords"
+                      className="w-full border p-2 rounded mt-1"
+                      onChange={handleChange}
                     />
                   </label>
                 </div>
@@ -736,7 +726,7 @@ const WebinarPage = () => {
                         Webinar Image
                       </h4>
                       <img
-                        src={`http://localhost:5000${viewData.WebinarImage}`}
+                        src={`${baseURL}${viewData.WebinarImage}`}
                         alt="Webinar"
                         className="w-60 h-auto rounded-lg shadow"
                       />
@@ -750,7 +740,7 @@ const WebinarPage = () => {
                         Logo
                       </h4>
                       <img
-                        src={`http://localhost:5000${viewData.WebinarLogo}`}
+                        src={`${baseURL}${viewData.WebinarLogo}`}
                         alt="Logo"
                         className="w-60 h-auto rounded-lg shadow"
                       />
@@ -767,7 +757,7 @@ const WebinarPage = () => {
                       </h4>
                       <video
                         controls
-                        src={`http://localhost:5000${viewData.WebinarVideoOptional}`}
+                        src={`${baseURL}${viewData.WebinarVideoOptional}`}
                         className="w-full rounded-lg shadow"
                       />
                     </div>

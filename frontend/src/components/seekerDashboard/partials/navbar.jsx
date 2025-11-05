@@ -4,6 +4,8 @@ import { useLocation, useNavigate, Link } from "react-router-dom";
 import logo from "../../../media/logo/ejob_ocean.png";
 import axios from '../../../utils/axios.js';
 
+const baseURL = import.meta.env.VITE_BACKEND_URL;
+
 const Navbar = ({ onSidebarToggle }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
@@ -14,6 +16,7 @@ const Navbar = ({ onSidebarToggle }) => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Company logo fetch function
   const getCompanyLogo = async () => {
     try {
       const response = await axios.get('/company-information/user/logo', {
@@ -22,14 +25,43 @@ const Navbar = ({ onSidebarToggle }) => {
         },
       });
 
-      // Check if logo exists in response
       if (response.data.success && response.data.logo) {
         return response.data.logo;
       }
-      return null; // Return null if no logo exists
+      return null;
     } catch (error) {
       console.error('Error fetching company logo:', error);
-      return null; // Return null on error
+      return null;
+    }
+  };
+
+  // Mentor profile fetch function
+  const getMentorProfile = async (userId) => {
+    try {
+      const response = await axios.get(`/users/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching mentor profile:', error);
+      return null;
+    }
+  };
+
+  // Seeker profile fetch function
+  const getSeekerProfile = async (userId) => {
+    try {
+      const response = await axios.get(`/users/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching seeker profile:', error);
+      return null;
     }
   };
 
@@ -43,10 +75,9 @@ const Navbar = ({ onSidebarToggle }) => {
     setShowProfile(false); // close dropdown on route change
   }, [location]);
 
-
-  // Load user data & listen for external updates
+  // Load user profile data
   useEffect(() => {
-    const loadUserData = async () => {
+    const loadUserProfile = async () => {
       const userData = localStorage.getItem("user");
       if (userData) {
         const parsedUser = JSON.parse(userData);
@@ -54,51 +85,98 @@ const Navbar = ({ onSidebarToggle }) => {
         setIsLoggedIn(!!localStorage.getItem("token"));
 
         try {
-          if (parsedUser.roleID?.name === "Employer") {
+          const userRole = parsedUser.roleID?.name?.toLowerCase();
+
+          console.log("User Role:", userRole);
+          console.log("User Data:", parsedUser);
+
+          if (userRole === "employer") {
+            // Employer - fetch company logo
             const logoPath = await getCompanyLogo();
             if (logoPath) {
-              const fullLogoUrl = `http://localhost:5000${logoPath}`;
+              const fullLogoUrl = `${baseURL}${logoPath}`;
               setProfileImage(fullLogoUrl);
               console.log("Employer Logo URL:", fullLogoUrl);
             } else {
-              // Set default image if no logo exists
               setProfileImage("/img/person-avtar.png");
             }
-          } else if (parsedUser.roleID?.name === "seeker") {
-            const logoPath = await getCompanyLogo();
-            if (logoPath) {
-              const fullLogoUrl = `http://localhost:5000${logoPath}`;
-              setProfileImage(fullLogoUrl);
+          }
+          else if (userRole === "seeker") {
+            // Seeker - fetch seeker profile
+            const seekerData = await getSeekerProfile(parsedUser._id);
+             console.log("Seeker Data:", seekerData);
+            if (seekerData && seekerData.profilePicture) {
+              const fullProfileUrl = `${baseURL}${seekerData.profilePicture}`;
+              setProfileImage(fullProfileUrl);
+              console.log("Seeker Profile URL:", fullProfileUrl);
             } else {
               setProfileImage("/img/person-avtar.png");
             }
-          } else if (parsedUser.roleID?.name === "superadmin") {
+          }
+          else if (userRole === "mentor") {
+            // ✅ MENTOR PROFILE - fetch mentor profile picture
+            const mentorData = await getMentorProfile(parsedUser._id);
+                 console.log("Mentor Data:", mentorData);
+            if (mentorData && mentorData.profilePicture) {
+              const fullProfileUrl = `${baseURL}${mentorData.profilePicture}`;
+              setProfileImage(fullProfileUrl);
+             console.log("Mentor Profile URL:", fullProfileUrl);
+            } else {
+              // If no profile picture, use default
+              setProfileImage("/img/person-avtar.png");
+            }
+          }
+          else if (userRole === "superadmin") {
+            // Superadmin - use logo
             setProfileImage(logo);
           }
+          else {
+            // Default for other roles
+            setProfileImage("/img/person-avtar.png");
+               console.log("Using default avatar");
+          }
+
         } catch (error) {
-          console.error("Error fetching logo/profile:", error);
+          console.error("Error fetching user profile:", error);
           setProfileImage("/img/person-avtar.png");
         }
       }
-
     };
 
-    loadUserData(); // On initial load
-    window.addEventListener("userUpdated", loadUserData);
+    loadUserProfile();
+
+    // Listen for user updates (like when profile is edited)
+    window.addEventListener("userUpdated", loadUserProfile);
     return () => {
-      window.removeEventListener("userUpdated", loadUserData);
+      window.removeEventListener("userUpdated", loadUserProfile);
     };
   }, []);
-
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUser(null);
     setIsLoggedIn(false);
-    setProfileImage(null)
+    setProfileImage(null);
     setCompanyLogo(null);
     navigate("/");
+  };
+
+  // Get dashboard route based on user role
+  const getDashboardRoute = () => {
+    const roleName = user?.roleID?.name?.toLowerCase();
+    switch (roleName) {
+      case "seeker":
+        return "/seeker-dashboard";
+      case "employer":
+        return "/employer-dashboard";
+      case "superadmin":
+        return "/admin-dash";
+      case "mentor":
+        return "/mentor-dashboard"; // ✅ Mentor dashboard
+      default:
+        return "/";
+    }
   };
 
   return (
@@ -134,12 +212,18 @@ const Navbar = ({ onSidebarToggle }) => {
             onClick={() => setShowProfile(prev => !prev)}
             className="flex items-center gap-2 p-2 rounded hover:bg-gray-100 transition"
           >
-            <img
-              src={profileImage || companyLogo || "/img/person-avtar.png"}
-              alt="Profile"
-              className="h-8 w-8 rounded-full object-cover"
+            {profileImage ? (
+              <img
+                src={profileImage}
+                alt="Profile"
+                className="h-10 w-10 rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
+                <FaUser className="text-gray-600" />
+              </div>
+            )}
 
-            />
             <span className="hidden md:block font-medium">
               {user ? `${user.firstName} ${user.lastName}` : "example"}
             </span>
@@ -150,12 +234,17 @@ const Navbar = ({ onSidebarToggle }) => {
               <div className="flex items-center gap-3 p-3 border-b">
                 <div>
                   <div className='flex gap-2 items-center'>
-                    <img
-                      src={profileImage || companyLogo || "/img/person-avtar.png"}
-                      alt="Profile"
-                      className="h-8 w-8 rounded-full object-cover"
-
-                    />
+                    {profileImage ? (
+                      <img
+                        src={profileImage}
+                        alt="Profile"
+                        className="h-10 w-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
+                        <FaUser className="text-gray-600" />
+                      </div>
+                    )}
                     <p className="font-medium text-sm">
                       {user ? `${user.firstName} ${user.lastName}` : "Admin"}
                     </p>
@@ -167,20 +256,14 @@ const Navbar = ({ onSidebarToggle }) => {
               <ul className="text-sm text-gray-700">
                 <li
                   onClick={() => {
-                    const roleName = user?.roleID?.name?.toLowerCase();
-                    if (roleName === "seeker") navigate("/seeker-dashboard");
-                    else if (roleName === "employer") navigate("/employer-dashboard");
-                    else if (roleName === "superadmin") navigate("/admin-dash");
-                    else navigate("/");
+                    const dashboardRoute = getDashboardRoute();
+                    navigate(dashboardRoute);
                     setShowProfile(false);
                   }}
                   className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
                 >
                   <FaUser /> Profile
                 </li>
-                {/* <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2">
-                    <FaEnvelope /> Messages
-                  </li> */}
                 <li
                   onClick={handleLogout}
                   className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2 text-red-500"

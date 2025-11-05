@@ -10,17 +10,20 @@ export default function Navbar() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showMoreDropdown, setShowMoreDropdown] = useState(false);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
   const [user, setUser] = useState(null);
   const [companyLogo, setCompanyLogo] = useState(null);
+  const baseURL = import.meta.env.VITE_BACKEND_URL; // Vite
+  // या CRA में: const baseURL = process.env.REACT_APP_BACKEND_URL;
 
   const fetchCompanyLogo = async () => {
     try {
       const response = await axios.get('/general-settings'); // ya aapke backend endpoint
       if (response.data && response.data.logo) {
-        setCompanyLogo(`http://localhost:5000${response.data.logo}`);
+        setCompanyLogo(`${baseURL}${response.data.logo}`);
       }
     } catch (error) {
       console.error("Failed to fetch company logo:", error);
@@ -69,52 +72,193 @@ export default function Navbar() {
   }, [location]);
 
 
+  // Load user data & listen for external updates
+  // useEffect(() => {
+  //   const loadUserData = async () => {
+  //     const userData = localStorage.getItem("user");
+  //     if (userData) {
+  //       const parsedUser = JSON.parse(userData);
+  //       setUser(parsedUser);
+  //       setIsLoggedIn(!!localStorage.getItem("token"));
 
+  //       try {
+  //         // 🔹 SIMPLIFIED VERSION: सभी roles के लिए common approach
+  //         if (parsedUser.profilePicture) {
+  //           // अगर user के पास profilePicture है
+  //           setProfileImage(`${baseURL}${parsedUser.profilePicture}`);
+  //         } else if (parsedUser.roleID?.name === "superadmin") {
+  //           // केवल superadmin के लिए default logo
+  //           setProfileImage(logo);
+  //         } else {
+  //           // बाकी सभी के लिए null (default avatar show होगा)
+  //           setProfileImage(null);
+  //         }
+
+  //         console.log("Parsed User Data:", parsedUser);
+  //       } catch (error) {
+  //         console.error("Error processing user data:", error);
+  //         setProfileImage(null);
+  //       }
+  //     }
+  //   };
+
+  //   loadUserData();
+  //   window.addEventListener("userUpdated", loadUserData);
+  //   return () => {
+  //     window.removeEventListener("userUpdated", loadUserData);
+  //   };
+  // }, []);
 
   // Load user data & listen for external updates
-  useEffect(() => {
+  // useEffect(() => {
+  //   const loadUserData = async () => {
+  //     const userData = localStorage.getItem("user");
+  //     if (userData) {
+  //       const parsedUser = JSON.parse(userData);
+  //       setUser(parsedUser);
+  //       setIsLoggedIn(!!localStorage.getItem("token"));
+
+  //       try {
+  //         if (parsedUser.roleID?.name === "Employer") {
+  //           // 🔹 Employer -> fetch company logo
+  //           const response = await getCompanyLogo();
+  //           if (response.success) {
+  //             const fullLogoUrl = `${baseURL}${response.logo}`;
+  //             setProfileImage(fullLogoUrl);
+  //             console.log("Employer Logo URL:", fullLogoUrl);
+  //           } else {
+  //             setProfileImage(null);
+  //           }
+  //         } else if (parsedUser.roleID?.name === "mentor") {
+  //           const response = await getCompanyLogo();
+  //           const fullLogoUrl = `${baseURL}${response.logo}`;
+  //           setProfileImage(fullLogoUrl);
+  //         } else if (parsedUser.roleID?.name === "seeker") {
+  //           const response = await getCompanyLogo();
+  //           const fullLogoUrl = `${baseURL}${response.logo}`;
+  //           setProfileImage(fullLogoUrl);
+  //         } else if (parsedUser.roleID?.name === "superadmin") {
+  //           // 🔹 Superadmin -> use default logo
+  //           setProfileImage(logo);
+  //         }
+
+  //         console.log("Parsed User Data:", parsedUser);
+  //       } catch (error) {
+  //         console.error("Error fetching logo/profile:", error);
+  //         setProfileImage(null);
+  //       }
+  //     }
+
+  //   };
+
+  //   loadUserData(); // On initial load
+  //   window.addEventListener("userUpdated", loadUserData);
+  //   return () => {
+  //     window.removeEventListener("userUpdated", loadUserData);
+  //   };
+  // }, []);
+// Navbar.js में loadUserData function को replace करें
+useEffect(() => {
     const loadUserData = async () => {
-      const userData = localStorage.getItem("user");
-      if (userData) {
-        const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
-        setIsLoggedIn(!!localStorage.getItem("token"));
+        const userData = localStorage.getItem("user");
+        const token = localStorage.getItem("token");
+        
+        if (userData && token) {
+            const parsedUser = JSON.parse(userData);
+            setUser(parsedUser);
+            setIsLoggedIn(true);
 
-        try {
-          if (parsedUser.roleID?.name === "Employer") {
-            // 🔹 Employer -> fetch company logo
-            const response = await getCompanyLogo();
-            if (response.success) {
-              const fullLogoUrl = `http://localhost:5000${response.logo}`;
-              setProfileImage(fullLogoUrl);
-              console.log("Employer Logo URL:", fullLogoUrl);
-            } else {
-              setProfileImage(null);
+            try {
+                // 🔹 SEEKER के लिए अलग logic
+                if (parsedUser.roleID?.name === "seeker") {
+                    try {
+                        // Seeker profile data fetch करें
+                        const seekerRes = await axios.get("/seeker/me", {
+                            headers: { Authorization: `Bearer ${token}` },
+                        });
+                        
+                        if (seekerRes.data.success && seekerRes.data.data) {
+                            const seekerData = seekerRes.data.data;
+                            
+                            // Seeker का profileImage check करें
+                            if (seekerData.profileImage) {
+                                const cleanBase = baseURL.replace(/\/+$/, "");
+                                const cleanPath = seekerData.profileImage.replace(/^\/+/, "");
+                                setProfileImage(`${cleanBase}/${cleanPath}`);
+                                
+                                console.log("Seeker Profile Image:", `${cleanBase}/${cleanPath}`);
+                            } else {
+                                setProfileImage(null);
+                            }
+                        } else {
+                            setProfileImage(null);
+                        }
+                    } catch (seekerError) {
+                        console.error("Error fetching seeker profile:", seekerError);
+                        setProfileImage(null);
+                    }
+                }
+                // 🔹 EMPLOYER के लिए company logo
+                else if (parsedUser.roleID?.name === "Employer") {
+                    try {
+                        const response = await getCompanyLogo();
+                        if (response.success) {
+                            const fullLogoUrl = `${baseURL}${response.logo}`;
+                            setProfileImage(fullLogoUrl);
+                        } else {
+                            setProfileImage(null);
+                        }
+                    } catch (error) {
+                        console.error("Error fetching employer logo:", error);
+                        setProfileImage(null);
+                    }
+                }
+                // 🔹 MENTOR के लिए
+                else if (parsedUser.roleID?.name === "mentor") {
+                    // Mentor के लिए profilePicture use करें
+                    if (parsedUser.profilePicture) {
+                        setProfileImage(`${baseURL}${parsedUser.profilePicture}`);
+                    } else {
+                        setProfileImage(null);
+                    }
+                }
+                // 🔹 SUPERADMIN के लिए
+                else if (parsedUser.roleID?.name === "superadmin") {
+                    setProfileImage(logo);
+                }
+                // 🔹 DEFAULT case
+                else {
+                    if (parsedUser.profilePicture) {
+                        setProfileImage(`${baseURL}${parsedUser.profilePicture}`);
+                    } else {
+                        setProfileImage(null);
+                    }
+                }
+
+            } catch (error) {
+                console.error("Error processing user data:", error);
+                setProfileImage(null);
             }
-          } else if (parsedUser.roleID?.name === "seeker") {
-            const response = await getCompanyLogo();
-            const fullLogoUrl = `http://localhost:5000${response.logo}`;
-            setProfileImage(fullLogoUrl);
-          } else if (parsedUser.roleID?.name === "superadmin") {
-            // 🔹 Superadmin -> use default logo
-            setProfileImage(logo);
-          }
-
-          console.log("Parsed User Data:", parsedUser);
-        } catch (error) {
-          console.error("Error fetching logo/profile:", error);
-          setProfileImage(null);
+        } else {
+            setUser(null);
+            setProfileImage(null);
+            setIsLoggedIn(false);
         }
-      }
-
     };
 
-    loadUserData(); // On initial load
-    window.addEventListener("userUpdated", loadUserData);
+    loadUserData();
+    
+    // Listen for profile updates
+    const handleUserUpdate = () => {
+        loadUserData();
+    };
+
+    window.addEventListener("userUpdated", handleUserUpdate);
     return () => {
-      window.removeEventListener("userUpdated", loadUserData);
+        window.removeEventListener("userUpdated", handleUserUpdate);
     };
-  }, []);
+}, []);
+
 
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
@@ -131,7 +275,7 @@ export default function Navbar() {
     localStorage.removeItem("user");
     sessionStorage.removeItem("role");
     setIsLoggedIn(false);
-    navigate("/login");
+    navigate("/");
   };
 
   const getImageSource = () => {
@@ -158,7 +302,9 @@ export default function Navbar() {
           </div>
 
           <ul className="hidden md:flex items-center gap-4 text-sm font-medium px-6 py-4">
-            <li className="relative">
+            <Link to='/blogs'><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">BLOGS</li></Link>
+            {/* <li className="relative">
+              
               <span onClick={toggleDropdown} className=" cursor-pointer p-4">
                 <Link to='/courses' className='hover:text-[#339ca0]'>COURSES</Link>
               </span>
@@ -190,40 +336,42 @@ export default function Navbar() {
                   </div>
                 </div>
               )}
-            </li>
+            </li> */}
 
-            <li><Link to="/placement-program" className="hover:text-[#339ca0]">PLACEMENT PROGRAM</Link></li>
-            <li><Link to="/webinars" className="hover:text-[#339ca0]">WEBINARS</Link></li>
-            <li><Link to="/hall-of-fame" className="hover:text-[#339ca0]">LIVE MENTORSHIP</Link></li>
+            {/* <li><Link to="/placement-program" className="hover:text-[#339ca0]">PLACEMENT PROGRAM</Link></li> */}
+            <li><Link to="/webinars" className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">WEBINARS</Link></li>
+            <li><Link to="/hall-of-fame" className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">LIVE MENTORSHIP</Link></li>
             {/* <li><Link to="/live-mentorship" className="hover:text-[#339ca0]">LIVE MENTORSHIP</Link></li> */}
-            
-              <Link to="/placement-program">
+
+            <Link to="/placement-program">
               <li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">JOBS</li>
-              </Link>
+            </Link>
             <li className="relative">
-              <span onClick={toggleMoreDropdown} className="cursor-pointer hover:text-[#339ca0] p-4">MORE</span>
+              <span onClick={toggleMoreDropdown} className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">MORE</span>
               {showMoreDropdown && (
                 <div className="absolute left-[-130px] top-[28px] mt-1 w-[250px] bg-white border shadow-xl z-50 p-6 rounded-lg text-sm">
                   <ul className="space-y-3">
                     <li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">WHATSAPP GROUPS</li>
 
-                    <li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">TESTIMONIALS</li>
-                    <li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">BECOME A MENTOR</li>
+                    <Link to='/testimonials-page'><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">TESTIMONIALS</li></Link>
+                    <Link to="/become-a-mentor"><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">BECOME A MENTOR</li></Link>
+
                     <li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">HIRE FORM US</li>
                     <li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">B2B CORPORATE TRAINING</li>
-                    <Link to='/About-Us'><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">ABOUT US</li></Link>
-                    <Link to='/Blogs-page'><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">BLOGS</li></Link>
+                    <Link to='/about-us'><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">ABOUT US</li></Link>
+                    <Link to="/knowledge-base"><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">KNOWLEDGE-BASE</li></Link>
+
                   </ul>
                 </div>
               )}
             </li>
 
-            <Link to="/CA-register"><li className="cursor-pointer hover:text-[#339ca0]">CA Fresher</li></Link>
+            <Link to="/ca-register"><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">CA Fresher</li></Link>
 
             {!isLoggedIn ? (
               <>
-                <li onClick={() => setShowRegisterModal(true)} className="cursor-pointer hover:text-[#339ca0]">Register</li>
-                <Link to='/login'><li className="cursor-pointer hover:text-[#339ca0]">LOGIN</li></Link>
+                <li onClick={() => setShowRegisterModal(true)} className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">Register</li>
+                <li onClick={() => setShowLoginModal(true)} className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">LOGIN</li>
               </>
             ) : (
               <div className="relative profile-dropdown">
@@ -250,14 +398,17 @@ export default function Navbar() {
                     <div className="flex items-center gap-3 p-3 border-b">
                       <div>
                         <div className='flex gap-2 items-center'>
-                          <img
-                            src={profileImage}
-                            alt="Profile"
-                            className="h-8 w-8 rounded-full object-cover"
-                            onError={(e) => {
-                              e.target.src = "/img/person-avtar.png";
-                            }}
-                          />
+                          {profileImage ? (
+                            <img
+                              src={getImageSource()}
+                              alt="Profile"
+                              className="w-10 h-10 rounded-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
+                              <FaUser className="text-gray-600" />
+                            </div>
+                          )}
                           <p className="font-medium text-sm">
                             {user ? `${user.firstName} ${user.lastName}` : "Admin"}
                           </p>
@@ -273,6 +424,7 @@ export default function Navbar() {
                           if (roleName === "seeker") navigate("/seeker-dashboard");
                           else if (roleName === "employer") navigate("/employer-dashboard");
                           else if (roleName === "superadmin") navigate("/admin-dash");
+                          else if (roleName === "mentor") navigate('/mentor-dashboard')
                           else navigate("/");
                           setShowProfile(false);
                         }}
@@ -299,17 +451,45 @@ export default function Navbar() {
           {/* Mobile Menu */}
           {menuOpen && (
             <ul className="space-y-2 absolute top-[70px] left-0 w-full bg-white shadow-md py-4 px-6 flex flex-col md:hidden text-sm font-medium z-50">
-              <li onClick={closeMenu}><Link to="/Courses" className="p-2 border-b block hover:text-[#339ca0]">COURSES</Link></li>
-              <li onClick={closeMenu}><Link to="/placement-program" className="p-2 border-b block hover:text-[#339ca0]">PLACEMENT PROGRAM</Link></li>
+              <li onClick={closeMenu} className="hover:bg-[#339ca0] border-b block hover:text-white p-2 rounded cursor-pointer"><Link to='/blogs' >BLOGS</Link></li>
+              {/* <li onClick={closeMenu}><Link to="/Courses" className="p-2 border-b block hover:text-[#339ca0]">COURSES</Link></li> */}
+
               <li onClick={closeMenu}><Link to="/webinars" className="p-2 border-b block hover:text-[#339ca0]">WEBINARS</Link></li>
               <li onClick={closeMenu}><Link to="/hall-of-fame" className="p-2 border-b block hover:text-[#339ca0]">HALL OF FAME</Link></li>
               <li onClick={closeMenu}><Link to="/live-mentorship" className="p-2 border-b block hover:text-[#339ca0]">LIVE MENTORSHIP</Link></li>
+              {/* ✅ MORE Section */}
+              <li onClick={closeMenu}><Link to="/placement-program" className="p-2 border-b block hover:text-[#339ca0]">JOBS</Link></li>
+              <li className="border-b">
+                <div onClick={toggleMoreDropdown} className="p-2 flex justify-between items-center cursor-pointer hover:text-[#339ca0]">
+                  <span>MORE</span>
+                  <span>{showMoreDropdown ? "▲" : "▼"}</span>
+                </div>
 
+                {showMoreDropdown && (
+                  <ul className="pl-4 mt-2 space-y-3 text-[15px]">
+                    <li onClick={closeMenu} className="hover:text-[#339ca0] cursor-pointer">WHATSAPP GROUPS</li>
+                    <li onClick={closeMenu}>
+                      <Link to="/testimonials-page" className="hover:text-[#339ca0] block">TESTIMONIALS</Link>
+                    </li>
+                    <li onClick={closeMenu}>
+                      <Link to="/become-a-mentor" className="hover:text-[#339ca0] block">BECOME A MENTOR</Link>
+                    </li>
+                    <li onClick={closeMenu} className="hover:text-[#339ca0] cursor-pointer">HIRE FORM US</li>
+                    <li onClick={closeMenu} className="hover:text-[#339ca0] cursor-pointer">B2B CORPORATE TRAINING</li>
+                    <li onClick={closeMenu}>
+                      <Link to="/about-us" className="hover:text-[#339ca0] block">ABOUT US</Link>
+                    </li>
+                    <li onClick={closeMenu}>
+                      <Link to="/knowledge-base" className="hover:text-[#339ca0] block">KNOWLEDGE-BASE</Link>
+                    </li>
+                  </ul>
+                )}
+              </li>
               {!isLoggedIn ? (
                 <>
-                  <li onClick={closeMenu}><Link to="/CA-register" className="p-2 block hover:text-[#339ca0]">CA Fresher</Link></li>
+                  <li onClick={closeMenu}><Link to="/ca-register" className="p-2 block hover:text-[#339ca0]">CA Fresher</Link></li>
                   <li onClick={() => { setShowRegisterModal(true); closeMenu(); }} className="p-2 cursor-pointer hover:text-[#339ca0]">Register</li>
-                  <li onClick={closeMenu}><Link to="/login" className="p-2 block hover:text-[#339ca0]">Login</Link></li>
+                  <li onClick={() => { setShowLoginModal(true); closeMenu(); }} ><Link to="/login" className="p-2 block hover:text-[#339ca0]">Login</Link></li>
                 </>
               ) : (
                 <li onClick={() => { handleLogout(); closeMenu(); }} className="p-2 cursor-pointer text-red-500">Logout</li>
@@ -352,6 +532,48 @@ export default function Navbar() {
                 >
                   Company
                 </button>
+              </div>
+            </div>
+          )}
+
+          {/* LOGIN MODAL */}
+          {showLoginModal && (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+              onClick={() => setShowLoginModal(false)}
+            >
+              <div
+                className="bg-white p-6 rounded-lg w-[400px] text-center space-y-4"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex justify-between items-center">
+                  <h2 className="text-xl font-bold mb-4">Login As</h2>
+                  <button onClick={() => setShowLoginModal(false)}>
+                    <IoMdClose size={20} />
+                  </button>
+                </div>
+
+                <button
+                  onClick={() => { setShowLoginModal(false); navigate("/login?role=seeker"); }}
+                  className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                >
+                  Job Seeker
+                </button>
+
+                <button
+                  onClick={() => { setShowLoginModal(false); navigate("/login?role=Mentor"); }}
+                  className="w-full py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                >
+                  Mentor
+                </button>
+
+                <button
+                  onClick={() => { setShowLoginModal(false); navigate("/login?role=employer"); }}
+                  className="w-full py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700"
+                >
+                  Employer
+                </button>
+
               </div>
             </div>
           )}

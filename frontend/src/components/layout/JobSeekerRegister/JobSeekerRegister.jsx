@@ -67,7 +67,7 @@ const JobSeekerRegister = () => {
 
       const payload = {
         ...formData,
-        roleID, // ✅ include seeker roleID
+        roleID, //  include seeker roleID
       };
       const res = axios.post("/auth/register", payload);
 

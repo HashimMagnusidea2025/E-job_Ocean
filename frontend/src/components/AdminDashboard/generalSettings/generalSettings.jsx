@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "../../../utils/axios";
 import Layout from "../../seekerDashboard/partials/layout";
-
+const baseURL = import.meta.env.VITE_BACKEND_URL; // Vite
+// या CRA में: const baseURL = process.env.REACT_APP_BACKEND_URL;
 // Utility function
 const toCamelCase = (str) => {
   return str
@@ -13,6 +14,7 @@ const toCamelCase = (str) => {
 
 const GeneralSettings = () => {
   const [formData, setFormData] = useState({
+    name: "",
     companyName: "",
     companyEmail: "",
     companyPhone: "",
@@ -36,9 +38,9 @@ const GeneralSettings = () => {
           ...res.data,
         }));
         if (res.data.logo)
-          setPreviewLogo(`http://localhost:5000${res.data.logo}`);
+          setPreviewLogo(`${baseURL}${res.data.logo}`);
         if (res.data.faviconIcon)
-          setPreviewFavicon(`http://localhost:5000${res.data.faviconIcon}`);
+          setPreviewFavicon(`${baseURL}${res.data.faviconIcon}`);
       }
       console.log(res.data);
 
@@ -101,6 +103,7 @@ const GeneralSettings = () => {
             className="grid grid-cols-1 md:grid-cols-2 gap-6"
           >
             {[
+              { name: "name", label: " Name" },
               { name: "companyName", label: "Company Name" },
               { name: "companyEmail", label: "Company Email", type: "email" },
               { name: "companyPhone", label: "Company Phone" },

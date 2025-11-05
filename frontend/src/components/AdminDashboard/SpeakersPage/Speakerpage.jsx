@@ -3,12 +3,18 @@ import DataTable from "react-data-table-component";
 import axios from "../../../utils/axios.js";
 import Layout from "../../seekerDashboard/partials/layout.jsx";
 import { FaEye, FaEdit, FaTrash, FaToggleOn, FaToggleOff } from "react-icons/fa";
+const baseURL = import.meta.env.VITE_BACKEND_URL; // Vite
+// या CRA में: const baseURL = process.env.REACT_APP_BACKEND_URL;
 const Speakerpage = () => {
     const [speakers, setSpeakers] = useState([]);
     const [open, setOpen] = useState(false);
     const [editId, setEditId] = useState(null);
     const [previewImage, setPreviewImage] = useState(null);
-
+    const [loading, setLoading] = useState({
+        countries: false,
+        states: false,
+        cities: false
+    });
     const [formData, setFormData] = useState({
         salutation: "",
         firstName: "",
@@ -28,6 +34,95 @@ const Speakerpage = () => {
     const [cities, setCities] = useState([]);
     const [viewData, setViewData] = useState(null);
 
+
+
+
+    //  useEffect(() => {
+
+    //     axios.get("/country").then((res) => setCountries(res.data.country));
+    // }, []);
+
+
+    // // dependent dropdowns
+    // useEffect(() => {
+    //     if (formData.country) {
+    //         axios.get(`/state/country/${formData.country}`).then((res) => setStates(res.data.data));
+    //     } else setStates([]);
+    // }, [formData.country]);
+
+    // useEffect(() => {
+    //     if (formData.state) {
+    //         axios.get(`/city/state/${formData.state}`).then((res) => setCities(res.data.data));
+    //     } else setCities([]);
+    // }, [formData.state]);
+
+
+
+    // ✅ Load Countries
+    useEffect(() => {
+        const loadCountries = async () => {
+            setLoading(prev => ({ ...prev, countries: true }));
+            try {
+                const response = await axios.get("/country");
+                setCountries(response.data.country || []);
+            } catch (error) {
+                console.error("Failed to fetch countries:", error);
+                alert("Failed to load countries");
+            } finally {
+                setLoading(prev => ({ ...prev, countries: false }));
+            }
+        };
+        loadCountries();
+    }, []);
+
+    // ✅ Load States when country changes
+    useEffect(() => {
+        const loadStates = async () => {
+            if (!formData.country) {
+                setStates([]);
+                setFormData(prev => ({ ...prev, state: "", city: "" }));
+                return;
+            }
+
+            setLoading(prev => ({ ...prev, states: true }));
+            try {
+                const response = await axios.get(`/state/country/${formData.country}`);
+                setStates(response.data.data || []);
+            } catch (error) {
+                console.error("Failed to fetch states:", error);
+                setStates([]);
+            } finally {
+                setLoading(prev => ({ ...prev, states: false }));
+            }
+        };
+
+        loadStates();
+    }, [formData.country]);
+
+    // ✅ Load Cities when state changes
+    useEffect(() => {
+        const loadCities = async () => {
+            if (!formData.state) {
+                setCities([]);
+                setFormData(prev => ({ ...prev, city: "" }));
+                return;
+            }
+
+            setLoading(prev => ({ ...prev, cities: true }));
+            try {
+                const response = await axios.get(`/city/state/${formData.state}`);
+                setCities(response.data.data || []);
+            } catch (error) {
+                console.error("Failed to fetch cities:", error);
+                setCities([]);
+            } finally {
+                setLoading(prev => ({ ...prev, cities: false }));
+            }
+        };
+
+        loadCities();
+    }, [formData.state]);
+
     // ✅ Delete Speaker
     const handleDelete = async (id) => {
         if (!window.confirm("Are you sure you want to delete this speaker?")) return;
@@ -42,7 +137,7 @@ const Speakerpage = () => {
         }
     };
     // ✅ Open Update Modal
-    const handleEdit = (speaker) => {
+    const handleEdit = async (speaker) => {
         setEditId(speaker._id);
         setFormData({
             salutation: speaker.salutation || "",
@@ -60,28 +155,26 @@ const Speakerpage = () => {
             profilePic: null,
         });
         // Set preview image to existing profile pic
-    setPreviewImage(getProfilePic(speaker.profilePic));
+        setPreviewImage(getProfilePic(speaker.profilePic));
+        // Load states and cities for the speaker's location
+        if (speaker.country) {
+            try {
+                const statesRes = await axios.get(`/state/country/${speaker.country}`);
+                setStates(statesRes.data.data || []);
+
+                if (speaker.state) {
+                    const citiesRes = await axios.get(`/city/state/${speaker.state}`);
+                    setCities(citiesRes.data.data || []);
+                }
+            } catch (error) {
+                console.error("Error loading location data:", error);
+            }
+        }
+
         setOpen(true);
     };
 
-    useEffect(() => {
 
-        axios.get("/country").then((res) => setCountries(res.data.country));
-    }, []);
-
-
-    // dependent dropdowns
-    useEffect(() => {
-        if (formData.country) {
-            axios.get(`/state/country/${formData.country}`).then((res) => setStates(res.data.data));
-        } else setStates([]);
-    }, [formData.country]);
-
-    useEffect(() => {
-        if (formData.state) {
-            axios.get(`/city/state/${formData.state}`).then((res) => setCities(res.data.data));
-        } else setCities([]);
-    }, [formData.state]);
 
 
 
@@ -92,25 +185,35 @@ const Speakerpage = () => {
     const handleFileChange = (e) => {
         setFormData({ ...formData, profilePic: e.target.files[0] });
     };
+
+
+    // ✅ Fix location change handler
+    const handleLocationChange = (field, value) => {
+        setFormData(prev => ({
+            ...prev,
+            [field]: value,
+            // Reset dependent fields when parent changes
+            ...(field === 'country' && { state: "", city: "" }),
+            ...(field === 'state' && { city: "" })
+        }));
+    };
+
     const handleView = async (speaker) => {
         setViewData(speaker);
 
-        // fetch country list if not already loaded
-        if (!countries.length) {
-            const resCountries = await axios.get("/country");
-            setCountries(resCountries.data.country);
-        }
+        // Load location data for view modal
+        try {
+            if (speaker.country) {
+                const statesRes = await axios.get(`/state/country/${speaker.country}`);
+                setStates(statesRes.data.data || []);
 
-        // fetch states for this speaker's country
-        if (speaker.country) {
-            const resStates = await axios.get(`/state/country/${speaker.country}`);
-            setStates(resStates.data.data);
-        }
-
-        // fetch cities for this speaker's state
-        if (speaker.state) {
-            const resCities = await axios.get(`/city/state/${speaker.state}`);
-            setCities(resCities.data.data);
+                if (speaker.state) {
+                    const citiesRes = await axios.get(`/city/state/${speaker.state}`);
+                    setCities(citiesRes.data.data || []);
+                }
+            }
+        } catch (error) {
+            console.error("Error loading location data for view:", error);
         }
     };
 
@@ -173,6 +276,11 @@ const Speakerpage = () => {
         }
     };
     const columns = [
+        {
+      name: "ID",
+      cell: (row, index) => index + 1,
+      width: "80px",
+    },
         {
             name: "Full Name",
             selector: (row) => `${row.firstName || ""} ${row.lastName || ""}`,
@@ -244,14 +352,14 @@ const Speakerpage = () => {
         const cityName = cities.find(c => String(c.id) === String(viewData.city))?.name || '';
 
         const locationParts = [cityName, stateName, countryName];
-        return locationParts.filter(Boolean).join(', ');
+        return locationParts.filter(Boolean).join(', ') || "Location not specified";
     };
 
     const getProfilePic = (pic) => {
         if (!pic || pic === "null") return "/default-profile.png";
 
         // Ensure uploads folder is included in the path
-        return `http://localhost:5000/${pic.startsWith("uploads/") ? pic : "uploads" + pic}`;
+        return `${baseURL}/${pic.startsWith("uploads/") ? pic : "uploads" + pic}`;
     };
 
 
@@ -417,13 +525,15 @@ const Speakerpage = () => {
                                 {/* Country / State / City */}
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                     <div>
-                                        <label className="block text-sm font-medium mb-1">Country</label>
+                                        <label className="block text-sm font-medium mb-1">
+                                            Country {loading.countries && "(Loading...)"}
+                                        </label>
                                         <select
+                                            name="country"
                                             value={formData.country}
-                                            onChange={(e) =>
-                                                setFormData({ ...formData, country: Number(e.target.value) })
-                                            }
+                                            onChange={(e) => handleLocationChange('country', e.target.value)}
                                             className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                                            disabled={loading.countries}
                                         >
                                             <option value="">-- Select Country --</option>
                                             {countries.map((country) => (
@@ -435,12 +545,15 @@ const Speakerpage = () => {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium mb-1">State</label>
+                                        <label className="block text-sm font-medium mb-1">
+                                            State {loading.states && "(Loading...)"}
+                                        </label>
                                         <select
+                                            name="state"
                                             value={formData.state}
-                                            onChange={(e) => setFormData({ ...formData, state: Number(e.target.value) })}
+                                            onChange={(e) => handleLocationChange('state', e.target.value)}
                                             className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                                            disabled={!formData.country}
+                                            disabled={!formData.country || loading.states}
                                         >
                                             <option value="">-- Select State --</option>
                                             {states.map((state) => (
@@ -452,12 +565,15 @@ const Speakerpage = () => {
                                     </div>
 
                                     <div>
-                                        <label className="block text-sm font-medium mb-1">City</label>
+                                        <label className="block text-sm font-medium mb-1">
+                                            City {loading.cities && "(Loading...)"}
+                                        </label>
                                         <select
+                                            name="city"
                                             value={formData.city}
-                                            onChange={(e) => setFormData({ ...formData, city: Number(e.target.value) })}
+                                            onChange={(e) => handleLocationChange('city', e.target.value)}
                                             className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                                            disabled={!formData.state}
+                                            disabled={!formData.state || loading.cities}
                                         >
                                             <option value="">-- Select City --</option>
                                             {cities.map((city) => (

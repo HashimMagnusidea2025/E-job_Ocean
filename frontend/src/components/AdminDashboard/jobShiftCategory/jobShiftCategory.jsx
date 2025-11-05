@@ -77,14 +77,14 @@ export default function JobShiftCategoryPage() {
 
   // Toggle status
   const handleToggleStatus = async (id, currentStatus) => {
-     const newStatus = currentStatus === "active" ? "inactive" : "active";
-      const category = categories.find(cat => cat._id === id);
+    const newStatus = currentStatus === "active" ? "inactive" : "active";
+    const category = categories.find(cat => cat._id === id);
     try {
       await axios.put(`/job-Shift-category/${id}`, {
-       name: category.name,
+        name: category.name,
         status: newStatus
       });
-     Swal.fire("Updated!", `Status changed to ${newStatus}`, "success");
+      Swal.fire("Updated!", `Status changed to ${newStatus}`, "success");
       fetchCategories();
     } catch (err) {
       console.error(err);
@@ -94,7 +94,7 @@ export default function JobShiftCategoryPage() {
 
   // DataTable columns
   const columns = [
-     {
+    {
       name: "ID",
       selector: (row, index) => index + 1,
       width: "70px",
@@ -109,9 +109,8 @@ export default function JobShiftCategoryPage() {
       cell: (row) => (
         <div className="flex items-center gap-2">
           <span
-            className={`px-2 py-1 text-xs rounded text-white ${
-              row.status === "active" ? "bg-green-500" : "bg-red-500"
-            }`}
+            className={`px-2 py-1 text-xs rounded text-white ${row.status === "active" ? "bg-green-500" : "bg-red-500"
+              }`}
           >
             {row.status}
           </span>
@@ -159,79 +158,79 @@ export default function JobShiftCategoryPage() {
 
   return (
     <Layout>
-    <div className="p-6 max-w-6xl mx-auto">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-xl font-bold">Job Shift Categories</h1>
-        <input
-          type="text"
-          placeholder="Search..."
-          className="border px-3 py-2 rounded mb-4 "
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <button
-          onClick={() => {
-            setFormData({ id: null, name: "", status: "active" });
-            setModalOpen(true);
-          }}
-          className="flex items-center bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600"
-        >
-          <FaPlus className="mr-2" /> Add Category
-        </button>
-      </div>
-
-      <DataTable
-        columns={columns}
-        data={filteredData}
-        pagination
-        highlightOnHover
-        striped
-        className="bg-white rounded shadow"
-      />
-
-      {modalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center">
-          <div className="bg-white p-6 rounded w-96 shadow-lg">
-            <h2 className="text-lg font-bold mb-4">
-              {formData.id ? "Edit Category" : "Add Category"}
-            </h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <input
-                type="text"
-                placeholder="Category Name"
-                className="border px-3 py-2 w-full rounded"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-              />
-              <select
-                className="border px-3 py-2 w-full rounded"
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-              >
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-              </select>
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setModalOpen(false)}
-                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                >
-                  Save
-                </button>
-              </div>
-            </form>
-          </div>
+      <div className="p-6 max-w-6xl mx-auto">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-xl font-bold">Job Shift Categories</h1>
+          <input
+            type="text"
+            placeholder="Search..."
+            className="border px-3 py-2 rounded mb-4 "
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <button
+            onClick={() => {
+              setFormData({ id: null, name: "", status: "active" });
+              setModalOpen(true);
+            }}
+            className="flex items-center bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600"
+          >
+            <FaPlus className="mr-2" /> Add Category
+          </button>
         </div>
-      )}
-    </div>
+
+        <DataTable
+          columns={columns}
+          data={filteredData}
+          pagination
+          highlightOnHover
+          striped
+          className="bg-white rounded shadow"
+        />
+
+        {modalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center">
+            <div className="bg-white p-6 rounded w-96 shadow-lg">
+              <h2 className="text-lg font-bold mb-4">
+                {formData.id ? "Edit Category" : "Add Category"}
+              </h2>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <input
+                  type="text"
+                  placeholder="Category Name"
+                  className="border px-3 py-2 w-full rounded"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                />
+                <select
+                  className="border px-3 py-2 w-full rounded"
+                  value={formData.status}
+                  onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                >
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+                <div className="flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setModalOpen(false)}
+                    className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                  >
+                    Save
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
     </Layout>
   );
 }

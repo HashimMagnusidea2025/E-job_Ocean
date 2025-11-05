@@ -5,6 +5,8 @@ import Navbar from './components/layout/navbar/navbar';
 import Footer from './components/layout/footer/footer';
 import Home from './pages/home/home';
 import Placementapge from './pages/PlacementProgrampage/PlacementProgram';
+
+import JobDetailsPage from './pages/JobDetailspage/JobDetailspage.jsx';
 import WebinarspageList from './pages/Webinars/Webinars';
 import WebinarDetailsPage from './pages/Webinars/webinarDetilasPage.jsx';
 
@@ -15,6 +17,7 @@ import ComboIncludesPage from './pages/comboIncludespage/comboIncludespage';
 
 import EmployerDashboard from './components/employerDashboard/employerDashboard';
 // import ViewPublicProfile from './components/seekerDashboard/View-Public-Profile';
+import TestimonialsPage from './pages/TESTIMONIALSPAGE/testimonialspage.jsx';
 import AboutUs from './pages/AboutUs/AboutUspage';
 import BlogsPage from './pages/Blogspage/Blogspage';
 import BlogDetailsPage from './pages/Blogspage/blogdetailpage.jsx';
@@ -22,6 +25,9 @@ import BlogDetailsPage2 from './pages/Blogspage/blogdetailpage2.jsx';
 import Dashboard from './components/AdminDashboard/Admindashborard';
 import CaFreshersForm from './components/layout/section/CaFreshersForm/CaFreshersForm';
 import Login from './components/layout/section/login/login';
+
+import KnowledgeBasePage from './pages/KnowledgeBasePage/KnowledgeBasePage.jsx';
+import KnowledgeBaseRegisterList from './components/AdminDashboard/KnowledgeBaseRegisterList/KnowledgeBaseRegisterList.jsx';
 
 
 
@@ -50,8 +56,10 @@ import PurchasedCvsPackage from './components/employerDashboard/CvsSearchPackage
 import PaymentHistory from './components/employerDashboard/paymentHistory.jsx';
 import UnlockedUsers from './components/employerDashboard/unlockedUsers.jsx';
 import CompanyFollowers from './components/employerDashboard/companyFollowers.jsx';
+import JobCandidates from './components/employerDashboard/JobCandidates.jsx';
 
 // Admin dashoard inner file //
+import AdminLogin from './components/AdminDashboard/adminlogin/adminlogin.jsx';
 import AdminDash from './components/AdminDashboard/admin-dash.jsx';
 import RolesPage from './components/AdminDashboard/rolepage/rolepage';
 import UsersPage from './components/AdminDashboard/userspage/userspage';
@@ -66,6 +74,7 @@ import FunctionalAreaCategory from './components/AdminDashboard/FunctionalAreaCa
 import JobTypeCategoryPage from './components/AdminDashboard/jobTypeCategory/jobTypeCategory.jsx';
 import JobShiftCategoryPage from './components/AdminDashboard/jobShiftCategory/jobShiftCategory.jsx';
 import DegreeLevelCategoryPage from './components/AdminDashboard/DegreeLevelCategory/DegreeLevelCategory.jsx';
+import DegreeTypeCategoryPage from './components/AdminDashboard/DegreeTypeCategory/DegreeTypeCategory.jsx';
 import CompanyCategoryPage from './components/AdminDashboard/CompanyCategory/CompanyCategory.jsx';
 import OwnershipCategoryPage from './components/AdminDashboard/OwnershipCategory/OwnershipCategory.jsx';
 import NoofOfficeCategoryPage from './components/AdminDashboard/NoofOfficeCategory/NoofOfficeCategory.jsx';
@@ -81,11 +90,13 @@ import PaymentReceiptOneToOne from './components/ui/PaymentReceipt/PaymentReceip
 import PostAJobAdmin from './components/AdminDashboard/jobPostadmin/jobPostadmin.jsx'
 // Create Company
 import CreateCompany from './components/AdminDashboard/createCompany/createCompany.jsx';
+import BecomeAMentorRegisterList from './components/AdminDashboard/BecomeAMentorRegisterList/BecomeAMentorRegisterList.jsx';
 
 import {
   ProtectedAdminRoute,
   ProtectedSeekerRoute,
   ProtectedEmployerRoute,
+  ProtectedMentorRoute
 } from "./ProtectedAdminRoute.jsx";
 
 import Dash from './components/seekerDashboard/dash.jsx';
@@ -93,15 +104,28 @@ import EmployerDash from './components/employerDashboard/employerdash.jsx';
 
 import Speakerpage from './components/AdminDashboard/SpeakersPage/Speakerpage.jsx';
 import AddWebinarPage from './components/AdminDashboard/WebinarPage/WebinarPage.jsx';
-import OneToOneForm from './components/AdminDashboard/OneToOneForm/OneToOneForm.jsx';
+import AdminOneToOneForm from './components/AdminDashboard/OneToOneForm/OneToOneForm.jsx';
 import OneToOneList from './components/AdminDashboard/OneToOneForm/OneToOneList.jsx';
 import CMSPage from './components/AdminDashboard/CMSPage/CMSPage.jsx';
 import JobPostList from './components/AdminDashboard/JobPostList/JobPostList.jsx';
+import JobRegisterList from './components/AdminDashboard/jobRegisterList/JobRegisterList.jsx';
+import KnowledgeBaseForm from './components/AdminDashboard/KnowledgeBaseForm/KnowledgeBaseForm.jsx';
+import KnowledgeBaseList from './components/AdminDashboard/KnowledgeBaseList/KnowledgeBaseList.jsx';
+import BecomeAMentorRegister from './pages/BecomeAMentorRegister/BecomeAMentorRegister.jsx'
 
 // import SeekerDashboard from './components/seekerDashboard/seekerDashboard';
 
 
 import PaymentReceipt from "./components/ui/PaymentReceipt/PaymentReceipt.jsx";
+import ForgotPassword from './pages/ForgotPassword/ForgotPassword.jsx';
+import ResetPassword from './pages/ResetPassword/ResetPassword.jsx';
+
+// Mentor Dashborad file
+
+import MentorDashboard from './components/MentorDashboard/MentorDashboard.jsx';
+import MentorOneToOneForm from './components/MentorDashboard/MentorOneToOneForm/MentorOneToOneForm.jsx';
+import MentorSessionsList from './components/MentorDashboard/SessionsListMentor/SessionsListMentor.jsx';
+import EditMentorDetails from './components/MentorDashboard/editMentorDetilas/editMentorDetilas.jsx';
 
 function App() {
   return (
@@ -110,6 +134,8 @@ function App() {
         <Route path="/" element={<><Home /></>} />
         <Route path='/courses' element={<><CoursesPage /></>} />
         <Route path="/placement-program" element={<><Placementapge /></>} />
+        <Route path="/job-details/:id" element={<><Navbar /><JobDetailsPage /><Footer /></>} />
+
         <Route path="/webinars" element={<><WebinarspageList /></>} />
         <Route path="/webinars/:id" element={<WebinarDetailsPage />} />
 
@@ -120,10 +146,15 @@ function App() {
 
         <Route path='/live-mentorship' element={<><Navbar /><LiveMentorShipPage /><Footer /></>} />
         <Route path='/combo-page' element={<><Navbar /><ComboIncludesPage /><Footer /></>} />
-        <Route path='/About-Us' element={<><Navbar /><AboutUs /><Footer /></>} />
-        <Route path='/blogs-page' element={<><BlogsPage /></>} />
+        <Route path='/testimonials-page' element={<><Navbar /><TestimonialsPage /><Footer /></>} />
+        <Route path='/become-a-mentor' element={<><Navbar /><BecomeAMentorRegister /><Footer /></>} />
+        <Route path='/about-us' element={<><Navbar /><AboutUs /><Footer /></>} />
+        <Route path='/blogs' element={<><BlogsPage /></>} />
         <Route path='/blogs' element={<><BlogDetailsPage /></>} />
         <Route path='/blogs/:id' element={<><BlogDetailsPage2 /></>} />
+        <Route path="/blogs/category/:categoryId" element={<BlogDetailsPage2 />} />
+
+        <Route path='/knowledge-base' element={<><Navbar /><KnowledgeBasePage /><Footer /></>} />
         <Route
           path="/payment-receipt/:webinarId"
           element={
@@ -184,16 +215,32 @@ function App() {
         <Route path="/employer-dashboard/edit/company-profile" element={<EditAccountDetails />} />
         <Route path='/employer-dashboard/company-profile' element={<><CompanyPublicProfile /></>} />
         <Route path='/employer-dashboard/post-job' element={<><PostAJob /></>} />
-        
-
+        <Route path="/employer-dashboard/post-job/:id" element={<PostAJob />} />
         <Route path='/employer-dashboard/posted-jobs' element={<><ManageJobs /></>} />
         <Route path='/employer-dashboard/company-packages' element={<><PurchasedCvsPackage /></>} />
         <Route path='/employer-dashboard/list-payment-history' element={<><PaymentHistory /></>} />
         <Route path='/employer-dashboard/unloced-seekers' element={<><UnlockedUsers /></>} />
         <Route path='/employer-dashboard/company-messages' element={<></>} />
         <Route path='/employer-dashboard/company-followers' element={<><CompanyFollowers /></>} />
+        <Route path="/employer-dashboard/job-candidates/:jobId" element={<JobCandidates />} />
 
 
+
+
+        {/* Mentor-Dashboard Route */}
+        <Route path='/mentor-dashboard' element={<>
+          <ProtectedMentorRoute>
+            <MentorDashboard />
+          </ProtectedMentorRoute></>} />
+
+        <Route path='/mentor-dashboard/edit-mentor-details' element={<><EditMentorDetails /></>} />
+        <Route path='/mentor-dashboard/add-mentor-session' element={<><MentorOneToOneForm /></>} />
+        <Route path='/mentor-dashboard/mentor-session-list' element={<><MentorSessionsList /></>} />
+
+
+
+
+        <Route path='/admin-login' element={<><AdminLogin /></>} />
         <Route
           path="/admin-dashboard"
           element={
@@ -224,6 +271,7 @@ function App() {
         <Route path='/admin-dashboard/job-type-category' element={<><JobTypeCategoryPage /></>} />
         <Route path='/admin-dashboard/job-shift-category' element={<><JobShiftCategoryPage /></>} />
         <Route path='/admin-dashboard/degree-level-category' element={<><DegreeLevelCategoryPage /></>} />
+        <Route path='/admin-dashboard/degree-type-category' element={<><DegreeTypeCategoryPage /></>} />
 
         {/* Company profile Routes */}
         <Route path='/admin-dashboard/create-company' element={<><CreateCompany /></>} />
@@ -241,23 +289,32 @@ function App() {
         <Route path='/company-Information/:id' element={<EditAccountDetails />} />
         <Route path='/job-seeker-register' element={<><Navbar /><JobSeekerRegister /></>} />
         <Route path='/company-register' element={<><Navbar /><CompanyRegister /></>} />
+
         <Route path='/login' element={<><Login /></>} />
-        <Route path='/CA-register' element={<><CaFreshersForm /></>} />
+        <Route path='/forgot-password' element={<><Navbar /><ForgotPassword /><Footer /></>} />
+        <Route path='/reset-password/:token' element={<><Navbar /><ResetPassword /><Footer /></>} />
+
+        <Route path='/ca-register' element={<><CaFreshersForm /></>} />
 
         <Route path='/admin-dashboard/add-speakers' element={<><Speakerpage /></>} />
         <Route path='/admin-dashboard/add-webinar' element={<><AddWebinarPage /></>} />
         <Route path='/admin-dashboard/webinar-registration-list' element={<><WebinarRegistrationList /></>} />
         <Route path='/admin-dashboard/one-to-one-registration-list' element={<><OneToOneRegistrationList /></>} />
         <Route path="/one-to-one-receipt/:oneToOneId" element={<><Navbar /><PaymentReceiptOneToOne /><Footer /></>} />
-       <Route path="/admin-dashboard/post-job/:id" element={<PostAJobAdmin />} />
+        <Route path="/admin-dashboard/post-job/:id" element={<PostAJobAdmin />} />
         <Route path='/admin-dashboard/job-post' element={<><PostAJobAdmin /></>} />
-        
-      
 
-        <Route path='/admin-dashboard/add-one-to-one' element={<><OneToOneForm /></>} />
+        <Route path='/admin-dashboard/add-one-to-one' element={<><AdminOneToOneForm /></>} />
         <Route path='/admin-dashboard/one-to-one-list' element={<><OneToOneList /></>} />
         <Route path='/admin-dashboard/cms-page' element={<><CMSPage /></>} />
-         <Route path='/admin-dashboard/job-post-list' element={<><JobPostList /></>} />
+        <Route path='/admin-dashboard/job-post-list' element={<><JobPostList /></>} />
+        <Route path='/admin-dashboard/job-register-list' element={<><JobRegisterList /></>} />
+        <Route path='/admin-dashboard/knowledge-baseform' element={<><KnowledgeBaseForm /></>} />
+        <Route path='/admin-dashboard/knowledge-baseform/:id' element={<><KnowledgeBaseForm /></>} />
+        <Route path='/admin-dashboard/knowledge-base-list' element={<><KnowledgeBaseList /></>} />
+        <Route path="/admin/knowledge-base-registers" element={<KnowledgeBaseRegisterList />} />
+        <Route path="/admin/become-a-mentor-registerList" element={<BecomeAMentorRegisterList />} />
+
 
 
 

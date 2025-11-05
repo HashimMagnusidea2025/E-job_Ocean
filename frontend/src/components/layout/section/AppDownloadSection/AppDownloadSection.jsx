@@ -1,5 +1,6 @@
-import phoneMockup from '../../../../media/logo/mobileapp.png'
-
+import { useState, useEffect, Suspense, lazy } from "react";
+import phoneMockup from '../../../../media/logo/phone_3-.png'
+import axios from '../../../../utils/axios.js'
 import { BsWhatsapp } from "react-icons/bs";
 import { FaTelegram } from "react-icons/fa6";
 import { CiYoutube } from "react-icons/ci";
@@ -8,6 +9,24 @@ import { FaLinkedinIn } from "react-icons/fa6";
 import { CiTwitter } from "react-icons/ci";
 
 export default function AppDownloadSection() {
+
+ const [data, setData] = useState()
+    const fetchCompanydata = async () => {
+        try {
+            const response = await axios.get('/general-settings'); // backend endpoint
+            console.log("✅ Full Response:", response);              // logs full Axios response object
+            console.log("✅ Data Received:", response.data);          // logs only your actual data
+
+            setData(response.data);
+        } catch (error) {
+            console.error("❌ Failed to fetch company logo:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchCompanydata();
+    }, []);
+
   return (
     <div className="w-full bg-[linear-gradient(to_right,_#090A47,_#20AEB2)]">
       <div className="relative h-[500px] overflow-hidden font-[Poppins]">
@@ -28,14 +47,14 @@ export default function AppDownloadSection() {
               <img
                 src={phoneMockup}
                 alt="Phone Mockup"
-                className="w-64 sm:w-80 md:w-96 lg:w-[450px]"
+                className="w-64 sm:w-80 md:w-96 lg:w-[540px]"
               />
             </div>
 
             {/* Content Section */}
             <div className="w-full lg:w-1/2 text-center lg:text-left flex items-center justify-center gap-6 flex-col">
               <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-6 drop-shadow">
-                Download eJob Ocean App
+                Download {data?.name} App
               </h2>
 
               {/* Buttons */}

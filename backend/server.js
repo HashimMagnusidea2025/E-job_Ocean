@@ -26,6 +26,7 @@ import FunctionalAreaCategoryRouter from './src/routes/FunctionalAreaCategory.Ro
 import jobTypeCategoryRouter from './src/routes/jobTypeCategory.Routes.js';
 import jobShiftCategoryRouter from './src/routes/jobShiftCategory.Routes.js';
 import DegreeLevelCategoryRouter from './src/routes/DegreeLevelCategory.Routes.js';
+import DegreeTypeCategoryRouter from './src/routes/DegreeTypeCategory.Routes.js'
 import EstablishedInCategoryRouter from './src/routes/EstablishedInCategory.Routes.js';
 // Company profile //
 import CompanyCategoryRouter from './src/routes/CompanyCategory.Routes.js';
@@ -37,6 +38,7 @@ import NoofEmployeesCategoryRouter from './src/routes/NoofEmployeesCategory.Rout
 import Googlerouter from './src/routes/googleAuth.js';
 
 import JObPostRouter from './src/module/jobPost/jobPost.Routes.js';
+import JobRegisterRoute from './src/module/JobRegister/JobRegister.Routes.js';
 
 import LikeRoute from './src/module/likes/likes.Routes.js';
 import CommentRuter from './src/module/comment/comment.Routes.js';
@@ -47,10 +49,18 @@ import SpeakerRouter from './src/module/Speaker/Speaker.Routes.js';
 import WebinarRouter from './src/module/webinar/webinar.Routes.js';
 import WebinarRegistrationRoute from './src/module/webinarRegistration/webinarRegistration.Routes.js';
 import CMSPageRoutes from './src/module/CMSPage/CMS.Routes.js';
+import CMSContentrouter from './src/module/CMSPages/CMSPages.Routes.js';
 import PaymentRouter from './src/module/Payment/Payment.Routes.js';
 
 import OneToOneRoute from './src/module/OneToOne/OneToOne.Routes.js';
+import KnowlegeBaseRouter from './src/module/knowlegeBase/knowlegeBase.Routes.js';
+import knowlegeBaseRegisterRouter from './src/module/knowlegeBaseRegister//knowlegeBaseRegister.Routes.js';
 
+import SeekerInformationRouter from './src/module/seekerInformation/seekerInformation.Routes.js';
+import PostOfficerouter from './src/module/PostOffice/PostOffice.Routes.js';
+import buildResumeRoute from './src/module/BuildResume/BuildResume.Routes.js'
+import FavoriteRoute from './src/module/favorite/favorite.Routes.js';
+import JobAlertsRoute from './src/module/JobAlerts/JobAlerts.Routes.js'
 
 import cors from 'cors';
 import dotenv from 'dotenv'
@@ -58,12 +68,18 @@ dotenv.config();
 
 
 const server = express();
-server.use(express.json());
-server.use(express.urlencoded({ extended: true }));
+// server.use(express.json());
+// server.use(express.urlencoded({ extended: true }));
+server.use(express.json({ limit: '50mb' }));  // JSON payload limit
+server.use(express.urlencoded({ limit: '50mb', extended: true }));  // URL-encoded limit
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 server.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 console.log("Serving uploads from:", path.join(__dirname, "uploads"));
+
+
+
 
 
 server.use("/api-docs", (req, res, next) => {
@@ -72,9 +88,20 @@ server.use("/api-docs", (req, res, next) => {
 }, swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 server.use(cors({
   origin: 'http://localhost:5173',
+  //  origin: 'http://ejobocean.in/',
+  //  origin: 'https://site.ejobocean.in',
   methods: ['GET', 'POST', 'PUT', "PATCH", 'DELETE'],
   credentials: true
 }));
+
+server.use(express.static(path.join(__dirname, "dist")));
+
+
+server.get('/api/test', (req, res) => {
+  console.log('hello');
+  res.send('Hello printed in console!');
+});
+
 
 server.use("/api/auth", AuthRoutes);
 server.use("/api/users", UserRouter);
@@ -84,9 +111,11 @@ server.use('/api/course-category', Courserouter);
 server.use('/api/cmspage', CMSRouter);
 server.use('/api/general-settings', generalSettingsRoute);
 server.use('/api/cms-page', CMSPageRoutes)
+server.use('/api/cms-content',CMSContentrouter)
 server.use('/api/country', CountryRouter);
 server.use('/api/state', StateRouter);
 server.use('/api/city', CityRouter);
+server.use('/api/post-offices',PostOfficerouter);
 server.use('/api/professional-categories', ProfessionalCategoryRouter);
 server.use('/api/location', LocationRouter);
 server.use('/api/CA-Fresher', CaFresherRouter);
@@ -97,6 +126,8 @@ server.use('/api/functionalArea-Category', FunctionalAreaCategoryRouter);
 server.use('/api/job-Type-category', jobTypeCategoryRouter);
 server.use('/api/job-Shift-category', jobShiftCategoryRouter)
 server.use('/api/degree-Level-Category', DegreeLevelCategoryRouter);
+server.use('/api/degree-Type-Category', DegreeTypeCategoryRouter);
+
 
 // Company profile //
 server.use('/api/company-category', CompanyCategoryRouter);
@@ -107,30 +138,56 @@ server.use('/api/established-in-category', EstablishedInCategoryRouter)
 // server.use('/api/founded-year-category', FoundedYearCategoryRouter)
 
 
+server.use('/api/build-Resume',buildResumeRoute);
+
 server.use('/api/blogs/like', LikeRoute);
 server.use('/api/comment', CommentRuter);
 
+server.use('/api/favorite',FavoriteRoute);
+
 server.use('/api/speakers', SpeakerRouter);
 server.use('/api/webinars', WebinarRouter);
-server.use('/api/one-to-one',OneToOneRoute);
+server.use('/api/one-to-one', OneToOneRoute);
 
 server.use("/api/registrations", WebinarRegistrationRoute);
+
 server.use('/api/payment', PaymentRouter);
 
-server.use('/api/job-post',JObPostRouter)
+server.use('/api/job-post', JObPostRouter);
 
+server.use('/api/job-register', JobRegisterRoute);
 
+server.use('/api/knowlege-base', KnowlegeBaseRouter);
+server.use('/api/knowlege-base-register', knowlegeBaseRegisterRouter);
 
-server.use('/api/google', Googlerouter)
+server.use('/api/seeker', SeekerInformationRouter);
+
+server.use('/api/job-alerts',JobAlertsRoute)
+
+server.use('/api/google', Googlerouter);
 
 
 // filterOptionRoutes // 
 server.use("/api", filterOptionRouter);
 
-server.post("/test", (req, res) => {
-  console.log("Request body:", req.body);
-  res.send(req.body);
+// server.post("/test", (req, res) => {
+//   console.log("Request body:", req.body);
+//   res.send(req.body);
+// });
+
+
+// server.get('/api/test', (req, res) => {
+//   console.log('hello');
+//   res.send('Test route working!');
+// });
+
+server.use((req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
+//  Works in Express 5+
+// server.get("/*", (req, res) => {
+//   res.sendFile(path.join(__dirname, "dist", "index.html"));
+// });
 
 
 server.listen(process.env.PORT, () => {

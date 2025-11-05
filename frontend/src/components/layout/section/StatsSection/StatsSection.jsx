@@ -7,8 +7,27 @@ import {
 } from "react-icons/fa";
 import CountUp from "react-countup";
 import { useInView } from "react-intersection-observer";
-
+import axios from '../../../../utils/axios.js';
+import { useState, useEffect, Suspense, lazy } from "react";
 export default function StatsSection() {
+
+  const [data, setData] = useState()
+  const fetchCompanydata = async () => {
+    try {
+      const response = await axios.get('/general-settings'); // backend endpoint
+      console.log("✅ Full Response:", response);              // logs full Axios response object
+      console.log("✅ Data Received:", response.data);          // logs only your actual data
+
+      setData(response.data);
+    } catch (error) {
+      console.error("❌ Failed to fetch company logo:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCompanydata();
+  }, []);
+
   const { ref, inView } = useInView({ triggerOnce: true });
 
   const stats = [
@@ -61,8 +80,8 @@ export default function StatsSection() {
           <div className="relative z-10 container mx-auto px-4" ref={ref}>
             {/* Subheading */}
             <div className="text-white mb-10 max-w-3xl mx-auto text-center">
-              <h3 className="text-[34px] sm:text-[50px] font-semibold uppercase mb-2">
-                About eJob Ocean
+              <h3 className="text-[34px] sm:text-[50px] font-semibold  mb-2">
+                About {data?.name}
               </h3>
               <p className="text-sm sm:text-base text-white">
                 We believe in the power of learning & are committed to offering

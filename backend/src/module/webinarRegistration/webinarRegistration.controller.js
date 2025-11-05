@@ -11,6 +11,7 @@ dotenv.config();
 
 
 import { google } from "googleapis";
+import { log } from "console";
 
 // ✅ Transporter config
 const transporter = nodemailer.createTransport({
@@ -22,6 +23,7 @@ const transporter = nodemailer.createTransport({
 });
 
 const BASE_URL = `http://localhost:${process.env.PORT}`;
+
 export const CreateWebinarRegistration = async (req, res) => {
   try {
     const { email, mobile, webinarId, firstName } = req.body;
@@ -42,10 +44,17 @@ export const CreateWebinarRegistration = async (req, res) => {
       });
     }
 
+
+
     // Step 2: Create new registration
+
+    const webinars = await WebinarModel.findById(webinarId);
     const Registration = new webinarRegistrationModel({
       ...req.body,
       type: "webinar",
+      selectDate: webinars?.WebinarStartDateTime || "",
+      WebinarType: webinars?.WebinarType || "Free",
+      startTime: webinars?.WebinarStartDateTime || "",
     });
     await Registration.save();
 
@@ -121,7 +130,7 @@ export const CreateWebinarRegistration = async (req, res) => {
                   <td style="padding:10px;">
                     <h3 style="margin:0 0 10px; font-size:18px; color:#333;">Webinar Details:</h3>
                     <p style="margin:6px 0;"><strong>Date:</strong> ${formattedStart} to ${formattedEnd} (IST)</p>
-                    <p style="margin:6px 0;"><strong>Description:</strong> ${webinarDescription}</p>
+                  
                   </td>
                 </tr>
               </table>
@@ -513,13 +522,296 @@ export const deleteWebinarRegistration = async (req, res) => {
 
 const logoUrl = `https://talent.ejobocean.com/upload/settings/1747379111_1739879134_ejob_oceanlogo.png`;
 
+// export const CreateOneToOneRegistration = async (req, res) => {
+//   try {
+//     const { email, mobile, one_to_oneId, firstName, lastName } = req.body;
+//     const settings = await generalSettingModel.findOne();
+//     const companyName = settings?.companyName || "Your Company";
+//     const companyEmail = settings?.companyEmail || "your email"
+//     // Step 1: Check for existing registration
+
+//     console.log("📥 Registration request received:", {
+//       email,
+//       mobile,
+//       one_to_oneId,
+//       firstName,
+//       lastName
+//     });
+//     const existing = await webinarRegistrationModel.findOne({
+//       email,
+//       mobile,
+//       one_to_oneId,
+//       type: "one_to_one",
+//     });
+
+//     if (existing) {
+//       return res.status(409).json({
+//         success: false,
+//         message: "You are already registered for this session with this email and mobile.",
+//       });
+//     }
+//     const oneToOneSessions = await OneToOneModel.findById(one_to_oneId);
+//     // Step 2: Create new registration
+//     const Registration = new webinarRegistrationModel({
+//       ...req.body,
+//       type: "one_to_one",
+//       selectDate: oneToOneSessions?.selectDate || "",
+//       WebinarType: oneToOneSessions?.paymentType || "Free",
+//       startTime: oneToOneSessions?.startTime || "",
+//     });
+//     await Registration.save();
+
+//     // Step 3: Fetch one-to-one session details with speaker information
+//     const oneToOneSession = await OneToOneModel.findById(one_to_oneId).populate('Speaker');
+
+//     if (!oneToOneSession) {
+//       return res.status(404).json({ message: "Session not found" });
+//     }
+
+//     const speaker = oneToOneSession.Speaker;
+//     const sessionDate = oneToOneSession.selectDate;
+//     const startTime = oneToOneSession.startTime;
+//     const endTime = oneToOneSession.endTime;
+//     const paymentType = oneToOneSession.paymentType;
+
+//     // ✅ Send email to user (attendee)
+//     const userMailOptions = {
+//       from: process.env.SMTP_EMAIL,
+//       to: Registration.email,
+//       subject: `One-to-One Session Confirmation with ${speaker.firstName} ${speaker.lastName}`,
+//       html: `
+//   <body style="margin:0; padding:0; background-color:#E3F2FD; font-family: Arial, sans-serif;">
+//     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" align="center" style="background-color:#E3F2FD;">
+//       <tr>
+//         <td align="center">
+
+//           <!-- Main Container -->
+//           <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" align="center" style="max-width:600px; margin:30px auto; background:#FFFFFF; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.1); overflow:hidden;">
+
+//             <!-- Header -->
+//             <tr>
+//               <td align="center" bgcolor="#CCE2F9" style="padding:20px;">
+//                 <img src="${logoUrl}" alt="Company Logo" width="200" style="display:block; margin:auto;" />
+//                 <h1 style="margin:10px 0 0; font-size:22px; font-weight:bold; color:#333333;">One-to-One Session Confirmation</h1>
+//               </td>
+//             </tr>
+
+//             <!-- Content -->
+//             <tr>
+//               <td style="padding:25px; font-size:16px; line-height:1.6; color:#333333; text-align:left;">
+//                 <h2 style="text-align:center; margin:0 0 15px; font-size:20px; color:#333333;">Hello ${Registration.firstName} ${Registration.lastName}!</h2>
+//                 <p style="margin:0 0 15px;">🎉 Your one-to-one session has been successfully booked.</p>
+
+//                 <!-- Session Details -->
+//                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#f8f9fa; border-radius:8px; padding:15px; margin:15px 0;">
+//                   <tr>
+//                     <td style="padding:10px;">
+//                       <h3 style="margin:0 0 10px; font-size:18px; color:#333;">Session Details:</h3>
+//                       <p style="margin:6px 0;"><strong>Expert:</strong> ${speaker.salutation || ''} ${speaker.firstName} ${speaker.lastName}</p>
+//                       <p style="margin:6px 0;"><strong>Date:</strong> ${sessionDate}</p>
+//                       <p style="margin:6px 0;"><strong>Time:</strong> ${startTime} - ${endTime}</p>
+//                       <p style="margin:6px 0;"><strong>Session Type:</strong> ${paymentType}</p>
+//                       ${speaker.description ? `<p style="margin:6px 0;"><strong>About Expert:</strong> ${speaker.description}</p>` : ''}
+//                     </td>
+//                   </tr>
+//                 </table>
+//               </td>
+//             </tr>
+
+//             <!-- Footer -->
+//             <tr>
+//               <td bgcolor="#F8F9FA" style="padding:20px; font-size:14px; color:#555555; text-align:center; border-top:1px solid #dddddd;">
+//                 <p style="font-size:16px; color:#888; margin:0 0 15px;">Stay connected with us through our social media platforms.</p>
+//                 <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center">
+//                   <tr>
+//                     <td align="center" style="padding:5px;">
+//                       <a href="https://www.instagram.com/" target="_blank" style="background:#E4405F; padding:8px 12px; border-radius:6px; color:#fff; text-decoration:none;">Instagram</a>
+//                     </td>
+//                     <td align="center" style="padding:5px;">
+//                       <a href="https://www.facebook.com/" target="_blank" style="background:#1877F2; padding:8px 12px; border-radius:6px; color:#fff; text-decoration:none;">Facebook</a>
+//                     </td>
+//                     <td align="center" style="padding:5px;">
+//                       <a href="https://www.linkedin.com/" target="_blank" style="background:#0077B5; padding:8px 12px; border-radius:6px; color:#fff; text-decoration:none;">LinkedIn</a>
+//                     </td>
+//                     <td align="center" style="padding:5px;">
+//                       <a href="https://twitter.com/" target="_blank" style="background:#1DA1F2; padding:8px 12px; border-radius:6px; color:#fff; text-decoration:none;">Twitter</a>
+//                     </td>
+//                   </tr>
+//                 </table>
+//                 <p style="margin:15px 0 5px;">If you have any questions, contact us at <a href="mailto:${companyEmail}" style="color:#007BFF; text-decoration:none; font-weight:bold;">${companyEmail}</a>.</p>
+//                    <p style="margin:0;">&copy; ${new Date().getFullYear()} ${companyName} | All rights reserved.</p>
+//               </td>
+//             </tr>
+
+//           </table>
+//         </td>
+//       </tr>
+//     </table>
+//   </body>
+// `,
+
+//     };
+
+//     //  Send email to speaker
+//     const speakerMailOptions = {
+//       from: process.env.SMTP_EMAIL,
+//       to: speaker.email, // Speaker's email
+//       subject: `New One-to-One Session Booking - ${Registration.firstName} ${Registration.lastName}`,
+//       html: `
+//   <style>
+//     body { font-family: 'Arial', sans-serif; background-color: #f0f8ff; margin: 0; padding: 0; }
+//     table { border-spacing: 0; width: 100%; }
+//     td { padding: 0; }
+//     .email-container { max-width: 764px; margin: 30px auto; background-color: #FFFFFF; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+//     .header { text-align: center; padding: 20px; background-color: #4CAF50; color: white; }
+//     .content { padding: 25px; font-size: 16px; line-height: 1.6; color: #333; text-align: left; }
+//     .content p { margin: 10px 0; }
+//     .attendee-details { background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 15px 0; }
+//     .footer { background-color: #F8F9FA; padding: 20px; font-size: 14px; color: #555; text-align: center; border-top: 1px solid #ddd; }
+//   </style>
+//   <body>
+//     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" align="center">
+//       <tr>
+//         <td align="center">
+//           <!-- Main Email Container -->
+//           <table role="presentation" class="email-container" width="764" cellspacing="0" cellpadding="0" align="center">
+
+//             <!-- Logo Row -->
+//             <tr>
+//               <td align="center" style="padding: 20px 0;">
+//                 <img src="${logoUrl}" alt="Company Logo" width="200" style="display: block; margin: auto;" />
+//               </td>
+//             </tr>
+
+//             <!-- Header Row -->
+
+//             <tr>
+//              <td align="center" bgcolor="#4CAF50" style="padding: 20px; text-align: center;">
+//               <h1 style="margin: 0; font-size: 24px; font-family: Arial, sans-serif; color: #ffffff;">
+//                  New Session Booking
+//               </h1>
+//             </td>
+//             </tr>
+
+
+//             <!-- Content Row -->
+//             <tr>
+//               <td class="content">
+//                 <h2 style="text-align: center; color: #333;">Hello ${speaker.salutation || ''} ${speaker.firstName} ${speaker.lastName}!</h2>
+//                 <p>You have a new one-to-one session booking.</p>
+
+//                 <div class="attendee-details">
+//                   <h3 style="color: #333; margin-top: 0;">Attendee Details:</h3>
+//                   <p><strong>Name:</strong> ${Registration.firstName} ${Registration.lastName}</p>
+//                   <p><strong>Email:</strong> ${Registration.email}</p>
+//                   <p><strong>Mobile:</strong> ${Registration.mobile}</p>
+//                   <p><strong>Location:</strong> ${Registration.city}, ${Registration.state}</p>
+//                   ${Registration.gstNumber ? `<p><strong>GST Number:</strong> ${Registration.gstNumber}</p>` : ''}
+//                 </div>
+
+//                 <div class="attendee-details">
+//                   <h3 style="color: #333; margin-top: 0; text-center">Session Details:</h3>
+//                   <p><strong>Date:</strong> ${sessionDate}</p>
+//                   <p><strong>Time:</strong> ${startTime} - ${endTime}</p>
+//                   <p><strong>Session Type:</strong> ${paymentType?.toLowerCase() === "paid" ? "Paid Session" : "Free Session"}</p>
+//                 </div>
+//               </td>
+//             </tr>
+
+//             <!-- Footer Row -->
+//             <tr>
+//               <td class="footer">
+//                 <p>If you have any scheduling conflicts, please contact the admin immediately.</p>
+
+//                 <p>Contact admin: <a href="mailto:${companyEmail}">${companyEmail}</a></p>
+//              <p style="margin:0;">&copy; ${new Date().getFullYear()} ${companyName} | All rights reserved.</p>
+//               </td>
+//             </tr>
+
+//           </table>
+//         </td>
+//       </tr>
+//     </table>
+//   </body>
+// `,
+
+//     };
+
+//     // Send emails
+//     try {
+//       // Send email to user
+//       await transporter.sendMail(userMailOptions);
+//       console.log("✅ Registration email sent to user:", email);
+
+//       // Send email to speaker
+//       await transporter.sendMail(speakerMailOptions);
+//       console.log("✅ Notification email sent to speaker:", speaker.email);
+
+//     } catch (mailErr) {
+//       console.error("❌ Email sending error:", mailErr.message);
+//       // Email fail होने पर भी registration को fail मत करो
+//     }
+
+//     // For paid sessions, proceed to payment
+//     if (paymentType.toLowerCase() === "paid") {
+//       return res.status(200).json({
+//         success: true,
+//         message: "Registration successful. Proceed to payment.",
+//         Registration,
+//         requiresPayment: true
+//       });
+//     }
+
+//     // For free sessions
+//     res.status(201).json({
+//       success: true,
+//       message: "Registration successful for free session.",
+//       Registration,
+//       requiresPayment: false
+//     });
+
+//   } catch (err) {
+//     console.error("One-to-One Registration error:", err.message);
+//     res.status(500).json({ error: err.message });
+//   }
+// };
+
+// // Helper functions to get city and state names (if needed)
+// async function getCityName(cityId) {
+//   try {
+//     const city = await CityModel.findById(cityId);
+//     return city ? city.name : 'N/A';
+//   } catch (error) {
+//     return 'N/A';
+//   }
+// }
+
+// async function getStateName(stateId) {
+//   try {
+//     const state = await StateModel.findById(stateId);
+//     return state ? state.name : 'N/A';
+//   } catch (error) {
+//     return 'N/A';
+//   }
+// }
+
+// Registration.controller.js में
 export const CreateOneToOneRegistration = async (req, res) => {
   try {
     const { email, mobile, one_to_oneId, firstName, lastName } = req.body;
-const settings = await generalSettingModel.findOne();
+    const settings = await generalSettingModel.findOne();
     const companyName = settings?.companyName || "Your Company";
-    const companyEmail = settings?.companyEmail || "your email"
-    // Step 1: Check for existing registration
+    const companyEmail = settings?.companyEmail || "your email";
+
+    console.log("📥 Registration request received:", {
+      email,
+      mobile,
+      one_to_oneId,
+      firstName,
+      lastName
+    });
+
+    // ✅ Step 1: Check for existing registration
     const existing = await webinarRegistrationModel.findOne({
       email,
       mobile,
@@ -528,77 +820,118 @@ const settings = await generalSettingModel.findOne();
     });
 
     if (existing) {
+      console.log("❌ Already registered:", { email, mobile, one_to_oneId });
       return res.status(409).json({
         success: false,
         message: "You are already registered for this session with this email and mobile.",
       });
     }
 
-    // Step 2: Create new registration
+    // ✅ Step 2: Fetch session details first
+    const oneToOneSession = await OneToOneModel.findById(one_to_oneId).populate('Speaker').populate('Mentor');
+
+    if (!oneToOneSession) {
+      console.log("❌ Session not found:", one_to_oneId);
+      return res.status(404).json({
+        success: false,
+        message: "Session not found"
+      });
+    }
+
+    console.log("✅ Session found:", {
+      sessionId: oneToOneSession._id,
+      hasSpeaker: !!oneToOneSession.Speaker,
+      hasMentor: !!oneToOneSession.Mentor,
+      paymentType: oneToOneSession.paymentType
+    });
+
+    // ✅ Step 3: Create new registration
     const Registration = new webinarRegistrationModel({
       ...req.body,
       type: "one_to_one",
+      selectDate: oneToOneSession?.selectDate || "",
+      WebinarType: oneToOneSession?.paymentType || "Free",
+      startTime: oneToOneSession?.startTime || "",
     });
+
     await Registration.save();
+    console.log("✅ Registration saved:", Registration._id);
 
-    // Step 3: Fetch one-to-one session details with speaker information
-    const oneToOneSession = await OneToOneModel.findById(one_to_oneId).populate('Speaker');
-
-    if (!oneToOneSession) {
-      return res.status(404).json({ message: "Session not found" });
+    // ✅ Step 4: Determine if it's Speaker or Mentor session
+    const expert = oneToOneSession.Speaker || oneToOneSession.Mentor;
+    if (!expert) {
+      console.log("❌ No expert found for session");
+      return res.status(400).json({
+        success: false,
+        message: "No expert found for this session"
+      });
     }
 
-    const speaker = oneToOneSession.Speaker;
     const sessionDate = oneToOneSession.selectDate;
     const startTime = oneToOneSession.startTime;
     const endTime = oneToOneSession.endTime;
     const paymentType = oneToOneSession.paymentType;
+    const expertType = oneToOneSession.Speaker ? 'Speaker' : 'Mentor';
 
-    // ✅ Send email to user (attendee)
+    console.log("✅ Expert details:", {
+      expertType,
+      expertName: `${expert.firstName} ${expert.lastName}`,
+      expertEmail: expert.email,
+      paymentType
+    });
+
+    // ✅ Step 5: Send email to user (attendee)
     const userMailOptions = {
       from: process.env.SMTP_EMAIL,
       to: Registration.email,
-      subject: `One-to-One Session Confirmation with ${speaker.firstName} ${speaker.lastName}`,
+      subject: `One-to-One Session Confirmation with ${expert.firstName} ${expert.lastName}`,
       html: `
   <body style="margin:0; padding:0; background-color:#E3F2FD; font-family: Arial, sans-serif;">
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" align="center" style="background-color:#E3F2FD;">
       <tr>
         <td align="center">
-          
-          <!-- Main Container -->
           <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" align="center" style="max-width:600px; margin:30px auto; background:#FFFFFF; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.1); overflow:hidden;">
-            
-            <!-- Header -->
             <tr>
               <td align="center" bgcolor="#CCE2F9" style="padding:20px;">
                 <img src="${logoUrl}" alt="Company Logo" width="200" style="display:block; margin:auto;" />
                 <h1 style="margin:10px 0 0; font-size:22px; font-weight:bold; color:#333333;">One-to-One Session Confirmation</h1>
               </td>
             </tr>
-
-            <!-- Content -->
             <tr>
               <td style="padding:25px; font-size:16px; line-height:1.6; color:#333333; text-align:left;">
                 <h2 style="text-align:center; margin:0 0 15px; font-size:20px; color:#333333;">Hello ${Registration.firstName} ${Registration.lastName}!</h2>
                 <p style="margin:0 0 15px;">🎉 Your one-to-one session has been successfully booked.</p>
-
-                <!-- Session Details -->
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#f8f9fa; border-radius:8px; padding:15px; margin:15px 0;">
                   <tr>
                     <td style="padding:10px;">
                       <h3 style="margin:0 0 10px; font-size:18px; color:#333;">Session Details:</h3>
-                      <p style="margin:6px 0;"><strong>Expert:</strong> ${speaker.salutation || ''} ${speaker.firstName} ${speaker.lastName}</p>
+                      <p style="margin:6px 0;"><strong>Expert:</strong> ${expert.salutation || ''} ${expert.firstName} ${expert.lastName}</p>
+                      <p style="margin:6px 0;"><strong>Expert Type:</strong> ${expertType}</p>
                       <p style="margin:6px 0;"><strong>Date:</strong> ${sessionDate}</p>
                       <p style="margin:6px 0;"><strong>Time:</strong> ${startTime} - ${endTime}</p>
                       <p style="margin:6px 0;"><strong>Session Type:</strong> ${paymentType}</p>
-                      ${speaker.description ? `<p style="margin:6px 0;"><strong>About Expert:</strong> ${speaker.description}</p>` : ''}
+                      ${expert.description ? `<p style="margin:6px 0;"><strong>About Expert:</strong> ${expert.description}</p>` : ''}
                     </td>
                   </tr>
                 </table>
               </td>
             </tr>
 
-            <!-- Footer -->
+            <tr>
+            <p style="text-align:center;">
+           Stay Connected with us through 
+          <a href="https://www.whatsapp.com/channel/0029Va9eG38545unsNxNkA3z" 
+            target="_blank" 
+            style="color:#25D366; text-decoration:none; font-weight:bold;">
+             WhatsApp
+           </a> 
+            and also  <a href="https://site.ejobocean.in/ca-register" 
+            target="_blank" 
+            style="color:#25D366; text-decoration:none; font-weight:bold;">
+             Register Hare
+           </a> 
+        </p>
+            </tr>
             <tr>
               <td bgcolor="#F8F9FA" style="padding:20px; font-size:14px; color:#555555; text-align:center; border-top:1px solid #dddddd;">
                 <p style="font-size:16px; color:#888; margin:0 0 15px;">Stay connected with us through our social media platforms.</p>
@@ -619,23 +952,21 @@ const settings = await generalSettingModel.findOne();
                   </tr>
                 </table>
                 <p style="margin:15px 0 5px;">If you have any questions, contact us at <a href="mailto:${companyEmail}" style="color:#007BFF; text-decoration:none; font-weight:bold;">${companyEmail}</a>.</p>
-                   <p style="margin:0;">&copy; ${new Date().getFullYear()} ${companyName} | All rights reserved.</p>
+                <p style="margin:0;">&copy; ${new Date().getFullYear()} ${companyName} | All rights reserved.</p>
               </td>
             </tr>
-
           </table>
         </td>
       </tr>
     </table>
   </body>
-`,
-
+      `,
     };
 
-    //  Send email to speaker
-    const speakerMailOptions = {
+    // ✅ Step 6: Send email to expert (Speaker/Mentor)
+    const expertMailOptions = {
       from: process.env.SMTP_EMAIL,
-      to: speaker.email, // Speaker's email
+      to: expert.email,
       subject: `New One-to-One Session Booking - ${Registration.firstName} ${Registration.lastName}`,
       html: `
   <style>
@@ -653,33 +984,23 @@ const settings = await generalSettingModel.findOne();
     <table role="presentation" width="100%" cellspacing="0" cellpadding="0" align="center">
       <tr>
         <td align="center">
-          <!-- Main Email Container -->
           <table role="presentation" class="email-container" width="764" cellspacing="0" cellpadding="0" align="center">
-            
-            <!-- Logo Row -->
             <tr>
               <td align="center" style="padding: 20px 0;">
                 <img src="${logoUrl}" alt="Company Logo" width="200" style="display: block; margin: auto;" />
               </td>
             </tr>
-
-            <!-- Header Row -->
-           
             <tr>
-             <td align="center" bgcolor="#4CAF50" style="padding: 20px; text-align: center;">
-              <h1 style="margin: 0; font-size: 24px; font-family: Arial, sans-serif; color: #ffffff;">
-                 New Session Booking
-              </h1>
-            </td>
+              <td align="center" bgcolor="#4CAF50" style="padding: 20px; text-align: center;">
+                <h1 style="margin: 0; font-size: 24px; font-family: Arial, sans-serif; color: #ffffff;">
+                  New Session Booking
+                </h1>
+              </td>
             </tr>
-
-
-            <!-- Content Row -->
             <tr>
               <td class="content">
-                <h2 style="text-align: center; color: #333;">Hello ${speaker.salutation || ''} ${speaker.firstName} ${speaker.lastName}!</h2>
+                <h2 style="text-align: center; color: #333;">Hello ${expert.salutation || ''} ${expert.firstName} ${expert.lastName}!</h2>
                 <p>You have a new one-to-one session booking.</p>
-
                 <div class="attendee-details">
                   <h3 style="color: #333; margin-top: 0;">Attendee Details:</h3>
                   <p><strong>Name:</strong> ${Registration.firstName} ${Registration.lastName}</p>
@@ -688,52 +1009,62 @@ const settings = await generalSettingModel.findOne();
                   <p><strong>Location:</strong> ${Registration.city}, ${Registration.state}</p>
                   ${Registration.gstNumber ? `<p><strong>GST Number:</strong> ${Registration.gstNumber}</p>` : ''}
                 </div>
-
                 <div class="attendee-details">
-                  <h3 style="color: #333; margin-top: 0; text-center">Session Details:</h3>
+                  <h3 style="color: #333; margin-top: 0; text-align: center;">Session Details:</h3>
                   <p><strong>Date:</strong> ${sessionDate}</p>
                   <p><strong>Time:</strong> ${startTime} - ${endTime}</p>
-                  <p><strong>Session Type:</strong> ${paymentType?.toLowerCase() === "paid" ? "Paid Session" : "Free Session"}</p>
+                  <p><strong>Session Type:</strong> ${paymentType}</p>
                 </div>
               </td>
             </tr>
-
-            <!-- Footer Row -->
             <tr>
               <td class="footer">
                 <p>If you have any scheduling conflicts, please contact the admin immediately.</p>
-            
                 <p>Contact admin: <a href="mailto:${companyEmail}">${companyEmail}</a></p>
-             <p style="margin:0;">&copy; ${new Date().getFullYear()} ${companyName} | All rights reserved.</p>
+
+                <p style=" text-align:center;">
+           Stay Connected with us through 
+          <a href="https://www.whatsapp.com/channel/0029Va9eG38545unsNxNkA3z" 
+            target="_blank" 
+            style="color:#25D366; text-decoration:none; font-weight:bold;">
+             WhatsApp
+           </a> 
+            and also  <a href="https://site.ejobocean.in/ca-register" 
+            target="_blank" 
+            style="color:#25D366; text-decoration:none; font-weight:bold;">
+             Register Hare
+           </a> 
+        </p>
+                <p style="margin:0;">&copy; ${new Date().getFullYear()} ${companyName} | All rights reserved.</p>
               </td>
             </tr>
 
+            
           </table>
         </td>
       </tr>
     </table>
   </body>
-`,
-
+      `,
     };
 
-    // Send emails
+    // ✅ Step 7: Send emails
     try {
-      // Send email to user
       await transporter.sendMail(userMailOptions);
       console.log("✅ Registration email sent to user:", email);
 
-      // Send email to speaker
-      await transporter.sendMail(speakerMailOptions);
-      console.log("✅ Notification email sent to speaker:", speaker.email);
-
+      if (expert.email) {
+        await transporter.sendMail(expertMailOptions);
+        console.log("✅ Notification email sent to expert:", expert.email);
+      }
     } catch (mailErr) {
       console.error("❌ Email sending error:", mailErr.message);
       // Email fail होने पर भी registration को fail मत करो
     }
 
-    // For paid sessions, proceed to payment
-    if (paymentType.toLowerCase() === "paid") {
+    // ✅ Step 8: Handle payment type
+    if (paymentType && paymentType.toLowerCase() === "paid") {
+      console.log("💰 Paid session - redirecting to payment");
       return res.status(200).json({
         success: true,
         message: "Registration successful. Proceed to payment.",
@@ -742,7 +1073,8 @@ const settings = await generalSettingModel.findOne();
       });
     }
 
-    // For free sessions
+    // ✅ Step 9: Success response for free sessions
+    console.log("✅ Free session - registration completed");
     res.status(201).json({
       success: true,
       message: "Registration successful for free session.",
@@ -751,29 +1083,15 @@ const settings = await generalSettingModel.findOne();
     });
 
   } catch (err) {
-    console.error("One-to-One Registration error:", err.message);
-    res.status(500).json({ error: err.message });
+    console.error("❌ One-to-One Registration error:", err.message);
+    console.error("❌ Error stack:", err.stack);
+
+    res.status(500).json({
+      success: false,
+      message: "Registration failed: " + err.message
+    });
   }
 };
-
-// // Helper functions to get city and state names (if needed)
-// async function getCityName(cityId) {
-//   try {
-//     const city = await CityModel.findById(cityId);
-//     return city ? city.name : 'N/A';
-//   } catch (error) {
-//     return 'N/A';
-//   }
-// }
-
-// async function getStateName(stateId) {
-//   try {
-//     const state = await StateModel.findById(stateId);
-//     return state ? state.name : 'N/A';
-//   } catch (error) {
-//     return 'N/A';
-//   }
-// }
 
 
 
@@ -955,6 +1273,136 @@ export const createGoogleEvent = async (req, res) => {
   } catch (err) {
     console.error("Error adding attendee to Google Calendar event:", err);
     res.status(500).json({ message: "Failed to add attendee" });
+  }
+};
+
+
+// export const importWebinarRegistrations = async (req, res) => {
+//   try {
+//     console.log("📥 Import endpoint hit");
+//     console.log("📦 Request body length:", req.body?.length);
+//     console.log("📦 First record sample:", req.body?.[0]);
+
+//     if (!req.body || !Array.isArray(req.body) || req.body.length === 0) {
+//       console.log("❌ Invalid or empty data received");
+//       return res.status(400).json({
+//         success: false,
+//         message: "Invalid or empty data received"
+//       });
+//     }
+
+//     const registrations = req.body;
+
+//     // Check what data is actually coming
+//     console.log("🔍 Data analysis:");
+//     console.log("- First name present:", registrations[0]?.firstName);
+//     console.log("- Email present:", registrations[0]?.email);
+//     console.log("- Mobile present:", registrations[0]?.mobile);
+//     console.log("- Country present:", registrations[0]?.country);
+//     console.log("- State present:", registrations[0]?.state);
+//     console.log("- City present:", registrations[0]?.city);
+//     console.log("- Type present:", registrations[0]?.type);
+
+//     // Validate required fields
+//     const validRegistrations = registrations.filter((reg, index) => {
+//       const hasRequiredFields = reg.firstName && reg.email && reg.mobile && reg.country && reg.state && reg.city;
+
+//       if (!hasRequiredFields) {
+//         console.log(`❌ Row ${index} missing required fields:`, {
+//           firstName: !!reg.firstName,
+//           email: !!reg.email,
+//           mobile: !!reg.mobile,
+//           country: !!reg.country,
+//           state: !!reg.state,
+//           city: !!reg.city
+//         });
+//       }
+
+//       return hasRequiredFields;
+//     });
+
+//     console.log(`📊 Valid registrations: ${validRegistrations.length} out of ${registrations.length}`);
+
+//     if (validRegistrations.length === 0) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "No valid registrations found. Check required fields."
+//       });
+//     }
+
+//     // Try to insert
+//     const result = await webinarRegistrationModel.insertMany(validRegistrations, {
+//       ordered: false
+//     });
+
+//     console.log(`✅ Successfully imported ${result.length} registrations`);
+
+//     res.status(201).json({
+//       success: true,
+//       message: `Bulk import successful. ${result.length} records imported.`,
+//       importedCount: result.length
+//     });
+
+//   } catch (err) {
+//     console.error("❌ Bulk import error:", err);
+//     console.error("❌ Error name:", err.name);
+//     console.error("❌ Error message:", err.message);
+
+//     if (err.writeErrors) {
+//       console.log("❌ Write errors:", err.writeErrors.length);
+//       err.writeErrors.forEach((error, idx) => {
+//         console.log(`❌ Error ${idx + 1}:`, error.errmsg);
+//       });
+//     }
+
+//     res.status(500).json({
+//       success: false,
+//       message: "Bulk import failed: " + err.message
+//     });
+//   }
+// };
+
+
+
+
+export const importWebinarRegistrations = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+    const jsonData = JSON.parse(req.file.buffer.toString());
+    // :small_blue_diamond: Set a static webinarId here (replace with your actual ObjectId)
+    const staticWebinarId = "6901c3dea9fe9cb5de97dc40";
+    // Map JSON fields to match your schema
+    const formattedData = jsonData.map((item) => ({
+      one_to_oneId: staticWebinarId,       // :white_tick: Static webinarId
+      //  webinar_id: item.webinar_id,
+      assignment_id: item.assignment_id,
+      firstName: item.first_name,
+      lastName: item.last_name,
+      email: item.email,
+      mobile: item.mobile,
+      pinCode: item.zip_code,
+      type: item.type || "webinar",
+      country: item.country,
+      state: item.State,
+      city: item.city,
+      gstNumber: item.gst_number || null,
+      selectDate: item.date || "",
+      WebinarType: item.payment_status, // default if not in JSON
+      startTime: item.start_time || "",
+    }));
+    await webinarRegistrationModel.insertMany(formattedData);
+    res.json({
+      message: "Data imported successfully",
+      count: formattedData.length,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      message: "Failed to import data",
+      error: err.message,
+    });
   }
 };
 

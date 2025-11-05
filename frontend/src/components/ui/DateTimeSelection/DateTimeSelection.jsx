@@ -5,7 +5,7 @@ import { format, getDay, parseISO, isSameDay } from "date-fns";
 import { FaRegCalendarAlt, FaClock } from "react-icons/fa";
 import axios from "../../../utils/axios.js";
 
-export default function DateTimeSelection({ speakerId, onContinue }) {
+export default function DateTimeSelection({ speakerId, mentorId,userType, onContinue }) {
   const [date, setDate] = useState(new Date());
   const [availableDays, setAvailableDays] = useState([]);
   const [sessions, setSessions] = useState([]);
@@ -13,21 +13,56 @@ export default function DateTimeSelection({ speakerId, onContinue }) {
   const [showTimeSlots, setShowTimeSlots] = useState(false);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
 
-  // Fetch sessions for this speaker
+  // Fetch sessions for speaker or mentor
   useEffect(() => {
     const fetchSessions = async () => {
       try {
         setLoading(true);
-        const { data } = await axios.get(`/one-to-one/speaker/${speakerId}`);
+        let data = [];
+        let endpoint = "";
+
+        console.log("Fetching sessions for:", { speakerId, mentorId, userType });
+
+        // if (speakerId) {
+        //   endpoint = `/one-to-one/speaker/${speakerId}`;
+        // } else if (mentorId) {
+        //   endpoint = `/one-to-one/mentor/${mentorId}`;
+        // }
+         if (userType === 'mentor' && mentorId) {
+          // Mentor ke sessions ke liye correct endpoint
+          endpoint = `/one-to-one/mentor/${mentorId}`;
+          console.log("Fetching mentor sessions from:", endpoint);
+        } else if (userType === 'speaker' && speakerId) {
+          // Speaker ke sessions ke liye
+          endpoint = `/one-to-one/speaker/${speakerId}`;
+          console.log("Fetching speaker sessions from:", endpoint);
+        } else if (speakerId) {
+          // Fallback: agar userType nahi hai lekin speakerId hai
+          endpoint = `/one-to-one/speaker/${speakerId}`;
+        }
+
+         if (endpoint) {
+          const response = await axios.get(endpoint);
+          data = response.data;
+          console.log("Fetched sessions:", data);
+        } else {
+          console.log("No valid endpoint found");
+        }
+
+        // if (endpoint) {
+        //   const response = await axios.get(endpoint);
+        //   data = response.data;
+        // }
+        
         setSessions(data);
 
-        // Take only non-empty selectDays for this speaker
+        // Take only non-empty selectDays
         const allDays = data
           .flatMap(session => (Array.isArray(session.selectDays) ? session.selectDays : []))
           .filter(day => day && typeof day === "string" && day.trim() !== "");
 
         setAvailableDays([...new Set(allDays)]);
-        console.log("Filtered Days for this speaker:", allDays);
+        console.log("Filtered Days:", allDays);
       } catch (err) {
         console.error("Error fetching sessions:", err);
         setAvailableDays([]);
@@ -35,9 +70,9 @@ export default function DateTimeSelection({ speakerId, onContinue }) {
         setLoading(false);
       }
     };
-
-    if (speakerId) fetchSessions();
-  }, [speakerId]);
+ if (speakerId || mentorId) fetchSessions();
+    // if (speakerId || mentorId) fetchSessions();
+  }, [speakerId, mentorId, userType]);
 
   // Convert day name to day number (0 = Sunday, 1 = Monday, etc.)
   const dayNameToNumber = (dayName) => {
@@ -86,7 +121,8 @@ export default function DateTimeSelection({ speakerId, onContinue }) {
           endTime: session.endTime,
           sessionId: session._id,
           courseTitle: session.courseTitle,
-          paymentType: session.paymentType
+          paymentType: session.paymentType,
+          sessionData: session // Pure session data
         });
       }
     });
@@ -117,15 +153,12 @@ export default function DateTimeSelection({ speakerId, onContinue }) {
     setSelectedTimeSlot(null);
   };
 
-
-
   const handleTimeSlotSelect = (slot) => {
-    setSelectedTimeSlot(slot); // entire slot object
+    setSelectedTimeSlot(slot);
   };
 
   const handleContinue = () => {
     if (selectedTimeSlot) {
-      // Parent ko slot bhej do
       if (onContinue) {
         onContinue(selectedTimeSlot);
       }
@@ -147,13 +180,20 @@ export default function DateTimeSelection({ speakerId, onContinue }) {
   }
 
   return (
-    <div className=" rounded-2xl shadow-xl p-6 max-w-md mx-auto font-[Poppins]">
+    <div className="rounded-2xl shadow-xl p-6 max-w-md mx-auto font-[Poppins]">
       {/* Header */}
       <div className="flex items-center justify-between border-b pb-3 mb-5">
         <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
           <FaRegCalendarAlt className="w-5 h-5 text-black" />
-          Date & Time
+          Available Sessions
         </h2>
+           {userType && (
+          <span className={`text-xs px-2 py-1 rounded ${
+            userType === 'mentor' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+          }`}>
+            {userType}
+          </span>
+        )}
       </div>
 
       {/* Available Days Info */}
@@ -170,7 +210,9 @@ export default function DateTimeSelection({ speakerId, onContinue }) {
         </div>
       ) : (
         <div className="mb-4 p-3 bg-yellow-50 rounded-lg">
-          <p className="text-sm font-medium text-yellow-800">No available sessions found for this speaker.</p>
+          <p className="text-sm font-medium text-yellow-800">
+            {userType === 'mentor' ? "Mentor" : "Speaker"} has no available sessions at the moment.
+          </p>
         </div>
       )}
 
@@ -184,28 +226,28 @@ export default function DateTimeSelection({ speakerId, onContinue }) {
         next2Label={null}
         prev2Label={null}
         className="w-full border-0 font-[Poppins] 
-    [&_.react-calendar__navigation]:flex 
-    [&_.react-calendar__navigation]:justify-center 
-    [&_.react-calendar__navigation]:mb-4 
-    [&_.react-calendar__navigation_button]:bg-transparent 
-    [&_.react-calendar__navigation_button]:text-base 
-    [&_.react-calendar__navigation_button]:font-semibold 
-    [&_.react-calendar__month-view__weekdays]:text-center 
-    [&_.react-calendar__month-view__weekdays]:text-sm 
-    [&_.react-calendar__month-view__weekdays]:font-bold 
-    [&_.react-calendar__month-view__weekdays]:uppercase 
-    [&_.react-calendar__month-view__weekdays]:pb-2
-    [&_.react-calendar__tile]:h-16 
-    [&_.react-calendar__tile]:w-16 
-    [&_.react-calendar__tile]:rounded-2xl 
-    [&_.react-calendar__tile]:text-base 
-    [&_.react-calendar__tile]:font-medium 
-    [&_.react-calendar__tile]:m-1
-    [&_.react-calendar__tile--active]:bg-gradient-to-r 
-    [&_.react-calendar__tile--active]:from-yellow-500 
-    [&_.react-calendar__tile--active]:to-yellow-600 
-    [&_.react-calendar__tile--active]:text-white 
-    [&_.react-calendar__tile--active]:shadow-md"
+          [&_.react-calendar__navigation]:flex 
+          [&_.react-calendar__navigation]:justify-center 
+          [&_.react-calendar__navigation]:mb-4 
+          [&_.react-calendar__navigation_button]:bg-transparent 
+          [&_.react-calendar__navigation_button]:text-base 
+          [&_.react-calendar__navigation_button]:font-semibold 
+          [&_.react-calendar__month-view__weekdays]:text-center 
+          [&_.react-calendar__month-view__weekdays]:text-sm 
+          [&_.react-calendar__month-view__weekdays]:font-bold 
+          [&_.react-calendar__month-view__weekdays]:uppercase 
+          [&_.react-calendar__month-view__weekdays]:pb-2
+          [&_.react-calendar__tile]:h-16 
+          [&_.react-calendar__tile]:w-16 
+          [&_.react-calendar__tile]:rounded-2xl 
+          [&_.react-calendar__tile]:text-base 
+          [&_.react-calendar__tile]:font-medium 
+          [&_.react-calendar__tile]:m-1
+          [&_.react-calendar__tile--active]:bg-gradient-to-r 
+          [&_.react-calendar__tile--active]:from-yellow-500 
+          [&_.react-calendar__tile--active]:to-yellow-600 
+          [&_.react-calendar__tile--active]:text-white 
+          [&_.react-calendar__tile--active]:shadow-md"
         tileDisabled={({ date, view }) => {
           if (view === "month") {
             if (date < new Date().setHours(0, 0, 0, 0)) {
@@ -252,12 +294,11 @@ export default function DateTimeSelection({ speakerId, onContinue }) {
                 <button
                   key={index}
                   onClick={() => handleTimeSlotSelect(slot)}
-className={`p-3 rounded-lg border-2 transition-all ${
-  selectedTimeSlot?.sessionId === slot.sessionId //    yeh sahi hai
-    ? "border-blue-500 bg-blue-200 text-black"
-    : "border-gray-200 bg-white text-black hover:border-blue-300"
-}`}
-
+                  className={`p-3 rounded-lg border-2 transition-all ${
+                    selectedTimeSlot?.sessionId === slot.sessionId
+                      ? "border-blue-500 bg-blue-200 text-black"
+                      : "border-gray-200 bg-white text-black hover:border-blue-300"
+                  }`}
                 >
                   <div className="text-sm font-medium">
                     {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
@@ -275,23 +316,18 @@ className={`p-3 rounded-lg border-2 transition-all ${
               No time slots available for this date
             </div>
           )}
-
         </div>
       )}
-
-      {/* Timezone */}
-      {/* <p className="text-center mt-3 text-sm bg-[#a3c6c7] text-black px-4 py-2 rounded-full font-medium shadow-sm inline-block">
-        Asia/Calcutta
-      </p> */}
 
       {/* Continue Button */}
       <button
         onClick={handleContinue}
         disabled={!selectedTimeSlot}
-        className={`mt-6 w-full py-3 rounded-xl font-semibold shadow-md transition transform ${selectedTimeSlot
-          ? "bg-gradient-to-r from-[#339ca0] to-black text-white hover:from-[#339ca9] hover:to-black hover:scale-[1.02]"
-          : "bg-gray-300 text-gray-500 cursor-not-allowed"
-          }`}
+        className={`mt-6 w-full py-3 rounded-xl font-semibold shadow-md transition transform ${
+          selectedTimeSlot
+            ? "bg-gradient-to-r from-[#339ca0] to-black text-white hover:from-[#339ca9] hover:to-black hover:scale-[1.02]"
+            : "bg-gray-300 text-gray-500 cursor-not-allowed"
+        }`}
       >
         {selectedTimeSlot ? "Continue" : "Select Time Slot"}
       </button>
@@ -302,10 +338,13 @@ className={`p-3 rounded-lg border-2 transition-all ${
           <p className="text-sm text-green-700 font-medium">
             Selected: {formatTime(selectedTimeSlot.startTime)} - {formatTime(selectedTimeSlot.endTime)}
           </p>
+          {selectedTimeSlot.courseTitle && (
+            <p className="text-xs text-green-600 mt-1">
+              Course: {selectedTimeSlot.courseTitle}
+            </p>
+          )}
         </div>
       )}
-
-
     </div>
   );
 }

@@ -4,12 +4,14 @@ import noImage from '../../media/png/no-image.png';
 import { useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import Layout from '../seekerDashboard/partials/layout';
-
+const baseURL = import.meta.env.VITE_BACKEND_URL; // Vite
+// या CRA में: const baseURL = process.env.REACT_APP_BACKEND_URL;
 export default function EditAccountDetails() {
     const [previewLogo, setPreviewLogo] = useState(null);
     const [users, setUsers] = useState(null);
     const [mapUrl, setMapUrl] = useState('');
     const [mapEmbedCode, setMapEmbedCode] = useState('');
+    const [previewHiringCompanies, setPreviewHiringCompanies] = useState(null);
 
     const [isCompanyCreated, setIsCompanyCreated] = useState(false);
 
@@ -22,7 +24,10 @@ export default function EditAccountDetails() {
     const [countries, setCountries] = useState([]);
     const [states, setStates] = useState([]);
     const [cities, setCities] = useState([]);
+
     const [logoFile, setLogoFile] = useState(null);
+    const [hiringCompaniesFile, setHiringCompaniesFile] = useState(null);
+
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const [passwords, setPasswords] = useState({
         currentPassword: "",
@@ -52,6 +57,7 @@ export default function EditAccountDetails() {
         designation: "",
         registrationNumber: "",
         logo: "",
+        hiringcompanies: "", // ✅ New field added
     });
 
     // Function to get full image URL
@@ -59,7 +65,7 @@ export default function EditAccountDetails() {
         if (!path) return noImage;
         if (path.startsWith('http')) return path;
         // Replace with your actual backend base URL
-        return `http://localhost:5000${path}`;
+        return `${baseURL}${path}`;
     };
 
     useEffect(() => {
@@ -144,6 +150,7 @@ export default function EditAccountDetails() {
                             designation: companyData.hrContact?.designation || "",
                             registrationNumber: companyData.hrContact?.companyRegistrationNumber || "",
                             logo: companyData.company?.employerLogo || "",
+                            hiringcompanies: companyData.company?.hiringcompanies || "",
 
                         });
                         // Generate map embed code if company location exists
@@ -233,16 +240,30 @@ export default function EditAccountDetails() {
         });
     };
 
-    const handleLogoChange = (e) => {
+    // const handleLogoChange = (e) => {
 
+    //     const file = e.target.files[0];
+    //     if (file) {
+    //         setLogoFile(file);
+    //         setPreviewLogo(URL.createObjectURL(file));
+
+    //     }
+    //     setLogoFile(e.target.files[0]);
+    // };
+    // Handle logo changes
+    const handleLogoChange = (e, type) => {
         const file = e.target.files[0];
         if (file) {
-            setLogoFile(file);
-            setPreviewLogo(URL.createObjectURL(file));
-
+            if (type === 'employerLogo') {
+                setLogoFile(file);
+                setPreviewLogo(URL.createObjectURL(file));
+            } else if (type === 'hiringCompanies') {
+                setHiringCompaniesFile(file);
+                setPreviewHiringCompanies(URL.createObjectURL(file));
+            }
         }
-        setLogoFile(e.target.files[0]);
     };
+
 
     // Function to generate map embed code from location
     const generateMapEmbedCode = (location) => {
@@ -320,6 +341,9 @@ export default function EditAccountDetails() {
                 if (logoFile) {
                     form.append("employerLogo", logoFile);
                 }
+                if (hiringCompaniesFile) {
+                    form.append("hiringCompanies", hiringCompaniesFile);
+                }
 
                 const createRes = await axios.post("/Company-Information", form, {
                     headers: {
@@ -335,8 +359,11 @@ export default function EditAccountDetails() {
                 if (createRes.data && createRes.data.data) {
                     setCompanyId(createRes.data.data._id);
                     // Reset logo file state after successful upload
+
                     setLogoFile(null);
+                    setHiringCompaniesFile(null);
                     setPreviewLogo(null);
+                    setPreviewHiringCompanies(null);
                     setIsCompanyCreated(true);
 
                     Swal.fire("Success", "Company profile created successfully", "success");
@@ -355,6 +382,12 @@ export default function EditAccountDetails() {
                     // If no new logo file, include the existing logo path to prevent it from being cleared
                     form.append("existingLogo", formData.logo || "");
                 }
+
+                if (hiringCompaniesFile) {
+                    form.append("hiringCompanies", hiringCompaniesFile);
+                } else {
+                    form.append("existingHiringCompanies", formData.hiringcompanies || "");
+                }
                 const res = await axios.put(`/Company-Information/my-company/update/${companyId}`, form, {
                     headers: {
                         "Authorization": `Bearer ${token}`,
@@ -366,11 +399,14 @@ export default function EditAccountDetails() {
                 const updatedCompanyData = res.data.data;
                 setFormData(prev => ({
                     ...prev,
-                    logo: updatedCompanyData.company?.employerLogo || prev.logo
+                    logo: updatedCompanyData.company?.employerLogo || prev.logo,
+                    hiringcompanies: updatedCompanyData.company?.hiringcompanies || prev.hiringcompanies
                 }));
                 // Reset logo file state after successful update
                 setLogoFile(null);
+                setHiringCompaniesFile(null);
                 setPreviewLogo(null);
+                setPreviewHiringCompanies(null);
 
                 // Trigger logo update event for Navbar
                 window.dispatchEvent(new Event('logoUpdated'));
@@ -513,25 +549,47 @@ export default function EditAccountDetails() {
                 </div>
 
                 {/* Logo Upload */}
-                <div className='flex flex-col items-center mt-4'>
-                    <label className="text-sm font-medium mb-2">Logo</label>
-                    <img
-                        src={previewLogo || getFullImageUrl(formData.logo) || noImage}
-                        alt="Logo Preview"
-                        className="w-32 h-32 object-contain border mb-2"
-                    />
-                    <input
-                        type="file"
-                        name="employerLogo"
-                        accept="image/*"
-                        className="hidden"
-                        id="logo-upload"
-                        onChange={handleLogoChange}
-                    />
-                    <label htmlFor="logo-upload" className="px-4 py-2 bg-blue-600 text-white rounded cursor-pointer hover:bg-blue-700">
-                        {previewLogo ? 'Change Logo' : 'Upload Logo'}
-                    </label>
+                <div className=' flex gap-20 justify-center'>
+                    <div className='flex flex-col items-center'>
+                        <label className="text-sm font-medium mb-2">Logo</label>
+                        <img
+                            src={previewLogo || getFullImageUrl(formData.logo) || noImage}
+                            alt="Logo Preview"
+                            className="w-32 h-32 object-contain border mb-2"
+                        />
+                        <input
+                            type="file"
+                            name="employerLogo"
+                            accept="image/*"
+                            className="hidden"
+                            id="logo-upload"
+                           onChange={(e) => handleLogoChange(e, 'employerLogo')}
+
+                        />
+                        <label htmlFor="logo-upload" className="px-4 py-2 bg-blue-600 text-white rounded cursor-pointer hover:bg-blue-700">
+                            {previewLogo ? 'Change Logo' : 'Upload Logo'}
+                        </label>
+                    </div>
+                    <div className='flex flex-col items-center '>
+                        <label className="text-sm font-medium mb-2">Hiring Companies Logo</label>
+                        <img
+                            src={previewHiringCompanies || getFullImageUrl(formData.hiringcompanies) || noImage}
+                            alt="Hiring Companies Preview"
+                            className="w-32 h-32 object-contain border mb-2"
+                        />
+                        <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            id="hiring-companies-upload"
+                            onChange={(e) => handleLogoChange(e, 'hiringCompanies')}
+                        />
+                        <label htmlFor="hiring-companies-upload" className="px-4 py-2 bg-green-600 text-white rounded cursor-pointer hover:bg-green-700">
+                            {previewHiringCompanies ? 'Change Hiring Logo' : 'Upload Hiring Logo'}
+                        </label>
+                    </div>
                 </div>
+
 
                 {/* Company Info */}
                 <h2 className="text-lg font-semibold">Company Information</h2>

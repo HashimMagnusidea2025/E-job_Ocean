@@ -5,7 +5,7 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { FaEye } from "react-icons/fa";
 import Layout from '../../seekerDashboard/partials/layout'
-
+const baseURL = import.meta.env.VITE_BACKEND_URL;
 const CAFresherListPage = () => {
   const [caFreshers, setCaFreshers] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
@@ -68,7 +68,7 @@ const CAFresherListPage = () => {
       worksheet.addRow({
         ...item,
         ResumeUpload: item.ResumeUpload
-          ? `http://localhost:5000/uploads/resume/${item.ResumeUpload}`
+          ? `${baseURL}/uploads/resume/${item.ResumeUpload}`
           : "N/A",
       });
     });
@@ -117,7 +117,7 @@ const CAFresherListPage = () => {
       cell: (row) =>
         row.ResumeUpload ? (
           <a
-            href={`http://localhost:5000/uploads/resume/${row.ResumeUpload}`}
+            href={`${baseURL}/uploads/resume/${row.ResumeUpload}`}
             target="_blank"
             rel="noreferrer"
             className="text-blue-600 underline"
@@ -204,7 +204,7 @@ const CAFresherListPage = () => {
                     <strong>Resume:</strong>{" "}
                     {selectedRow.ResumeUpload ? (
                       <a
-                        href={`http://localhost:5000/uploads/resume/${selectedRow.ResumeUpload}`}
+                        href={`${baseURL}/uploads/resume/${selectedRow.ResumeUpload}`}
                         target="_blank"
                         rel="noreferrer"
                         className="text-blue-600 underline"
@@ -234,3 +234,51 @@ const CAFresherListPage = () => {
 };
 
 export default CAFresherListPage;
+
+
+
+
+// components/CAImport.jsx
+// import { useState } from "react";
+// import api from "../../../utils/axios.js";
+// import Swal from "sweetalert2";
+// export default function CAFresherListPage() {
+//   const [file, setFile] = useState(null);
+//   const [loading, setLoading] = useState(false);
+//   const handleFileChange = (e) => {
+//     setFile(e.target.files[0]);
+//   };
+//   const handleImport = async () => {
+//     if (!file) {
+//       Swal.fire("Error", "Please select a JSON file", "error");
+//       return;
+//     }
+//     const formData = new FormData();
+//     formData.append("file", file);
+//     setLoading(true);
+//     try {
+//       const res = await api.post("/CA-Fresher/ca/import", formData, {
+//         headers: { "Content-Type": "multipart/form-data" },
+//       });
+//       Swal.fire(
+//         "Success",
+//         `${res.data.count} records imported successfully`,
+//         "success"
+//       );
+//     } catch (err) {
+//       console.error(err);
+//       Swal.fire("Error", err.response?.data?.message || "Import failed", "error");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+//   return (
+//     <div style={{ padding: "20px" }}>
+//       <h2>Import CA Fresher Registrations</h2>
+//       <input type="file" accept=".json" onChange={handleFileChange} />
+//       <button onClick={handleImport} disabled={loading}>
+//         {loading ? "Importing..." : "Import JSON"}
+//       </button>
+//     </div>
+//   );
+// }

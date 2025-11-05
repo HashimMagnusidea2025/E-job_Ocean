@@ -16,7 +16,8 @@ import noImg from '../../media/png/no-image.png';
 import Layout from "../seekerDashboard/partials/layout";
 import { useState, useEffect } from "react";
 import axios from '../../utils/axios.js';
-
+const baseURL = import.meta.env.VITE_BACKEND_URL; // Vite
+    // या CRA में: const baseURL = process.env.REACT_APP_BACKEND_URL;
 
 export default function CompanyPublicProfile() {
 
@@ -124,7 +125,7 @@ export default function CompanyPublicProfile() {
         if (!path) return noImg;
         if (path.startsWith('http')) return path;
         // Replace with your actual backend base URL
-        return `http://localhost:5000${path}`;
+        return `${baseURL}${path}`;
     };
 
     // Generate location string with proper names

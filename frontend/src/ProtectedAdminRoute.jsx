@@ -35,3 +35,17 @@ export function ProtectedEmployerRoute({ children }) {
 
   return children;
 }
+
+
+
+//  Employer Route Protection
+export function ProtectedMentorRoute({ children }) {
+  const token = localStorage.getItem("token");
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  if (!token || user?.roleID?.name?.toLowerCase() !== "mentor") {
+    return <Navigate to="/admin-login" replace />;
+  }
+
+  return children;
+}

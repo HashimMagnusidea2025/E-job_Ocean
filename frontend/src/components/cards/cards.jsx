@@ -1,3 +1,5 @@
+import { useState,useEffect  } from 'react';
+
 import logo from '../../media/logo/ejob_ocean.png';
 import profile from '../../media/logo/ejob_ocean.png';
 import linkedInIcon from '../../media/logo/in.png';
@@ -11,52 +13,87 @@ import { FaTimes } from "react-icons/fa";
 
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import { AutoScroll } from "@splidejs/splide-extension-auto-scroll";
-import "@splidejs/react-splide/css"; 
+import "@splidejs/react-splide/css";
+import axios from '../../utils/axios.js'
+
 
 
 // 🔹 1. Partner Logo Marquee
-export const MarqueeTagCards = () => {
-    return (
-        <div className="bg-[#f9fafb]">
-  <div className="overflow-hidden w-full py-8 sm:py-10">
-    <Splide
-      options={{
-        type: 'loop',
-        drag: false,
-        arrows: false,
-        pagination: false,
-        perPage: 8, 
-        gap: '1rem',
-        autoScroll: {
-          speed: 1, 
-          pauseOnHover: true,
-          pauseOnFocus: false,
-        },
-        breakpoints: {
-          640: {
-            perPage: 4, // mobile
-          },
-        },
-      }}
-      extensions={{ AutoScroll }}
-    >
-      {[...Array(2)].flatMap((_, i) =>
-        [...Array(20)].map((_, j) => (
-          <SplideSlide key={`${i}-${j}`}>
-            <img
-              src={logo}
-              alt="partner"
-              className="h-20  sm:h-24 w-auto bg-[#EDF1F9] p-4 sm:p-6 rounded-lg shadow hover:shadow-xl transition-all duration-300"
-            />
-          </SplideSlide>
-        ))
-      )}
-    </Splide>
-  </div>
-</div>
 
-    );
+
+export const MarqueeTagCards = () => {
+  const [companies, setCompanies] = useState([]);
+  const baseURL = import.meta.env.VITE_BACKEND_URL;
+
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        const { data } = await axios.get("/Company-Information"); // ✅ fetch all
+        setCompanies(data?.data || []);
+      } catch (error) {
+        console.error("Error fetching company info:", error);
+      }
+    };
+    fetchCompanies();
+  }, []);
+
+  return (
+    <div className="bg-[#f9fafb]">
+      <div className="overflow-hidden w-full py-8 sm:py-10">
+        <Splide
+          options={{
+            type: "loop",
+            drag: false,
+            arrows: false,
+            pagination: false,
+            perPage: 8,
+            gap: "1rem",
+            autoScroll: {
+              speed: 1,
+              pauseOnHover: true,
+              pauseOnFocus: false,
+            },
+            breakpoints: {
+              640: { perPage: 4 },
+            },
+          }}
+          extensions={{ AutoScroll }}
+        >
+          {companies.length > 0 ? (
+            companies.map((company, index) => {
+              const logoPath = company.company?.hiringcompanies;
+              const website = company.company?.website;
+
+              if (!logoPath) return null; // skip companies without a logo
+
+              return (
+                <SplideSlide key={index}>
+                  <a
+                    href={website || "#"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block"
+                  >
+                    <img
+                      src={`${baseURL}${logoPath}`}
+                      alt={company.company?.name || "Company"}
+                      className="h-20 sm:h-24 w-24 bg-[#EDF1F9] p-4 sm:p-6 rounded-lg shadow hover:shadow-xl transition-all duration-300 hover:scale-105"
+                    />
+                  </a>
+                </SplideSlide>
+              );
+            })
+          ) : (
+            <div className="text-center text-gray-500 w-full py-6">
+              No company logos available
+            </div>
+          )}
+        </Splide>
+      </div>
+    </div>
+  );
 };
+
 
 // 2. Student Cards Marquee
 const students = [
@@ -103,9 +140,9 @@ export const StudentCardMarquee = () => {
             >
                 {repeatedStudents.map((student, index) => (
                     <SplideSlide key={index} className="!w-[300px] py-2">
-                        <div className="relative pt-14 px-2"> 
+                        <div className="relative pt-14 px-2">
                             <div className="bg-white min-w-[280px] max-w-[280px] mx-auto rounded-xl shadow-md p-7 text-center relative">
-                                
+
                                 <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                                     <img
                                         src={profile}

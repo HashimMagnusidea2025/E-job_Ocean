@@ -5,7 +5,7 @@ import Layout from "../../seekerDashboard/partials/layout";
 import axios from "../../../utils/axios.js";
 import Swal from "sweetalert2";
 import { FaEdit, FaTrash, FaToggleOn, FaToggleOff } from "react-icons/fa";
-
+const baseURL = import.meta.env.VITE_BACKEND_URL;
 export default function CreateCompany() {
   const [users, setUsers] = useState([]);
   const [companies, setCompanies] = useState([]);
@@ -213,7 +213,7 @@ export default function CreateCompany() {
   };
 
   // open modal for edit
-  const BASE_URL = "http://localhost:5000";
+
   const openEditModal = (company) => {
     setEditingCompany(company._id);
     setFormData({
@@ -228,7 +228,7 @@ export default function CreateCompany() {
     });
 
     if (company.company?.employerLogo) {
-      setLogoPreview(`${BASE_URL}${company.company.employerLogo}`);
+      setLogoPreview(`${baseURL}${company.company.employerLogo}`);
     } else {
       setLogoPreview(noImage);
     }

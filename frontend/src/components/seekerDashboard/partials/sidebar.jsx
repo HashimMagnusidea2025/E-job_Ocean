@@ -6,6 +6,8 @@ import {
   FaUserAlt, FaCog, FaBuilding, FaList, FaArrowDown, FaArrowUp,
   FaAngleUp
 } from "react-icons/fa";
+import { RiMoneyDollarCircleLine } from "react-icons/ri";
+import { CiBoxList } from "react-icons/ci";
 import { FaAngleDown } from "react-icons/fa";
 import { BiSolidCategory } from "react-icons/bi";
 import { IoMdMenu, IoMdSettings } from "react-icons/io";
@@ -60,26 +62,40 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
     { path: "/seeker-dashboard/my-job-applications", icon: <FaDesktop />, label: "My Job Applications" },
     { path: "/seeker-dashboard/my-favourite-jobs", icon: <FaHeart />, label: "My Favourite Jobs" },
     { path: "/seeker-dashboard/my-alerts", icon: <FaBullhorn />, label: "My Job Alerts" },
-    { path: "/seeker-dashboard/my-messages", icon: <FaEnvelope />, label: "My Messages" },
-    { path: "/seeker-dashboard/my-followings", icon: <FaUser />, label: "My Followings" },
+    // { path: "/seeker-dashboard/my-messages", icon: <FaEnvelope />, label: "My Messages" }, 
+    // { path: "/seeker-dashboard/my-followings", icon: <FaUser />, label: "My Followings" },
     { icon: <FaSignOutAlt />, label: "Logout", onClick: handleLogout }
   ];
 
   // Employer Menu
   const EmployerItems = [
+    
     { path: "/", icon: <FaHome />, label: "Home" },
     { path: "/employer-dashboard", icon: <FaHome />, label: "Dashboard" },
     { path: "/employer-dashboard/edit/company-profile", icon: <FaPencilAlt />, label: "Edit Account Details" },
     { path: "/employer-dashboard/company-profile", icon: <FaFile />, label: "Company Public Profile" },
     { path: "/employer-dashboard/post-job", icon: <FaPrint />, label: "Post A Job" },
     { path: "/employer-dashboard/posted-jobs", icon: <FaEye />, label: "Manage Jobs" },
+    // { path: "/employer-dashboard/job-candidates/:jobId", icon: <CiBoxList  />, label: "Candidates-Register" },
+
     { path: "/employer-dashboard/company-packages", icon: <FaDesktop />, label: "CV Search Packages" },
-    { path: "/employer-dashboard/list-payment-history", icon: <FaHeart />, label: "Payment History" },
+    { path: "/employer-dashboard/list-payment-history", icon: <RiMoneyDollarCircleLine />, label: "Payment History" },
     { path: "/employer-dashboard/unloced-seekers", icon: <FaBullhorn />, label: "Unlocked Users" },
-    { path: "/employer-dashboard/company-messages", icon: <FaUser />, label: "Company Messages" },
-    { path: "/employer-dashboard/company-followers", icon: <FaUser />, label: "Company Followings" },
+    // { path: "/employer-dashboard/company-messages", icon: <FaUser />, label: "Company Messages" },
+    // { path: "/employer-dashboard/company-followers", icon: <FaUser />, label: "Company Followings" },
     { icon: <FaSignOutAlt />, label: "Logout", onClick: handleLogout }
+
   ];
+
+  const MentorItems = [
+    { path: "/", icon: <FaHome />, label: "Home" },
+    { path: "/mentor-dashboard", icon: <FaHome />, label: "Dashboard" },
+    { path: "/mentor-dashboard/edit-mentor-details", icon: <FaUser />, label: "Edit Mentor Details" },
+    { path: "/mentor-dashboard/add-mentor-session", icon: <FaUser />, label: "Add Mentor Session" },
+    { path: "/mentor-dashboard/mentor-session-list", icon: <FaUser />, label: "Mentor Session List" },
+
+
+  ]
 
   // Admin Menu (nested children)
   const AdminItems = [
@@ -87,7 +103,17 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
     { path: "/admin-dash", icon: <FaHome />, label: "Dashboard" },
     { path: "/admin-dashboard/ca-fresher-list", label: "CA Fresher List", icon: <GoDotFill size={12} className="dot" /> },
 
+    {
+      icon: <FaUser />, label: "Become-A-Mentor",
+      children: [
 
+        {
+          path: "/admin/become-a-mentor-registerList", icon: <GoDotFill size={12} className="dot" />,
+          label: "Mentor-RegisterList"
+        },
+
+      ]
+    },
     {
       icon: <FaUser />, label: "Job Post ",
       children: [
@@ -105,9 +131,32 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
       ]
     },
     {
-      icon: <FaUser />, label: " Registrations List",
+      icon: <FaUser />, label: "Knowledge Base ",
       children: [
 
+        {
+          path: "/admin-dashboard/knowledge-baseform", icon: <GoDotFill size={12} className="dot" />,
+          label: " Add Knowledge Base"
+        },
+        {
+          path: "/admin-dashboard/knowledge-base-list", icon: <GoDotFill size={12} className="dot" />,
+          label: "Knowledge Base List"
+        },
+        {
+          path: "/admin/knowledge-base-registers", icon: <GoDotFill size={12} className="dot" />,
+          label: "Knowledge Base register List"
+        },
+
+
+      ]
+    },
+    {
+      icon: <FaUser />, label: " Registrations List",
+      children: [
+        {
+          path: "/admin-dashboard/job-register-list", icon: <GoDotFill size={12} className="dot" />,
+          label: "Job Registration list"
+        },
         {
           path: "/admin-dashboard/webinar-registration-list", icon: <GoDotFill size={12} className="dot" />,
           label: "Webinar Registration List"
@@ -236,8 +285,17 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
           path: "/admin-dashboard/job-shift-category", icon: <GoDotFill size={12} className=" dot" />,
           label: "Job Shift Category"
         },
-        { path: "/admin-dashboard/degree-level-category", icon: <GoDotFill size={12} className=" dot" />, label: "Degree Level Category" },
+        {
+          path: "/admin-dashboard/degree-level-category", icon: <GoDotFill size={12} className=" dot" />, label: "Degree Level Category"
+        },
 
+        {
+          path: "/admin-dashboard/degree-type-category", icon: <GoDotFill size={12} className=" dot" />, label: "Degree Type Category"
+        },
+
+
+
+        
       ]
     },
 
@@ -248,6 +306,7 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
   if (role === "superadmin") menuItems = AdminItems;
   else if (role === "Employer") menuItems = EmployerItems;
   else if (role === "seeker") menuItems = SeekerItems;
+  else if (role === "Mentor") menuItems = MentorItems
 
   // auto open menus if child path matches
   useEffect(() => {

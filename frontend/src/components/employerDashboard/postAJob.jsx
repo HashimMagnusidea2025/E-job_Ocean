@@ -31,7 +31,8 @@ export default function PostAJob() {
         isActive: true,
         country: "",
         state: "",
-        city: ""
+        city: "",
+        postedByType: "Employer"
     });
 
     const [salaryCurrencies, setSalaryCurrencies] = useState([]);
@@ -48,6 +49,38 @@ export default function PostAJob() {
     const [states, setStates] = useState([]);
     const [cities, setCities] = useState([]);
     const [errors, setErrors] = useState({});
+    const [companyId, setCompanyId] = useState("");
+    const [loading, setLoading] = useState(false);
+
+    const [isEditing, setIdEditing] = useState(false);
+// Set editing mode based on ID
+    useEffect(() => {
+        if (id) {
+            setIdEditing(true);
+        }
+    }, [id]);
+
+    // ✅ Check if user has company profile
+
+    useEffect(() => {
+        const fetchCompanyData = async () => {
+            try {
+                const response = await axios.get("/Company-Information/my-company");
+                if (response.data.success && response.data.data) {
+                    setCompanyId(response.data.data._id);
+                    console.log("Company ID loaded:", response.data.data);
+                } else {
+                    Swal.fire("Warning", "Please create company profile first", "warning");
+                }
+            } catch (error) {
+                console.error("Error fetching company data:", error);
+                Swal.fire("Error", "Failed to load company data", "error");
+            }
+        };
+        fetchCompanyData();
+    }, []);
+
+
 
     // country list
     useEffect(() => {
@@ -70,8 +103,8 @@ export default function PostAJob() {
     useEffect(() => {
         const fetchCareerLevels = async () => {
             try {
-                const { data } = await axios.get("/career-level-category/active");
-                setCareerLevels(data);
+                const res = await axios.get("/career-level-category/active");
+                setCareerLevels(res.data);
             } catch (err) {
                 console.error("Failed to fetch career levels:", err);
             }
@@ -82,8 +115,8 @@ export default function PostAJob() {
     useEffect(() => {
         const fetchFunctionalAreas = async () => {
             try {
-                const { data } = await axios.get("/functionalArea-Category/active");
-                setFunctionalAreas(data);
+                const res = await axios.get("/functionalArea-Category/active");
+                setFunctionalAreas(res.data);
             } catch (err) {
                 console.error("Failed to fetch functional areas:", err);
             }
@@ -161,6 +194,61 @@ export default function PostAJob() {
         ]);
     }, []);
 
+
+
+    // Fetch job data for editing
+    useEffect(() => {
+        if (id) {
+            const fetchJobData = async () => {
+                try {
+                    setLoading(true);
+                    const response = await axios.get(`/job-post/${id}`);
+                    const job = response.data;
+
+                    setFormData({
+                        jobTitle: job.jobTitle || "",
+                        description: job.description || "",
+                        benefits: job.benefits || "",
+                        salaryFrom: job.salaryFrom || "",
+                        salaryTo: job.salaryTo || "",
+                        salaryCurrency: job.salaryCurrency?._id || job.salaryCurrency || "",
+                        salaryPeriod: job.salaryPeriod || "",
+                        hideSalary: job.hideSalary || false,
+                        careerLevel: job.careerLevel?._id || job.careerLevel || "",
+                        functionalArea: job.functionalArea?._id || job.functionalArea || "",
+                        jobType: job.jobType?._id || job.jobType || "",
+                        jobShift: job.jobShift?._id || job.jobShift || "",
+                        positions: job.positions || "",
+                        expiryDate: job.expiryDate?.split("T")[0] || "",
+                        degreeLevel: job.degreeLevel || "",
+                        experience: job.experience || "",
+                        externalJob: job.externalJob || "",
+                        isFreelance: job.isFreelance || false,
+                        isActive: job.isActive ?? true,
+                        country: job.country || "",
+                        state: job.state || "",
+                        city: job.city || ""
+                    });
+
+                    // populate selected skills
+                    if (job.skills && job.skills.length > 0) {
+                        const skillsData = job.skills.map(skill => ({
+                            value: skill._id || skill,
+                            label: skill.name || skill
+                        }));
+                        setSelectedSkills(skillsData);
+                    }
+                } catch (err) {
+                    console.error("Error fetching job data:", err);
+                    Swal.fire("Error", "Failed to load job data", "error");
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchJobData();
+        }
+    }, [id]);
+
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
         setFormData(prev => ({
@@ -204,7 +292,8 @@ export default function PostAJob() {
         if (!formData.functionalArea) newErrors.functionalArea = "Functional Area is required";
         if (!formData.positions) newErrors.positions = "Number of positions is required";
         if (!formData.jobShift) newErrors.jobShift = "Job Shift is required";
-
+        // ✅ Check if company exists
+        if (!companyId) newErrors.company = "Company profile not found. Please create company profile first.";
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -240,56 +329,59 @@ export default function PostAJob() {
 
 
 
-    useEffect(() => {
-        if (id) {
-            // fetch job data for editing
-            axios.get(`/job-post/${id}`).then(res => {
-                const job = res.data;
-                setFormData({
-                    jobTitle: job.jobTitle || "",
-                    description: job.description || "",
-                    benefits: job.benefits || "",
-                    salaryFrom: job.salaryFrom || "",
-                    salaryTo: job.salaryTo || "",
-                    salaryCurrency: job.salaryCurrency?._id || "",
-                    salaryPeriod: job.salaryPeriod || "",
-                    hideSalary: job.hideSalary || false,
-                    careerLevel: job.careerLevel?._id || "",
-                    functionalArea: job.functionalArea?._id || "",
-                    jobType: job.jobType?._id || "",
-                    jobShift: job.jobShift?._id || "",
-                    positions: job.positions || "",
-                    expiryDate: job.expiryDate?.split("T")[0] || "",
-                    degreeLevel: job.degreeLevel || "",
-                    experience: job.experience || "",
-                    externalJob: job.externalJob || "",
-                    isFreelance: job.isFreelance || false,
-                    isActive: job.isActive ?? true,
-                    country: job.country || "",
-                    state: job.state || "",
-                    city: job.city || ""
-                });
+    // useEffect(() => {
+    //     if (id) {
+    //         // fetch job data for editing
+    //         axios.get(`/job-post/${id}`).then(res => {
+    //             const job = res.data;
+    //             setFormData({
+    //                 jobTitle: job.jobTitle || "",
+    //                 description: job.description || "",
+    //                 benefits: job.benefits || "",
+    //                 salaryFrom: job.salaryFrom || "",
+    //                 salaryTo: job.salaryTo || "",
+    //                 salaryCurrency: job.salaryCurrency?._id || "",
+    //                 salaryPeriod: job.salaryPeriod || "",
+    //                 hideSalary: job.hideSalary || false,
+    //                 careerLevel: job.careerLevel?._id || "",
+    //                 functionalArea: job.functionalArea?._id || "",
+    //                 jobType: job.jobType?._id || "",
+    //                 jobShift: job.jobShift?._id || "",
+    //                 positions: job.positions || "",
+    //                 expiryDate: job.expiryDate?.split("T")[0] || "",
+    //                 degreeLevel: job.degreeLevel || "",
+    //                 experience: job.experience || "",
+    //                 externalJob: job.externalJob || "",
+    //                 isFreelance: job.isFreelance || false,
+    //                 isActive: job.isActive ?? true,
+    //                 country: job.country || "",
+    //                 state: job.state || "",
+    //                 city: job.city || ""
+    //             });
 
-                // populate selected skills
-                setSelectedSkills((job.skills || []).map(skill => ({
-                    value: skill._id,
-                    label: skill.name
-                })));
-            }).catch(err => console.error(err));
-        }
-    }, [id]);
+    //             // populate selected skills
+    //             setSelectedSkills((job.skills || []).map(skill => ({
+    //                 value: skill._id,
+    //                 label: skill.name
+    //             })));
+    //         }).catch(err => console.error(err));
+    //     }
+    // }, [id]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         if (!validateForm()) return;
 
         try {
             const submitData = {
                 ...formData,
-                skills: selectedSkills.map(skill => skill.value)
+                skills: selectedSkills.map(skill => skill.value),
+                postedByType: "Employer",
+                companyId: companyId
             };
 
-            if (id) {
+            if (isEditing) {
                 // update existing job
                 await axios.put(`/job-post/${id}`, submitData);
                 Swal.fire("Success", "Job updated successfully", "success");
@@ -297,22 +389,63 @@ export default function PostAJob() {
                 // create new job
                 await axios.post("/job-post", submitData);
                 Swal.fire("Success", "Job created successfully", "success");
+                resetForm();
             }
 
-            navigate("/admin-dashboard/job-post-list"); // redirect back to list
+            navigate("/employer-dashboard/posted-jobs"); // redirect back to job list
         } catch (err) {
-            console.error(err);
+            console.error("Submission error:", err);
             Swal.fire("Error", "Something went wrong", "error");
         }
     };
 
+    // Show warning if no company found
+    if (!companyId && !loading) {
+        return (
+            <Layout>
+                <div className="w-full mx-auto p-6 bg-white border shadow-sm rounded-md space-y-6">
+                    <div className="text-center py-10">
+                        <h2 className="text-xl font-semibold text-red-600 mb-4">Company Profile Required</h2>
+                        <p className="text-gray-600 mb-6">You need to create a company profile before posting jobs.</p>
+                        <button
+                            onClick={() => navigate("/employer-dashboard/company-profile")}
+                            className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md font-semibold"
+                        >
+                            Create Company Profile
+                        </button>
+                    </div>
+                </div>
+            </Layout>
+        );
+    }
+
+    if (loading && isEditing) {
+        return (
+            <Layout>
+                <div className="w-full mx-auto p-6">
+                    <div className="flex justify-center items-center h-64">
+                        <div className="text-lg">Loading job data...</div>
+                    </div>
+                </div>
+            </Layout>
+        );
+    }
 
     return (
         <Layout>
             <form onSubmit={handleSubmit}>
                 <div className="w-full mx-auto p-6 bg-white border shadow-sm rounded-md space-y-6">
                     <h2 className="text-lg sm:text-[30px] font-semibold text-gray-800">Job Details</h2>
-
+                    {companyId && (
+                        <span className="text-sm text-green-600 bg-green-100 px-3 py-1 rounded-full">
+                            ✅ Company Linked
+                        </span>
+                    )}
+                    {errors.company && (
+                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                            {errors.company}
+                        </div>
+                    )}
                     <div className="space-y-4">
                         {/* Job Title */}
                         <div>

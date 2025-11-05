@@ -162,7 +162,9 @@ import logo from '../../../media/logo/ejob_ocean.png';
 import { FaWhatsapp } from "react-icons/fa";
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import axios from '../../../utils/axios.js'
+import axios from '../../../utils/axios.js';
+const baseURL = import.meta.env.VITE_BACKEND_URL; // Vite
+    // या CRA में: const baseURL = process.env.REACT_APP_BACKEND_URL;
 export default function Footer() {
 
 
@@ -172,9 +174,9 @@ export default function Footer() {
         try {
             const response = await axios.get('/general-settings'); // ya aapke backend endpoint
             if (response.data && response.data.logo) {
-                setCompanyLogo(`http://localhost:5000${response.data.logo}`);
+                setCompanyLogo(`${baseURL}${response.data.logo}`);
                 setCompanyData(response.data);
-                console.log(response.data);
+              
 
             }
         } catch (error) {

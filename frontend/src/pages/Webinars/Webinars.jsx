@@ -2,16 +2,32 @@ import React, { useEffect, useState } from "react";
 import { FaRegCalendarAlt } from "react-icons/fa";
 import Navbar from "../../components/layout/navbar/navbar";
 import Footer from "../../components/layout/footer/footer";
-import { WebinarCardsList } from "../../components/ui/cards/cards";
+import { WebinarCardsList, HallOfFameCards } from "../../components/ui/cards/cards";
 import axios from "../../utils/axios.js";
 
 export default function WebinarspageList({ webinar }) {
   const [webinars, setWebinars] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
+  const [speakers, setSpeakers] = useState([]);
 
   const handleRegisterClick = (webinar) => {
     console.log("User clicked register for webinar:", webinar);
   };
+
+
+  // ✅ Fetch Active Speakers
+  useEffect(() => {
+    const fetchSpeakers = async () => {
+      try {
+        const { data } = await axios.get("/speakers/active");
+        setSpeakers(data);
+        console.log("Fetched Speakers:", data);
+      } catch (error) {
+        console.error("Failed to fetch speakers:", error);
+      }
+    };
+    fetchSpeakers();
+  }, []);
 
   useEffect(() => {
     const fetchWebinars = async () => {
@@ -35,16 +51,31 @@ export default function WebinarspageList({ webinar }) {
 
   const now = new Date();
 
-  const filteredWebinars = webinars.filter((webinar) => {
-    const start = new Date(webinar.WebinarStartDateTime);
-    const end = new Date(webinar.WebinarEndDateTime);
+  // const filteredWebinars = webinars.filter((webinar) => {
+  //   const start = new Date(webinar.WebinarStartDateTime);
+  //   const end = new Date(webinar.WebinarEndDateTime);
 
+  //   if (activeTab === "upcoming") {
+  //     return start >= now; // upcoming
+  //   } else if (activeTab === "past") {
+  //     return end < now; // past
+  //   } else if (activeTab === "Speaker") {
+  //     return end < now; // past
+  //   } else {
+  //     return true; // all
+  //   }
+  // });
+
+  // ✅ Filter webinars only if not in Speaker tab
+  const filteredWebinars = webinars.filter((webinar) => {
     if (activeTab === "upcoming") {
-      return start >= now; // upcoming
+      return new Date(webinar.WebinarStartDateTime) >= now;
     } else if (activeTab === "past") {
-      return end < now; // past
+      return new Date(webinar.WebinarEndDateTime) < now;
+    } else if (activeTab === "all") {
+      return true;
     } else {
-      return true; // all
+      return false; // don't show webinars in Speaker tab
     }
   });
 
@@ -71,7 +102,10 @@ export default function WebinarspageList({ webinar }) {
       <div className="container mx-auto">
         <div className="px-4 sm:px-6 md:px-10 py-10">
           <div className="flex justify-center items-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900">Webinars</h2>
+            <h2 className="text-3xl font-bold text-gray-900">
+              {activeTab === "Speaker" ? "Speakers" : "Webinars"}
+            </h2>
+
           </div>
 
           <div className="flex flex-col lg:flex-row gap-10">
@@ -105,11 +139,20 @@ export default function WebinarspageList({ webinar }) {
                 >
                   All
                 </button>
+                <button
+                  onClick={() => setActiveTab("Speaker")}
+                  className={`text-left transition ${activeTab === "Speaker"
+                    ? "text-black font-bold"
+                    : "text-gray-600 hover:text-black"
+                    }`}
+                >
+                  Speaker
+                </button>
               </div>
             </div>
 
             {/* Cards */}
-            <div className="lg:w-4/5 w-full grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {/* <div className="lg:w-4/5 w-full grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {filteredWebinars.length > 0 ? (
                 filteredWebinars.map((webinar) => (
                   <WebinarCardsList key={webinar._id} webinar={webinar}
@@ -119,6 +162,39 @@ export default function WebinarspageList({ webinar }) {
                 <p className="text-gray-500 col-span-full text-center">
                   No webinars found
                 </p>
+              )}
+            </div> */}
+            <div className="lg:w-4/5 w-full">
+              {activeTab === "Speaker" ? (
+                // ✅ SPEAKER VIEW
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {speakers.length > 0 ? (
+                    speakers.map((speaker, index) => (
+                      <HallOfFameCards key={index} speaker={speaker} />
+                    ))
+                  ) : (
+                    <p className="text-center text-gray-500 col-span-full">
+                      No active speakers found
+                    </p>
+                  )}
+                </div>
+              ) : (
+                // ✅ WEBINAR VIEW
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {filteredWebinars.length > 0 ? (
+                    filteredWebinars.map((webinar) => (
+                      <WebinarCardsList
+                        key={webinar._id}
+                        webinar={webinar}
+                        onRegisterClick={handleRegisterClick}
+                      />
+                    ))
+                  ) : (
+                    <p className="text-gray-500 col-span-full text-center">
+                      No webinars found
+                    </p>
+                  )}
+                </div>
               )}
             </div>
           </div>

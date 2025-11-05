@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
 import { FaRegCommentDots } from "react-icons/fa";
 import { AiOutlineLike, AiFillLike } from "react-icons/ai";
+
+import Swal from "sweetalert2";
 import { FaEye } from "react-icons/fa";
 import axios from '../../../utils/axios.js'
 import { FaCommentAlt } from "react-icons/fa";
 import { FaFacebookF, FaPinterestP, FaLinkedinIn } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { MdEmail, MdShare } from "react-icons/md";
-
+import { FaRegStar,FaStar  } from "react-icons/fa";
 
 // export const LikeButton = ({ blogId, type, likeCount, setLikeCount }) => {
 //   const [liked, setLiked] = useState(false);
@@ -50,14 +52,14 @@ import { MdEmail, MdShare } from "react-icons/md";
 
 // }
 
-export const LikeButton = ({ liked, likeCount, onClick }) => {
+export const LikeButton = ({ blogId, type, liked, setLikeCount, likeCount, onClick, }) => {
   return (
     <button
       onClick={onClick}
       disabled={liked}
       className={`flex items-center gap-2 px-3 py-3  transition ${liked
-          ? "bg-green-600 text-white cursor-not-allowed"
-          : "bg-[#1877F2] text-white hover:bg-[#145dbf]"
+        ? "bg-green-600 text-white cursor-not-allowed"
+        : "bg-[#1877F2] text-white hover:bg-[#145dbf]"
         }`}
     >
       {liked ? <AiFillLike size={18} /> : <AiOutlineLike size={18} />}
@@ -67,22 +69,109 @@ export const LikeButton = ({ liked, likeCount, onClick }) => {
 };
 
 
-export const CommentButton = ({ blogId, type }) => {
-  const [commentCount, setCommentCount] = useState(0);
+export const FavoriteButton = ({ jobId, type }) => {
+  const [favorited, setFavorited] = useState(false);
+
+
+  const handleFavorite = async () => {
+
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        if (!token) {
+          Swal.fire("Login required", "Please log in to favorite this item", "warning");
+          return;
+        }
+      }
+
+      const res = await axios.post('/favorite/toggle',
+         { jobId, type },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      setFavorited(res.data.favorited);
+      // Swal.fire("Success", res.data.message, "success");
+    } catch (err) {
+      console.error("Favorite error:", err);
+      Swal.fire("Error", "Could not update favorite", "error");
+    }
+  }
+
+
   useEffect(() => {
-    const fetchComments = async () => {
+    const fetchMyFavorites = async () => {
       try {
-        const res = await axios.get(`/comment/${blogId}?type=${type}`);
-        setCommentCount(res.data.count);
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const res = await axios.get("/favorite/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+            const isFavorited = res.data.data.some((f) => f.jobId?._id === jobId);
+        setFavorited(isFavorited);
       } catch (err) {
-        console.error("Error fetching comments:", err);
+        console.error("Error fetching my favorites:", err);
       }
     };
 
-    if (blogId) {
-      fetchComments();
-    }
-  }, [blogId, type]);
+    fetchMyFavorites();
+  }, [jobId]);
+  return (
+    <>
+
+      <div  className=" flex items-center gap-1 text-gray-600 text-sm">
+        <button onClick={handleFavorite} className="text-gray-600 flex items-center gap-1 hover:text-blue-600 transition">
+          {favorited ? <FaStar size={20} color="text-gray-600" /> : <FaRegStar size={20} />}
+
+
+        </button>
+      </div>
+    </>
+  )
+}
+
+
+
+export const LikeButtonSimple = ({ liked, likeCount, onClick }) => {
+  return (
+    <div className="flex items-center gap-1 text-gray-600 text-sm">
+      <button
+        onClick={onClick}
+        disabled={liked}
+        className={`text-gray-600 flex items-center gap-1 hover:text-blue-600 transition`}
+      >
+        {liked ? <AiFillLike size={20} /> : <AiFillLike size={20} />}
+        <span>{likeCount}</span>
+      </button>
+    </div>
+  );
+};
+
+
+export const CommentButton = ({ blogId, type, commentCount }) => {
+  // const [commentCount, setCommentCount] = useState(0);
+  // useEffect(() => {
+  //   const fetchComments = async () => {
+  //     try {
+  //       console.log("CommentButton: Fetching comments for", {
+  //         blogId,
+  //         type,
+  //         blogIdType: typeof blogId
+  //       });
+  //       console.log("CommentButton: Fetching comments for", { blogId, type }); // Debugging
+  //       const res = await axios.get(`/comment/${blogId}?type=${type}`);
+  //       console.log("CommentButton: Response", res.data); // Debugging
+  //       setCommentCount(res.data.count);
+  //     } catch (err) {
+  //       console.error("Error fetching comments:", err);
+
+  //     }
+  //   };
+
+  //   if (blogId && type) {
+  //     fetchComments();
+  //   }
+  // }, [blogId, type]);
 
   return (
     <>
@@ -102,16 +191,33 @@ export const CommentButton = ({ blogId, type }) => {
 }
 
 
-export const ViewButton = ({ blogId }) => {
+export const ViewButton = ({ blogId, type = "blog" }) => {
 
   const [views, setViews] = useState(0);
 
+  // useEffect(() => {
+  //   axios.get(`/blogs/like/view/${blogId}`)
+  //     .then((res) => setViews(res.data.views))
+  //     .catch((err) => console.error("Error fetching views:", err));
+  // }, [blogId]);
+
+
   useEffect(() => {
-    axios
-      .get(`/blogs/like/view/${blogId}`)
-      .then((res) => setViews(res.data.views))
-      .catch((err) => console.error("Error fetching views:", err));
-  }, [blogId]);
+    const fetchViews = async () => {
+      try {
+
+        const res = await axios.get(`/blogs/like/view/${blogId}?type=${type}`);
+
+        setViews(res.data.views);
+      } catch (err) {
+        console.error("Error fetching views:", err);
+      }
+    };
+
+    if (blogId) {
+      fetchViews();
+    }
+  }, [blogId, type]);
   return (
     <>
       <div className="flex items-center gap-1 text-gray-600 text-sm">
