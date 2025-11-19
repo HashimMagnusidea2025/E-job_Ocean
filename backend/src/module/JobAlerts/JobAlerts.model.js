@@ -20,7 +20,7 @@ const JobAlertsSchema = mongoose.Schema({
     // },
     skills: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: "buildSkills",
+        ref: "SkillsCategory",
     }],
     country: { ref: 'Country', type: Number, required: true },
     state: { ref: 'State', type: Number, required: true },

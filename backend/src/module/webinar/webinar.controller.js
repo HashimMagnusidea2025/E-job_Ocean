@@ -185,3 +185,22 @@ export const createGoogleEvent = async (req, res) => {
         res.status(500).json({ message: "Failed to add attendee" });
     }
 };
+
+
+
+// GET webinar by slug
+export const getWebinarBySlug = async (req, res) => {
+  try {
+    const webinar = await WebinarModel.findOne({ WebinarSlug: req.params.slug })
+      .populate("Speaker");
+
+    if (!webinar) {
+      return res.status(404).json({ message: "Webinar not found" });
+    }
+
+    res.json(webinar);
+  } catch (err) {
+    console.error("Error fetching webinar by slug:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+};

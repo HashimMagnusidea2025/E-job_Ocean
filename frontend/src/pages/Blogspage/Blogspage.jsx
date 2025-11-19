@@ -243,6 +243,7 @@ export default function BlogsPage() {
                                     Commentbtn={true}
                                     Viewbtn={true}
                                     category={value._embedded?.["wp:term"]?.[0]?.[0]?.name}
+                                    slug={value.slug}
                                 />
                             ))
                         )}

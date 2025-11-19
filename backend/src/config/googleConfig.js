@@ -5,7 +5,7 @@ import { google } from "googleapis";
   process.env.GOOGLE_CLIENT_SECRET,
   process.env.GOOGLE_REDIRECT_URI
 );
-console.log(oauth2Client);
+
 
 // Set token after user authentication (store in DB or file once you get it)
 oauth2Client.setCredentials({

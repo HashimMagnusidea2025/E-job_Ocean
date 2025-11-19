@@ -142,7 +142,9 @@ export default function EditMentorDetails() {
                 <form onSubmit={handleSubmit} className="space-y-5">
                     {/* ✅ Profile Picture */}
                     <div className="flex items-center justify-center">
-                        <div className="relative">
+
+
+                        {/* <div className="relative">
                             {preview && (
                                 <img
                                     src={preview}
@@ -150,7 +152,9 @@ export default function EditMentorDetails() {
                                     className="w-28 h-28 rounded-full object-cover border"
                                 />
                             )}
-
+                           <h2 className="border">
+                             Add Profile picture
+                           </h2>
                             <input
                                 type="file"
                                 accept="image/*"
@@ -158,7 +162,33 @@ export default function EditMentorDetails() {
                                 className="absolute bottom-0 right-0 opacity-0 w-28 h-28 cursor-pointer"
                                 title="Change profile picture"
                             />
+                        </div> */}
+
+                        <div className="relative flex flex-col items-center">
+                            {preview && (
+                                <img
+                                    src={preview}
+                                    alt="Profile"
+                                    className="w-28 h-28 rounded-full object-cover border mb-2"
+                                />
+                            )}
+
+                            <label
+                                htmlFor="profile-upload"
+                                className="border px-4 py-2 rounded-lg bg-blue-500 text-white cursor-pointer hover:bg-blue-600 transition"
+                            >
+                                Add Profile Picture
+                            </label>
+
+                            <input
+                                id="profile-upload"
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                                className="hidden"
+                            />
                         </div>
+
                     </div>
 
                     {/* ✅ Basic Info */}

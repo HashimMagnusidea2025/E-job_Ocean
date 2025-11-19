@@ -40,7 +40,7 @@ hiringcompanies: {
       state: {
         type: Number,  // Changed to Number to match State model
         ref: 'State',
-        required: true
+        required: true  
       },
       city: {
         type: String,  // Keep as String to match City model

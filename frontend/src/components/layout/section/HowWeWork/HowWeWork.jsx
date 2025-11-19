@@ -39,7 +39,7 @@ const step3 = {
 
 export default function HowWeWork() {
   return (
-    <div className="container mx-auto relative  overflow-hidden py-16 px-4 max-w-6xl mx-auto text-white font-[Poppins]">
+    <div className="container mx-auto relative  overflow-hidden py-10 px-4 max-w-6xl  text-white font-[Poppins]">
       {/* Animated Floating Circles */}
       
 
@@ -55,7 +55,7 @@ export default function HowWeWork() {
       </ul>
 
         {/* Step 1 - Image Right */}
-        <div className="relative flex flex-col md:flex-row items-start md:items-center gap-6 mb-12 border-l-4 border-dashed border-white pl-10">
+        <div className="relative flex flex-col md:flex-row items-start md:items-center gap-6 mb-4 border-l-4 border-dashed border-white pl-10">
           <div className="absolute -left-[17px] top-18 w-7 h-7 rounded-full bg-white border-4 border-[#339ca0] flex items-center justify-center text-sm font-bold text-[#339ca0]">
             {step1.number}
           </div>
@@ -75,10 +75,10 @@ export default function HowWeWork() {
         </div>
 
         {/* Step 2 - Image Left */}
-        <div className="relative flex flex-col md:flex-row-reverse items-start md:items-center gap-6 mb-12 border-l-4 border-dashed border-white pl-10">
+        <div className="relative flex flex-col md:flex-row-reverse items-start md:items-center gap-6 mb-4 border-l-4 border-dashed border-white pl-10">
           <div className="absolute -left-[17px] top-18 w-7 h-7 rounded-full bg-white border-4 border-[#339ca0] flex items-center justify-center text-sm font-bold text-[#339ca0]">
             {step2.number}
-          </div>
+          </div>  
           <div className="flex-1">
             <h3 className="text-xl font-semibold mb-2 text-white">{step2.title}</h3>
             <ul className="list-disc list-inside space-y-1 text-sm text-white">

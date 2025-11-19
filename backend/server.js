@@ -60,7 +60,9 @@ import SeekerInformationRouter from './src/module/seekerInformation/seekerInform
 import PostOfficerouter from './src/module/PostOffice/PostOffice.Routes.js';
 import buildResumeRoute from './src/module/BuildResume/BuildResume.Routes.js'
 import FavoriteRoute from './src/module/favorite/favorite.Routes.js';
-import JobAlertsRoute from './src/module/JobAlerts/JobAlerts.Routes.js'
+import JobAlertsRoute from './src/module/JobAlerts/JobAlerts.Routes.js';
+
+import ContactRoute from './src/module/contact/contact.Routes.js';
 
 import cors from 'cors';
 import dotenv from 'dotenv'
@@ -165,6 +167,8 @@ server.use('/api/seeker', SeekerInformationRouter);
 server.use('/api/job-alerts',JobAlertsRoute)
 
 server.use('/api/google', Googlerouter);
+
+server.use('/api/contact',ContactRoute)
 
 
 // filterOptionRoutes // 

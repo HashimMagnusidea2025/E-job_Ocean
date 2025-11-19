@@ -392,16 +392,27 @@ export const createEducation = async (req, res) => {
         const {
             degreeLevel,
             degreeType,
+            customDegreeType,
             degreeTitle,
-            country,
+            country,    
             state,
             city,
             yearOfCompletion,
             institute,
         } = req.body;
 
+        let degreeTypeToSave = null;
+
+          // अगर custom degree type है
+        if (degreeType === "other" && customDegreeType) {
+            degreeTypeToSave = null; // या आप new degree type create कर सकते हैं
+            // customDegreeType field में store करें
+        } else {
+            degreeTypeToSave = degreeType;
+        }
+
         // Validation
-        if (!degreeLevel || !degreeType || !degreeTitle || !country || !state || !city || !yearOfCompletion) {
+        if (!degreeLevel ||  !degreeTitle || !country || !state || !city || !yearOfCompletion) {
             return res.status(400).json({
                 success: false,
                 message: "All required fields must be provided",
@@ -420,7 +431,8 @@ export const createEducation = async (req, res) => {
         const education = new Education({
             userId: req.user._id, // Changed from user to userId
             degreeLevel,
-            degreeType,
+            degreeType: degreeTypeToSave,
+            customDegreeType: degreeType === "other" ? customDegreeType : null,
             degreeTitle,
             country,
             state,

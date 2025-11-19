@@ -94,6 +94,8 @@ export default function BuildResume() {
     const [editingExperience, setEditingExperience] = useState(null);
     const [editingEducation, setEditingEducation] = useState(null);
 
+    const [showCustomDegreeType, setShowCustomDegreeType] = useState(false);
+    const [customDegreeType, setCustomDegreeType] = useState("");
     // Form states
     const [experienceFormData, setExperienceFormData] = useState({
         jobTitle: "",
@@ -115,6 +117,7 @@ export default function BuildResume() {
         country: "",
         state: "",
         city: "",
+        customDegreeType: "" // 🔹 NEW: Custom degree type field
     });
 
     const [skillsFormData, setSkillsFormData] = useState({
@@ -444,20 +447,143 @@ export default function BuildResume() {
         setOpenModal("languages");
     };
 
+
+
+
     // 🔹 NEW: Handle Edit Education
-    const handleEditEducation = (education) => {
-        setEditingEducation(education);
+    // const handleEditEducation = (education) => {
+    //     setEditingEducation(education);
+    //     setEducationFormData({
+    //         degreeLevel: education.degreeLevel?._id || education.degreeLevel || "",
+    //         degreeType: education.degreeType?._id || education.degreeType || "",
+    //         degreeTitle: education.degreeTitle || "",
+    //         yearOfCompletion: education.yearOfCompletion || "",
+    //         country: education.country || "",
+    //         state: education.state || "",
+    //         city: education.city || "",
+    //     });
+    //     setOpenModal("education");
+    // };
+
+    // 🔹 NEW: When editing education, check if degree type is custom
+    // const handleEditEducation = (education) => {
+    //     setEditingEducation(education);
+
+    //     // Check if degree type exists in predefined list
+    //     const degreeTypeId = education.degreeType?._id || education.degreeType;
+    //     const isCustomDegreeType = !degreeTypes.some(type => type._id === degreeTypeId);
+
+    //     if (isCustomDegreeType && education.degreeType) {
+    //         // If it's a custom degree type
+    //         setShowCustomDegreeType(true);
+    //         setEducationFormData({
+    //             degreeLevel: education.degreeLevel?._id || education.degreeLevel || "",
+    //             degreeType: "other",
+    //             customDegreeType: education.degreeType?.name || education.degreeType || "",
+    //             degreeTitle: education.degreeTitle || "",
+    //             yearOfCompletion: education.yearOfCompletion || "",
+    //             country: education.country || "",
+    //             state: education.state || "",
+    //             city: education.city || "",
+    //         });
+    //     } else {
+    //         // If it's a predefined degree type
+    //         setShowCustomDegreeType(false);
+    //         setEducationFormData({
+    //             degreeLevel: education.degreeLevel?._id || education.degreeLevel || "",
+    //             degreeType: education.degreeType?._id || education.degreeType || "",
+    //             customDegreeType: "",
+    //             degreeTitle: education.degreeTitle || "",
+    //             yearOfCompletion: education.yearOfCompletion || "",
+    //             country: education.country || "",
+    //             state: education.state || "",
+    //             city: education.city || "",
+    //         });
+    //     }
+    //     setOpenModal("education");
+    // };
+    // 🔹 UPDATED: Handle Edit Education with proper custom degree type handling
+const handleEditEducation = (education) => {
+    setEditingEducation(education);
+    
+    console.log("Editing Education:", education); // Debug log
+    
+    // Check if this education has a custom degree type
+    const hasCustomDegreeType = education.customDegreeType && education.customDegreeType !== "";
+    const degreeTypeId = education.degreeType?._id || education.degreeType;
+    
+    // Check if it's a custom degree type (not in predefined list)
+    const isCustomInDatabase = !degreeTypes.some(type => type._id === degreeTypeId) && 
+                               education.degreeType && 
+                               education.degreeType !== "other";
+
+    if (hasCustomDegreeType || isCustomInDatabase) {
+        // If it's a custom degree type
+        setShowCustomDegreeType(true);
         setEducationFormData({
             degreeLevel: education.degreeLevel?._id || education.degreeLevel || "",
-            degreeType: education.degreeType?._id || education.degreeType || "",
+            degreeType: "other",
+            customDegreeType: education.customDegreeType || 
+                             education.degreeType?.name || 
+                             education.degreeType || 
+                             "",
             degreeTitle: education.degreeTitle || "",
             yearOfCompletion: education.yearOfCompletion || "",
             country: education.country || "",
             state: education.state || "",
             city: education.city || "",
         });
-        setOpenModal("education");
-    };
+    } else {
+        // If it's a predefined degree type
+        setShowCustomDegreeType(false);
+        setEducationFormData({
+            degreeLevel: education.degreeLevel?._id || education.degreeLevel || "",
+            degreeType: education.degreeType?._id || education.degreeType || "",
+            customDegreeType: "",
+            degreeTitle: education.degreeTitle || "",
+            yearOfCompletion: education.yearOfCompletion || "",
+            country: education.country || "",
+            state: education.state || "",
+            city: education.city || "",
+        });
+    }
+    setOpenModal("education");
+};
+
+    // 🔹 NEW: Get degree type display name for rendering
+    // const getDegreeTypeDisplayName = (education) => {
+    //     if (education.customDegreeType) {
+    //         return education.customDegreeType;
+    //     }
+    //     if (education.degreeType?.name) {
+    //         return education.degreeType.name;
+    //     }
+    //     if (typeof education.degreeType === 'string' && education.degreeType !== 'other') {
+    //         return education.degreeType;
+    //     }
+    //     return "Other";
+    // };
+
+    // 🔹 UPDATED: Get degree type display name with better fallbacks
+const getDegreeTypeDisplayName = (education) => {
+    // First check for custom degree type
+    if (education.customDegreeType && education.customDegreeType !== "") {
+        return education.customDegreeType;
+    }
+    
+    // Then check for degree type object with name
+    if (education.degreeType?.name) {
+        return education.degreeType.name;
+    }
+    
+    // Then check if degreeType is a string (could be "other" or custom value)
+    if (typeof education.degreeType === 'string' && education.degreeType !== 'other') {
+        return education.degreeType;
+    }
+    
+    // If it's "other" but no custom value, or no degree type at all
+    return "Not specified";
+};
 
     const handleExperienceSubmit = async (e) => {
         e.preventDefault();
@@ -561,44 +687,158 @@ export default function BuildResume() {
         }
     };
 
-    const handleEducationSubmit = async (e) => {
-        e.preventDefault();
-        try {
-            const submitData = {
-                degreeLevel: educationFormData.degreeLevel,
-                degreeType: educationFormData.degreeType,
-                degreeTitle: educationFormData.degreeTitle,
-                country: educationFormData.country,
-                state: educationFormData.state,
-                city: educationFormData.city,
-                yearOfCompletion: educationFormData.yearOfCompletion,
-            };
 
-            let res;
-            if (editingEducation) {
-                res = await axios.put(`/build-Resume/educations/${editingEducation._id}`, submitData);
-                setEditingEducation(null);
-            } else {
-                res = await axios.post("/build-Resume/educations", submitData);
-            }
+    // 🔹 NEW: Handle degree type change with "Other" option
+    const handleDegreeTypeChange = (e) => {
+        const { value } = e.target;
 
+        if (value === "other") {
+            // If "Other" is selected, show custom input
+            setShowCustomDegreeType(true);
+            setEducationFormData(prev => ({
+                ...prev,
+                degreeType: "other",
+                customDegreeType: ""
+            }));
+        } else {
+            // If regular degree type is selected
+            setShowCustomDegreeType(false);
+            setEducationFormData(prev => ({
+                ...prev,
+                degreeType: value,
+                customDegreeType: ""
+            }));
+        }
+    };
+
+    // 🔹 NEW: Handle custom degree type input change
+    const handleCustomDegreeTypeChange = (e) => {
+        const { value } = e.target;
+        setCustomDegreeType(value);
+        setEducationFormData(prev => ({
+            ...prev,
+            customDegreeType: value
+        }));
+    };
+    // const handleEducationSubmit = async (e) => {
+    //     e.preventDefault();
+    //     try {
+
+    //         let degreeTypeToSubmit = educationFormData.degreeType;
+    //         let customDegreeTypeToSubmit = "";
+
+    //         // If "Other" is selected, use the custom degree type
+    //         if (educationFormData.degreeType === "other" && educationFormData.customDegreeType) {
+    //             customDegreeTypeToSubmit = educationFormData.customDegreeType;
+    //             // You can choose to create a new degree type in backend or store as custom
+    //             // For now, we'll send both fields and let backend handle
+    //         }
+
+    //         const submitData = {
+    //             degreeLevel: educationFormData.degreeLevel,
+    //             // degreeType: educationFormData.degreeType,
+    //             degreeType: educationFormData.degreeType === "other" ? "other" : educationFormData.degreeType,
+    //             customDegreeType: customDegreeTypeToSubmit, // 🔹 NEW: Send custom degree type
+
+    //             degreeTitle: educationFormData.degreeTitle,
+    //             country: educationFormData.country,
+    //             state: educationFormData.state,
+    //             city: educationFormData.city,
+    //             yearOfCompletion: educationFormData.yearOfCompletion,
+    //         };
+
+    //         let res;
+    //         if (editingEducation) {
+    //             res = await axios.put(`/build-Resume/educations/${editingEducation._id}`, submitData);
+    //             setEditingEducation(null);
+    //         } else {
+    //             res = await axios.post("/build-Resume/educations", submitData);
+    //         }
+
+    //         setOpenModal(null);
+    //         setEducationFormData({
+    //             degreeLevel: "",
+    //             degreeType: "",
+    //             degreeTitle: "",
+    //             yearOfCompletion: "",
+    //             country: "",
+    //             state: "",
+    //             city: "",
+    //             customDegreeType: "" // 🔹 NEW: Reset custom degree type
+    //         });
+    //          setShowCustomDegreeType(false);
+    //         setCustomDegreeType("");
+
+    //         await fetchUserData();
+    //     } catch (err) {
+    //         console.error("❌ Error saving education:", err.response?.data || err.message);
+    //     }
+    // };
+
+    // 🔹 NEW: Delete experience
+    
+    // 🔹 UPDATED: Handle Education Submit with better data handling
+const handleEducationSubmit = async (e) => {
+    e.preventDefault();
+    try {
+        let submitData = {
+            degreeLevel: educationFormData.degreeLevel,
+            degreeTitle: educationFormData.degreeTitle,
+            country: educationFormData.country,
+            state: educationFormData.state,
+            city: educationFormData.city,
+            yearOfCompletion: educationFormData.yearOfCompletion,
+        };
+
+        // Handle degree type based on selection
+        if (educationFormData.degreeType === "other" && educationFormData.customDegreeType) {
+            // If "Other" is selected with custom value
+            submitData.degreeType = "other";
+            submitData.customDegreeType = educationFormData.customDegreeType;
+        } else if (educationFormData.degreeType === "other" && !educationFormData.customDegreeType) {
+            // If "Other" is selected but no custom value
+            alert("Please specify your degree type");
+            return;
+        } else {
+            // If predefined degree type is selected
+            submitData.degreeType = educationFormData.degreeType;
+            submitData.customDegreeType = ""; // Clear custom degree type
+        }
+
+        console.log("Submitting Education Data:", submitData); // Debug log
+
+        let res;
+        if (editingEducation) {
+            res = await axios.put(`/build-Resume/educations/${editingEducation._id}`, submitData);
+            setEditingEducation(null);
+        } else {
+            res = await axios.post("/build-Resume/educations", submitData);
+        }
+
+        if (res.data.success) {
             setOpenModal(null);
             setEducationFormData({
                 degreeLevel: "",
                 degreeType: "",
+                customDegreeType: "",
                 degreeTitle: "",
                 yearOfCompletion: "",
                 country: "",
                 state: "",
                 city: "",
             });
+            setShowCustomDegreeType(false);
+            setCustomDegreeType("");
             await fetchUserData();
-        } catch (err) {
-            console.error("❌ Error saving education:", err.response?.data || err.message);
+        } else {
+            alert(`Failed to save education: ${res.data.message}`);
         }
-    };
-
-    // 🔹 NEW: Delete experience
+    } catch (err) {
+        console.error("❌ Error saving education:", err.response?.data || err.message);
+        alert("Error saving education. Please try again.");
+    }
+};
+    
     const handleDeleteExperience = async (id) => {
         if (window.confirm("Are you sure you want to delete this experience?")) {
             try {
@@ -652,6 +892,8 @@ export default function BuildResume() {
         setEditingEducation(null);
         setEditingSkill(null);
         setEditingLanguage(null);
+        setShowCustomDegreeType(false);
+        setCustomDegreeType("");
 
         // Reset forms
         setExperienceFormData({
@@ -669,6 +911,7 @@ export default function BuildResume() {
         setEducationFormData({
             degreeLevel: "",
             degreeType: "",
+            customDegreeType: "",
             degreeTitle: "",
             yearOfCompletion: "",
             country: "",
@@ -700,6 +943,8 @@ export default function BuildResume() {
             .get("/degree-Type-Category/active")
             .then((res) => {
                 setDegreeTypes(res.data.data || res.data || []);
+                console.log(res.data);
+
             })
             .catch((err) => console.error("❌ Error fetching degree types:", err));
 
@@ -786,11 +1031,10 @@ export default function BuildResume() {
 
             {/* Status Badge */}
             <div className="absolute top-2 right-80">
-                <span className={`px-2 py-1 rounded-full text-xs font-medium  ${
-                    experience.isActive 
-                    ? 'bg-green-100 text-green-800' 
+                <span className={`px-2 py-1 rounded-full text-xs font-medium  ${experience.isActive
+                    ? 'bg-green-100 text-green-800'
                     : 'bg-red-100 text-red-800'
-                }`}>
+                    }`}>
                     {experience.isActive ? 'Active' : 'Inactive'}
                 </span>
             </div>
@@ -831,11 +1075,10 @@ export default function BuildResume() {
                 {/* Toggle Status Button */}
                 <button
                     onClick={() => toggleExperienceStatus(experience._id)}
-                    className={`p-1 rounded ${
-                        experience.isActive 
-                        ? 'text-green-600 hover:text-green-800' 
+                    className={`p-1 rounded ${experience.isActive
+                        ? 'text-green-600 hover:text-green-800'
                         : 'text-red-600 hover:text-red-800'
-                    }`}
+                        }`}
                     title={experience.isActive ? 'Deactivate' : 'Activate'}
                 >
                     {experience.isActive ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
@@ -862,11 +1105,10 @@ export default function BuildResume() {
 
             {/* Status Badge */}
             <div className="absolute top-2 right-80">
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    education.isActive 
-                    ? 'bg-green-100 text-green-800' 
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${education.isActive
+                    ? 'bg-green-100 text-green-800'
                     : 'bg-red-100 text-red-800'
-                }`}>
+                    }`}>
                     {education.isActive ? 'Active' : 'Inactive'}
                 </span>
             </div>
@@ -883,7 +1125,7 @@ export default function BuildResume() {
 
             <div className="flex items-center text-md text-gray-600 mt-1 gap-2">
                 <FaGraduationCap />
-                <span>{education.degreeType?.name}</span>
+                <span>{getDegreeTypeDisplayName(education)}</span>
             </div>
 
             <div className="flex items-center text-md text-gray-600 mt-1 gap-2">
@@ -902,11 +1144,10 @@ export default function BuildResume() {
                 {/* Toggle Status Button */}
                 <button
                     onClick={() => toggleEducationStatus(education._id)}
-                    className={`p-1 rounded ${
-                        education.isActive 
-                        ? 'text-green-600 hover:text-green-800' 
+                    className={`p-1 rounded ${education.isActive
+                        ? 'text-green-600 hover:text-green-800'
                         : 'text-red-600 hover:text-red-800'
-                    }`}
+                        }`}
                     title={education.isActive ? 'Deactivate' : 'Activate'}
                 >
                     {education.isActive ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
@@ -930,9 +1171,8 @@ export default function BuildResume() {
     const renderSkillItem = (skill, index) => (
         <div
             key={skill._id}
-            className={`flex justify-between items-center px-4 py-4 ${
-                index % 2 === 0 ? "bg-gray-50" : "bg-white"
-            } hover:bg-gray-100 transition-colors duration-200 ${!skill.isActive ? 'opacity-60' : ''}`}
+            className={`flex justify-between items-center px-4 py-4 ${index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                } hover:bg-gray-100 transition-colors duration-200 ${!skill.isActive ? 'opacity-60' : ''}`}
         >
             <div className="flex-1">
                 <h3 className="font-semibold text-gray-800 text-lg">
@@ -943,11 +1183,10 @@ export default function BuildResume() {
                 <span className="text-gray-600 bg-blue-50 px-3 py-1 rounded-full text-sm">
                     {skill.experience}
                 </span>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    skill.isActive 
-                    ? 'bg-green-100 text-green-800' 
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${skill.isActive
+                    ? 'bg-green-100 text-green-800'
                     : 'bg-red-100 text-red-800'
-                }`}>
+                    }`}>
                     {skill.isActive ? 'Active' : 'Inactive'}
                 </span>
             </div>
@@ -955,11 +1194,10 @@ export default function BuildResume() {
                 {/* Toggle Status Button */}
                 <button
                     onClick={() => toggleSkillStatus(skill._id)}
-                    className={`p-1 rounded ${
-                        skill.isActive 
-                        ? 'text-green-600 hover:text-green-800' 
+                    className={`p-1 rounded ${skill.isActive
+                        ? 'text-green-600 hover:text-green-800'
                         : 'text-red-600 hover:text-red-800'
-                    }`}
+                        }`}
                     title={skill.isActive ? 'Deactivate' : 'Activate'}
                 >
                     {skill.isActive ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
@@ -983,9 +1221,8 @@ export default function BuildResume() {
     const renderLanguageItem = (language, index) => (
         <div
             key={language._id}
-            className={`flex justify-between items-center px-4 py-4 ${
-                index % 2 === 0 ? "bg-gray-50" : "bg-white"
-            } hover:bg-gray-100 transition-colors duration-200 ${!language.isActive ? 'opacity-60' : ''}`}
+            className={`flex justify-between items-center px-4 py-4 ${index % 2 === 0 ? "bg-gray-50" : "bg-white"
+                } hover:bg-gray-100 transition-colors duration-200 ${!language.isActive ? 'opacity-60' : ''}`}
         >
             <div className="flex items-center gap-3 flex-1">
                 <FaLanguage className="text-blue-500" />
@@ -996,22 +1233,20 @@ export default function BuildResume() {
                 </div>
             </div>
             <div className="flex-1 flex items-center gap-2">
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    language.proficiency === 'Native' 
-                        ? 'bg-green-100 text-green-800'
-                        : language.proficiency === 'Expert'
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${language.proficiency === 'Native'
+                    ? 'bg-green-100 text-green-800'
+                    : language.proficiency === 'Expert'
                         ? 'bg-blue-100 text-blue-800'
                         : language.proficiency === 'Intermediate'
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : 'bg-gray-100 text-gray-800'
-                }`}>
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-gray-100 text-gray-800'
+                    }`}>
                     {language.proficiency}
                 </span>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    language.isActive 
-                    ? 'bg-green-100 text-green-800' 
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${language.isActive
+                    ? 'bg-green-100 text-green-800'
                     : 'bg-red-100 text-red-800'
-                }`}>
+                    }`}>
                     {language.isActive ? 'Active' : 'Inactive'}
                 </span>
             </div>
@@ -1019,22 +1254,21 @@ export default function BuildResume() {
                 {/* Toggle Status Button */}
                 <button
                     onClick={() => toggleLanguageStatus(language._id)}
-                    className={`p-1 rounded ${
-                        language.isActive 
-                        ? 'text-green-600 hover:text-green-800' 
+                    className={`p-1 rounded ${language.isActive
+                        ? 'text-green-600 hover:text-green-800'
                         : 'text-red-600 hover:text-red-800'
-                    }`}
+                        }`}
                     title={language.isActive ? 'Deactivate' : 'Activate'}
                 >
                     {language.isActive ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
                 </button>
 
-                <FaEdit 
+                <FaEdit
                     className="cursor-pointer text-gray-600 hover:text-blue-600 transition-colors duration-200"
                     size={16}
                     onClick={() => handleEditLanguage(language)}
                 />
-                <FaTimes 
+                <FaTimes
                     className="cursor-pointer text-gray-600 hover:text-red-600 transition-colors duration-200"
                     size={16}
                     onClick={() => handleDeleteLanguage(language._id)}
@@ -1254,7 +1488,7 @@ export default function BuildResume() {
                                     id="degreeType"
                                     name="degreeType"
                                     value={educationFormData.degreeType}
-                                    onChange={handleEducationChange}
+                                    onChange={handleDegreeTypeChange} // 🔹 UPDATED: Use new handler
                                     className="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     required
                                 >
@@ -1264,8 +1498,31 @@ export default function BuildResume() {
                                             {type.name}
                                         </option>
                                     ))}
+                                    <option value="other">Other</option> {/* 🔹 NEW: Other option */}
                                 </select>
                             </div>
+
+                            {/* 🔹 NEW: Custom Degree Type Input - Show only when "Other" is selected */}
+                            {showCustomDegreeType && (
+                                <div>
+                                    <label htmlFor="customDegreeType" className="block text-gray-700 font-medium mb-1">
+                                        Specify Degree Type *
+                                    </label>
+                                    <input
+                                        id="customDegreeType"
+                                        name="customDegreeType"
+                                        type="text"
+                                        value={educationFormData.customDegreeType || ""}
+                                        onChange={handleCustomDegreeTypeChange}
+                                        placeholder="Enter your degree type (e.g., Diploma in Computer Science)"
+                                        className="w-full border border-gray-300 rounded p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        required={showCustomDegreeType}
+                                    />
+                                    <p className="text-sm text-gray-500 mt-1">
+                                        Please specify your degree type if it's not in the list above
+                                    </p>
+                                </div>
+                            )}
 
                             {/* Degree Title */}
                             <div>

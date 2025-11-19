@@ -21,6 +21,7 @@ const upload = multer({ storage });
 
 const SpeakerRouter = express.Router();
 
+SpeakerRouter.get('/slug/:slug',getSpeakerBySlug);
 
 SpeakerRouter.post('/', upload.single("profilePic"), CreateSpeaker);
 

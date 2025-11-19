@@ -6,7 +6,7 @@ export const createDegreeTypeCategory = async (req, res) => {
         const { name, status } = req.body;
 
         // Check if category already exists
-        const existingCategory = await DegreeTypeCategoryModel.findOne({ name: name.trim()});
+        const existingCategory = await DegreeTypeCategoryModel.findOne({ name: name.trim() });
         if (existingCategory) {
             return res.status(400).json({ message: "Category with this name already exists" });
         }

@@ -19,7 +19,7 @@ import { PlacementProgramSection } from '../../components/layout/section/AppDown
 import axios from '../../utils/axios.js'
 export default function Placementpage() {
 
-const [data, setData] = useState()
+    const [data, setData] = useState()
     const fetchCompanydata = async () => {
         try {
             const response = await axios.get('/general-settings'); // backend endpoint
@@ -42,32 +42,36 @@ const [data, setData] = useState()
 
 
 
-            <section className=" bg-[linear-gradient(to_right,_#090A47,_#20AEB2)] to-black w-full h-[600px] relative overflow-hidden font-[Poppins] flex items-end">
+            <section className="bg-[linear-gradient(to_right,_#090A47,_#20AEB2)] w-full min-h-[350px] relative overflow-hidden font-[Poppins] flex flex-col-reverse md:flex-row items-center md:items-end">
+                <div className="relative z-10 flex flex-col md:flex-row w-full mx-auto px-4 md:px-8  md:py-0">
 
-                <div className="relative z-10 flex w-full mx-auto ">
-                    <div className="w-[60%] text-white flex justify-center ">
-                        <div className="space-y-6 w-[80%]">
-                            <h1 className="text-4xl sm:text-5xl md:text-[50px] font-bold leading-tight">
-                               {data?.name} <br /> FREE Placement Program
+                    {/* LEFT — TEXT */}
+                    <div className="w-full md:w-[60%] mt-2 sm:mt-0 lg:mt-0 text-white flex justify-center items-center text-center md:text-left">
+                        <div className="space-y-4 md:space-y-6 w-full md:w-[80%]">
+                            <h1 className="text-3xl sm:text-4xl md:text-[50px] font-bold leading-tight md:leading-[1.2]">
+                                {data?.name} <br /> FREE Placement Program
                             </h1>
-                            <h2 className="text-2xl font-semibold">Free Placement Assistance</h2>
-                            <p className="text-lg font-medium">
+
+                            <h2 className="text-xl sm:text-2xl font-semibold">
+                                Free Placement Assistance
+                            </h2>
+                            <p className="text-base sm:text-lg font-medium">
                                 Get Your Dream Finance Job/Articleship In Big 4s & Top Firms
                             </p>
                         </div>
-
                     </div>
 
-
-                    <div className="w-[40%]">
+                    {/* RIGHT — IMAGE */}
+                    <div className="w-full md:w-[36%] flex justify-center md:justify-end  md:mb-0">
                         <img
                             src={HeaderPalecment}
-                            alt="Girl Image"
-                            className="w-full h-auto rounded-lg "
+                            alt="Placement Program"
+                            className="w-[80%] sm:w-[60%] md:w-full h-auto rounded-lg object-contain"
                         />
                     </div>
                 </div>
             </section>
+
 
 
 

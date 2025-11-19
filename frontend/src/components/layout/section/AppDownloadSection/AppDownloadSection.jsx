@@ -97,7 +97,7 @@ export default function AppDownloadSection() {
 export function PlacementProgramSection() {
   return (
     <div className='container mx-auto'>
-      <div className=" py-28 px-4 sm:px-6 md:px-10 font-[Poppins] overflow-hidden">
+      <div className=" py-16 px-4 sm:px-6 md:px-10 font-[Poppins] overflow-hidden">
 
         {/* Ripple Circles */}
         <div className="ripple-background absolute inset-0 z-0">

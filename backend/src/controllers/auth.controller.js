@@ -4,6 +4,10 @@ import nodemailer from 'nodemailer';
 import bcrypt from "bcrypt";
 import generateToken from "../utils/generateToken.js";
 import roleModel from "../models/role.model.js";
+import dotenv, { config } from 'dotenv';
+import axios from "axios";
+
+dotenv.config();
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -13,10 +17,12 @@ const transporter = nodemailer.createTransport({
 });
 
 
+
 class AuthController {
+
   static async register(req, res) {
     try {
-      const { firstName, lastName, email, password, confirmPassword, role, roleID } = req.body;
+      const { firstName, lastName, email, password, phone, confirmPassword, role, roleID } = req.body;
 
       // Check if passwords match
       if (password !== confirmPassword) {
@@ -38,6 +44,7 @@ class AuthController {
         firstName,
         lastName,
         email,
+        phone,
         password: hashedPassword,
         role,
         roleID,
@@ -60,7 +67,7 @@ class AuthController {
 
 
     try {
-      const { firstName, lastName, email, phone, roleID ,type} = req.body;
+      const { firstName, lastName, email, phone, roleID, type } = req.body;
       const userExist = await UserModel.findOne({ email });
       if (userExist) {
         return res.status(400).json({ message: "User already exists" });
@@ -72,7 +79,7 @@ class AuthController {
         phone,
         roleID,
         Approved: "pending", // pending until admin approval
-        type:"mentor"
+        type: "mentor"
       });
       res.status(201).json({
         success: true,
@@ -221,6 +228,7 @@ class AuthController {
             firstName: "Google",
             lastName: "User",
             email,
+            phone,
             password: "",
             status: "active",
             roleID: defaultRole?._id || null,
@@ -345,7 +353,7 @@ class AuthController {
         { expiresIn: "15m" }
       );
 
-       const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+      const resetLink = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
       const mailOptions = {
         from: `"EJob Ocean" <${process.env.SMTP_EMAIL}>`,
@@ -402,6 +410,253 @@ class AuthController {
       res.status(400).json({ message: "Invalid or expired token" });
     }
   }
+
+
+  // static async slugMentor(req,res) {
+
+  //   try {
+  //     const mentor = await UserModel.findOne({ slug: req.params.slug, type: "mentor" });
+  //     if (!mentor) return res.status(404).json({ message: "Mentor not found" });
+  //     res.json(mentor);
+  //   } catch (err) {
+  //     res.status(500).json({ message: err.message });
+  //   }
+
+  // }
+
+  static async slugMentor(req, res) {
+    try {
+      const { slug } = req.params; // extract slug properly
+
+      console.log("Fetching mentor with slug:", slug);
+
+      const mentor = await UserModel.findOne({ slug, type: "mentor" });
+
+      if (!mentor) {
+        console.log("Mentor not found");
+        return res.status(404).json({ message: "Mentor not found" });
+      }
+
+      console.log("Mentor found:", mentor.firstName, mentor.lastName);
+      res.json(mentor);
+    } catch (err) {
+      console.error("Slug mentor error:", err);
+      res.status(500).json({ message: err.message });
+    }
+  }
+
+
+
+
+  // 📩 Send OTP to Email
+  static async sendOtpEmail(req, res) {
+    try {
+      const { email } = req.body;
+      if (!email) return res.status(400).json({ message: "Email is required" });
+
+      const user = await UserModel.findOne({ email }).populate("roleID");
+      if (!user) return res.status(404).json({ message: "User not found" });
+
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+      user.otp = otp;
+      user.otpExpires = Date.now() + 5 * 60 * 1000; // 5 minutes
+      await user.save();
+
+      const mailOptions = {
+        from: `"EJob Ocean" <${process.env.SMTP_EMAIL}>`,
+        to: email,
+        subject: "🔐 Your Login OTP",
+        text: `Your OTP is ${otp}. It will expire in 5 minutes.`,
+      };
+      await transporter.sendMail(mailOptions);
+
+      res.json({ success: true, message: "OTP sent to your email" });
+    } catch (err) {
+      console.error("Send Email OTP error:", err);
+      res.status(500).json({ message: "Server error" });
+    }
+  }
+
+  // 📲 Send OTP to phone (via Twilio)
+  // static async sendOtp(req, res) {
+  //   try {
+  //     const { phone } = req.body;
+  //     if (!phone) return res.status(400).json({ message: "phone number required" });
+
+  //     const user = await UserModel.findOne({ phone: phone }).populate("roleID");
+  //     if (!user) return res.status(404).json({ message: "User not found" });
+
+  //     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+  //     user.otp = otp;
+  //     user.otpExpires = Date.now() + 5 * 60 * 1000;
+  //     await user.save();
+
+  //     await client.messages.create({
+  //       from: process.env.TWILIO_PHONE_NUMBER,
+  //       to: `+91${phone}`, // adjust country code
+  //       body: `Your EJob Ocean OTP is ${otp}. It expires in 5 minutes.`,
+  //     });
+
+  //     res.json({ success: true, message: "OTP sent to your phone" });
+  //   } catch (err) {
+  //     console.error("Send phone OTP error:", err);
+  //     res.status(500).json({ message: "Server error" });
+  //   }
+  // }
+
+//  static async sendOtp(req, res) {
+//   try {
+//     const { phone } = req.body;
+//     if (!phone) return res.status(400).json({ message: "Phone number is required" });
+
+//     const user = await UserModel.findOne({ phone }).populate("roleID");
+//     if (!user) return res.status(404).json({ message: "User not found" });
+
+//     // Generate OTP
+//     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+//     // Save OTP in DB
+//     user.otp = otp;
+//     user.otpExpires = Date.now() + 5 * 60 * 1000; // 5 mins expiry
+//     await user.save();
+
+//     // ✅ SMS Text (required parameter)
+//     const message = `Dear Admin, your OTP is ${otp}. Do not share it. - Star Agro`;
+
+//     // Prepare POST data (including message)
+//     const postData = {
+//       authkey: "453039Aehzt6VtnMYS682d82c5P1",
+//       mobiles: phone,
+//       sender: "NSKFST",
+//       route: "4",
+//       country: "91",
+//       DLT_TE_ID: "1207162399931698582",
+//       message, // ✅ this was missing
+//     };
+
+//     // Send SMS
+//     const { data } = await axios.post(
+//       "http://control.bestsms.co.in/api/sendhttp.php",
+//       null,
+//       { params: postData }
+//     );
+
+//     console.log("📨 SMS API Response:", data);
+
+//     if (data.toLowerCase().includes("error")) {
+//       return res.status(400).json({ success: false, message: "SMS sending failed", response: data });
+//     }
+
+//     res.json({ success: true, message: "OTP sent successfully" });
+//   } catch (err) {
+//     console.error("Send SMS OTP error:", err.message);
+//     res.status(500).json({ message: "Failed to send OTP", error: err.message });
+//   }
+// }
+
+
+// 📲 Dummy OTP (No SMS)
+static async sendOtp(req, res) {
+  try {
+    const { phone } = req.body;
+    if (!phone)
+      return res.status(400).json({ message: "Phone number is required" });
+
+    const user = await UserModel.findOne({ phone }).populate("roleID");
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Save OTP in DB
+    
+    user.otp = otp;
+    user.otpExpires = Date.now() + 5 * 60 * 1000; // 5 minutes
+    await user.save();
+
+    console.log("📌 Dummy OTP:", otp);
+
+    return res.json({
+      success: true,
+      message: "Dummy OTP generated (no SMS sent)",
+      otp, // 👉 remove this in production
+    });
+  } catch (err) {
+    console.error("Dummy OTP error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+
+
+  // ✅ Verify OTP (works for email or phone)
+  // static async verifyOtp(req, res) {
+  //   try {
+  //     const { email, phone, otp } = req.body;
+  //     const query = email ? { email } : { phone: phone };
+  //     const user = await UserModel.findOne(query).populate("roleID");
+
+  //     if (!user) return res.status(404).json({ message: "User not found" });
+  //     if (!user.otp || user.otp !== otp)
+  //       return res.status(400).json({ message: "Invalid OTP" });
+  //     if (Date.now() > user.otpExpires)
+  //       return res.status(400).json({ message: "OTP expired" });
+
+  //     // clear OTP after use
+  //     user.otp = null;
+  //     user.otpExpires = null;
+  //     await user.save();
+
+  //     const token = generateToken(user._id);
+  //     res.json({ success: true, token, user });
+  //   } catch (err) {
+  //     console.error("Verify OTP error:", err);
+  //     res.status(500).json({ message: "Server error" });
+  //   }
+  // }
+
+
+
+  // ✅ Verify OTP for email or phone login
+static async verifyOtp(req, res) {
+  try {
+    const { email, phone, otp } = req.body;
+
+    let user;
+
+    if (email) user = await UserModel.findOne({ email }).populate("roleID");
+    if (phone) user = await UserModel.findOne({ phone }).populate("roleID");
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (user.otp !== otp)
+      return res.status(400).json({ message: "Invalid OTP" });
+
+    if (user.otpExpires < Date.now())
+      return res.status(400).json({ message: "OTP expired" });
+
+    // Login success
+    const token = generateToken(user._id);
+
+    // clear otp after success
+    user.otp = null;
+    user.otpExpires = null;
+    await user.save();
+
+    return res.json({
+      success: true,
+      message: "OTP verified successfully",
+      token,
+      user,
+    });
+  } catch (err) {
+    console.error("OTP Verify Error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
 
 
 }

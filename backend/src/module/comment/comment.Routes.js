@@ -13,6 +13,6 @@ CommentRuter.post('/post',protect,PostComment);
 
 CommentRuter.get('/:id', GetCommentsByBlog);
 
-CommentRuter.post('/like', LikeComment);    
+CommentRuter.post('/like',protect, LikeComment);    
 
 export default CommentRuter;

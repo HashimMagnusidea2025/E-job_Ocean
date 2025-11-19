@@ -315,7 +315,7 @@ const WebinarPage = () => {
 
 
                 {/* Webinar Slug */}
-                <label className="block">
+                {/* <label className="block">
                   <span className="text-gray-700 flex items-center gap-1">
                     Webinar Slug <span className="text-red-500">*</span>
                   </span>
@@ -327,7 +327,29 @@ const WebinarPage = () => {
                     className="w-full border p-2 rounded mt-1"
                     onChange={handleChange}
                   />
+                </label> */}
+
+                <label className="block">
+                  <span className="text-gray-700 flex items-center gap-1">
+                    Webinar Slug <span className="text-red-500">*</span>
+                  </span>
+                  <input
+                    type="text"
+                    name="WebinarSlug"
+                    value={formData.WebinarSlug}
+                    placeholder="Enter webinar slug"
+                    className="w-full border p-2 rounded mt-1"
+                    onChange={(e) => {
+                      const value = e.target.value
+                        .toLowerCase()         // convert to lowercase
+                        .replace(/\s+/g, "-")  // replace spaces with hyphen
+                        .replace(/[^a-z0-9\-]/g, ""); // remove special characters (optional)
+
+                      setFormData({ ...formData, WebinarSlug: value });
+                    }}
+                  />
                 </label>
+
 
                 {/* Introduction */}
                 <label className="block md:col-span-2">

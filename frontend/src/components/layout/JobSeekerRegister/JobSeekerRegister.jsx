@@ -69,7 +69,8 @@ const JobSeekerRegister = () => {
         ...formData,
         roleID, //  include seeker roleID
       };
-      const res = axios.post("/auth/register", payload);
+      const res = await axios.post("/auth/register", payload);
+      console.log("🚀 Register payload sending:", payload);
 
       console.log("Register response:", res.data);
       alert("Registration successful!");
@@ -96,6 +97,7 @@ const JobSeekerRegister = () => {
             <input
               type="text"
               name="firstName"
+              value={formData.firstName}
               placeholder="First Name"
               className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               onChange={handleChange}
@@ -104,6 +106,7 @@ const JobSeekerRegister = () => {
             <input
               type="text"
               name="lastName"
+              value={formData.lastName}
               placeholder="Last Name"
               className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               onChange={handleChange}
@@ -114,6 +117,7 @@ const JobSeekerRegister = () => {
           <input
             type="email"
             name="email"
+            value={formData.email}
             placeholder="Email"
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             onChange={handleChange}
@@ -123,6 +127,7 @@ const JobSeekerRegister = () => {
           <input
             type="text"
             name="phone"
+            value={formData.phone}
             placeholder="Phone Number"
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             onChange={handleChange}
@@ -132,6 +137,7 @@ const JobSeekerRegister = () => {
           <input
             type="password"
             name="password"
+            value={formData.password}
             placeholder="Password"
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             onChange={handleChange}
@@ -141,6 +147,7 @@ const JobSeekerRegister = () => {
           <input
             type="password"
             name="confirmPassword"
+            value={formData.confirmPassword}
             placeholder="Confirm Password"
             className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             onChange={handleChange}

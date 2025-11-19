@@ -69,7 +69,7 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
 
   // Employer Menu
   const EmployerItems = [
-    
+
     { path: "/", icon: <FaHome />, label: "Home" },
     { path: "/employer-dashboard", icon: <FaHome />, label: "Dashboard" },
     { path: "/employer-dashboard/edit/company-profile", icon: <FaPencilAlt />, label: "Edit Account Details" },
@@ -78,11 +78,12 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
     { path: "/employer-dashboard/posted-jobs", icon: <FaEye />, label: "Manage Jobs" },
     // { path: "/employer-dashboard/job-candidates/:jobId", icon: <CiBoxList  />, label: "Candidates-Register" },
 
-    { path: "/employer-dashboard/company-packages", icon: <FaDesktop />, label: "CV Search Packages" },
-    { path: "/employer-dashboard/list-payment-history", icon: <RiMoneyDollarCircleLine />, label: "Payment History" },
-    { path: "/employer-dashboard/unloced-seekers", icon: <FaBullhorn />, label: "Unlocked Users" },
+    // { path: "/employer-dashboard/company-packages", icon: <FaDesktop />, label: "CV Search Packages" },
+    // { path: "/employer-dashboard/list-payment-history", icon: <RiMoneyDollarCircleLine />, label: "Payment History" },
+    // { path: "/employer-dashboard/unloced-seekers", icon: <FaBullhorn />, label: "Unlocked Users" },
     // { path: "/employer-dashboard/company-messages", icon: <FaUser />, label: "Company Messages" },
     // { path: "/employer-dashboard/company-followers", icon: <FaUser />, label: "Company Followings" },
+    
     { icon: <FaSignOutAlt />, label: "Logout", onClick: handleLogout }
 
   ];
@@ -153,6 +154,9 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
     {
       icon: <FaUser />, label: " Registrations List",
       children: [
+
+       
+        
         {
           path: "/admin-dashboard/job-register-list", icon: <GoDotFill size={12} className="dot" />,
           label: "Job Registration list"
@@ -164,6 +168,10 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
         {
           path: "/admin-dashboard/one-to-one-registration-list", icon: <GoDotFill size={12} className="dot" />,
           label: "One To One Registration"
+        },
+        {
+          path: "/admin-dashboard/contact-list", icon: <GoDotFill size={12} className="dot" />,
+          label: "contact Us list"
         },
 
       ]
@@ -295,7 +303,7 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
 
 
 
-        
+
       ]
     },
 

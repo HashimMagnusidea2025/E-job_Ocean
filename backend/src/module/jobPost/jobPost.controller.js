@@ -37,6 +37,7 @@ export const getAllJobPosts = async (req, res) => {
   try {
     const jobs = await JobPostModel.find()
       .populate("skills", "name")  // populate skills with only the 'name' field
+       .populate("degreeLevel","name")
       .populate("careerLevel", "name")
       .populate("functionalArea", "name")
       .populate("jobType", "name")
@@ -55,6 +56,7 @@ export const getJobPost = async (req, res) => {
   try {
     const job = await JobPostModel.findById(req.params.id)
       .populate("skills", "name")
+      .populate("degreeLevel","name")
       .populate("careerLevel", "name")
       .populate("functionalArea", "name")
       .populate("jobType", "name")
@@ -125,6 +127,7 @@ export const getAllActiveJobPosts = async (req, res) => {
   try {
     const jobs = await JobPostModel.find({ isActive: true })
       .populate("skills", "name")
+       .populate("degreeLevel","name")
       .populate("careerLevel", "name")
       .populate("functionalArea", "name")
       .populate("jobType", "name")
@@ -149,6 +152,7 @@ export const getEmployerJobs = async (req, res) => {
       postedByType: "Employer"
     })
       .populate("skills", "name")
+       .populate("degreeLevel","name")
       .populate("careerLevel", "name")
       .populate("functionalArea", "name")
       .populate("jobType", "name")
@@ -199,6 +203,7 @@ export const toggleJobStatus = async (req, res) => {
       { new: true }
     )
     .populate("skills", "name")
+     .populate("degreeLevel","name")
     .populate("careerLevel", "name")
     .populate("functionalArea", "name")
     .populate("jobType", "name")

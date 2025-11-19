@@ -377,7 +377,7 @@ export default function PostAJobAdmin() {
                     jobShift: job.jobShift?._id || "",
                     positions: job.positions || "",
                     expiryDate: job.expiryDate?.split("T")[0] || "",
-                    degreeLevel: job.degreeLevel || "",
+                    degreeLevel: job.degreeLevel?._id || "",   
                     experience: job.experience || "",
                     externalJob: job.externalJob || "",
                     isFreelance: job.isFreelance || false,

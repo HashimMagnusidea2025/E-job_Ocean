@@ -32,7 +32,7 @@ export default function MYJobAlerts() {
   const skillsOptions = Array.isArray(buildSkills)
     ? buildSkills.map(skill => ({
       value: skill._id,
-      label: skill.skillName
+      label: skill.name   
     }))
     : [];
 
@@ -62,9 +62,10 @@ export default function MYJobAlerts() {
   useEffect(() => {
     const fetchBuildSkills = async () => {
       try {
-        const { data } = await axios.get('/build-Resume/skills');
+        const { data } = await axios.get('/skills-categories/active');
         // Ensure data is an array before setting state
         // console.log(data);
+        console.log(data);
 
         if (data && data.success && Array.isArray(data.data)) {
           setBuildSkills(data.data);
@@ -288,7 +289,7 @@ export default function MYJobAlerts() {
             <thead className="bg-gray-100 text-gray-700 text-left">
               <tr>
                 <th className="p-3 font-medium text-[18px]">Alert Title</th>
-                 <th className="p-3 font-medium text-[18px]">Mode</th>
+                <th className="p-3 font-medium text-[18px]">Mode</th>
                 <th className="p-3 font-medium text-[18px]">Skills</th>
                 <th className="p-3 font-medium text-[18px]">Created On</th>
                 <th className="p-3 font-medium text-[18px]">Action</th>

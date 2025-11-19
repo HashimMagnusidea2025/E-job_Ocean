@@ -91,10 +91,10 @@ export default function SpeakerDetailsPage() {
 
                     {/* Bio/Description */}
                     <p className="mt-2 text-gray-600 text-center">
-    {userType === "mentor" 
-        ? speaker.des || "No description available" 
-        : speaker.description || "No description available"}
-</p>
+                        {userType === "mentor"
+                            ? speaker.des || "No description available"
+                            : speaker.description || "No description available"}
+                    </p>
 
 
                     {/* Expertise and Details */}

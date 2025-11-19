@@ -85,6 +85,9 @@ export const getMyJobAlert = async (req, res) => {
     }
 }
 
+
+
+
 // Delete alert
 export const deleteJobAlert = async (req, res) => {
     try {

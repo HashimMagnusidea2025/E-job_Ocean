@@ -13,6 +13,7 @@ import { MdOutlineOndemandVideo } from "react-icons/md";
 import RegisterModal from "./RegisterModal.jsx";
 const WebinarDetailsPage = () => {
     const { id } = useParams();
+    const { slug } = useParams(); // ✅ Change from id to slug
     const [webinar, setWebinar] = useState(null);
     const [isRegisterOpen, setIsRegisterOpen] = useState(false);
 
@@ -23,7 +24,7 @@ const WebinarDetailsPage = () => {
     useEffect(() => {
         const fetchWebinar = async () => {
             try {
-                const { data } = await axios.get(`/webinars/${id}`);
+                const { data } = await axios.get(`/webinars/slug/${slug}`);
                 setWebinar(data);
                 console.log(data);
 
@@ -32,7 +33,7 @@ const WebinarDetailsPage = () => {
             }
         };
         fetchWebinar();
-    }, [id]);
+    }, [slug]);
 
     if (!webinar) {
         return <p className="text-center mt-10">Loading...</p>;

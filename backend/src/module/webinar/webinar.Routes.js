@@ -2,7 +2,7 @@ import express from 'express';
 import multer from "multer";
 import path from "path";
 import { protect } from '../../middleware/auth.Middleware.js';
-import { CreateWebinar, getWebinars, getWebinarById, updateWebinar, deleteWebinar,createGoogleEvent } from './webinar.controller.js';
+import { CreateWebinar, getWebinars,getWebinarBySlug, getWebinarById, updateWebinar, deleteWebinar,createGoogleEvent } from './webinar.controller.js';
 const WebinarRouter = express.Router();
 
 
@@ -26,6 +26,8 @@ WebinarRouter.post('/', upload.fields([
 ]), protect, CreateWebinar);
 
 
+
+
 WebinarRouter.get('/', getWebinars);
 
 WebinarRouter.get('/:id', getWebinarById);
@@ -37,7 +39,7 @@ WebinarRouter.put('/:id', upload.fields([
 
 WebinarRouter.delete('/:id', deleteWebinar);
 WebinarRouter.post("/:id/create-google-event", createGoogleEvent);
-
+WebinarRouter.get('/slug/:slug',getWebinarBySlug);
 export default WebinarRouter
 
 

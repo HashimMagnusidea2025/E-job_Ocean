@@ -1,97 +1,97 @@
-import { useState,useEffect  } from 'react';
+import { useState, useEffect } from 'react';
 
 import logo from '../../media/logo/ejob_ocean.png';
 import profile from '../../media/logo/ejob_ocean.png';
 import linkedInIcon from '../../media/logo/in.png';
-
+import { IoIosTimer } from "react-icons/io";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
-
+import { IoIosTime } from "react-icons/io";
 import { Navigation } from "swiper/modules";
 import { FaTimes } from "react-icons/fa";
-
+import { Link } from 'react-router-dom';
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import { AutoScroll } from "@splidejs/splide-extension-auto-scroll";
 import "@splidejs/react-splide/css";
 import axios from '../../utils/axios.js'
+import { useNavigate } from "react-router-dom";
 
-
-
+const baseURL = import.meta.env.VITE_BACKEND_URL; // Vite
 // 🔹 1. Partner Logo Marquee
 
 
 export const MarqueeTagCards = () => {
-  const [companies, setCompanies] = useState([]);
-  const baseURL = import.meta.env.VITE_BACKEND_URL;
+    const [companies, setCompanies] = useState([]);
+    const baseURL = import.meta.env.VITE_BACKEND_URL;
 
-  useEffect(() => {
-    const fetchCompanies = async () => {
-      try {
-        const { data } = await axios.get("/Company-Information"); // ✅ fetch all
-        setCompanies(data?.data || []);
-      } catch (error) {
-        console.error("Error fetching company info:", error);
-      }
-    };
-    fetchCompanies();
-  }, []);
+    useEffect(() => {
+        const fetchCompanies = async () => {
+            try {
+                const { data } = await axios.get("/Company-Information"); // ✅ fetch all
+                setCompanies(data?.data || []);
+            } catch (error) {
+                console.error("Error fetching company info:", error);
+            }
+        };
+        fetchCompanies();
+    }, []);
 
-  return (
-    <div className="bg-[#f9fafb]">
-      <div className="overflow-hidden w-full py-8 sm:py-10">
-        <Splide
-          options={{
-            type: "loop",
-            drag: false,
-            arrows: false,
-            pagination: false,
-            perPage: 8,
-            gap: "1rem",
-            autoScroll: {
-              speed: 1,
-              pauseOnHover: true,
-              pauseOnFocus: false,
-            },
-            breakpoints: {
-              640: { perPage: 4 },
-            },
-          }}
-          extensions={{ AutoScroll }}
-        >
-          {companies.length > 0 ? (
-            companies.map((company, index) => {
-              const logoPath = company.company?.hiringcompanies;
-              const website = company.company?.website;
+    return (
+        <div className="bg-[#f9fafb]">
+            <div className="overflow-hidden w-full py-8 sm:py-10">
+                <Splide
+                    options={{
+                        type: "loop",
+                        drag: false,
+                        arrows: false,
+                        pagination: false,
+                        perPage: 8,
+                        gap: "1rem",
+                        autoScroll: {
+                            speed: 1,
+                            pauseOnHover: true,
+                            pauseOnFocus: false,
+                        },
+                        breakpoints: {
+                            640: { perPage: 4 },
+                        },
+                    }}
+                    extensions={{ AutoScroll }}
+                >
+                    {companies.length > 0 ? (
+                        companies.map((company, index) => {
+                            const logoPath = company.company?.hiringcompanies;
+                            const website = company.company?.website;
 
-              if (!logoPath) return null; // skip companies without a logo
+                            if (!logoPath) return null; // skip companies without a logo
 
-              return (
-                <SplideSlide key={index}>
-                  <a
-                    href={website || "#"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block"
-                  >
-                    <img
-                      src={`${baseURL}${logoPath}`}
-                      alt={company.company?.name || "Company"}
-                      className="h-20 sm:h-24 w-24 bg-[#EDF1F9] p-4 sm:p-6 rounded-lg shadow hover:shadow-xl transition-all duration-300 hover:scale-105"
-                    />
-                  </a>
-                </SplideSlide>
-              );
-            })
-          ) : (
-            <div className="text-center text-gray-500 w-full py-6">
-              No company logos available
+                            return (
+                                <SplideSlide key={index}>
+                                    <a
+                                        href={website || "#"}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="block"
+                                    >
+                                        <img
+                                            src={`${baseURL}${logoPath}`}
+                                            alt={company.company?.name || "Company"}
+                                            className="h-20 sm:h-24 w-24 bg-[#EDF1F9] p-4 sm:p-6 rounded-lg shadow hover:shadow-xl transition-all duration-300 hover:scale-105"
+                                        />
+                                    </a>
+                                </SplideSlide>
+                            );
+                        })
+                    ) : (
+                        <div className="text-center text-gray-500 w-full py-6">
+                            No company logos available
+                        </div>
+                    )}
+                </Splide>
             </div>
-          )}
-        </Splide>
-      </div>
-    </div>
-  );
+        </div>
+    );
 };
 
 
@@ -233,32 +233,87 @@ const courses = [
 ];
 
 export const OurCourses = () => {
+    const [webinars, setWebinars] = useState([]);
+    const [activeTab, setActiveTab] = useState("all");
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchWebinars = async () => {
+            try {
+                const { data } = await axios.get("/webinars");
+                const validData = data.map((w) => ({
+                    ...w,
+                    WebinarStartDateTime: new Date(w.WebinarStartDateTime),
+                    WebinarEndDateTime: new Date(w.WebinarEndDateTime),
+                }));
+                setWebinars(validData);
+            } catch (err) {
+                console.error("Error fetching webinars:", err);
+            }
+        };
+        fetchWebinars();
+    }, []);
+
+    const now = new Date();
+
+    // ✅ Split webinars into categories
+    const upcomingWebinars = webinars.filter((w) => w.WebinarStartDateTime >= now);
+    const pastWebinars = webinars.filter((w) => w.WebinarEndDateTime < now);
+
+    // ✅ Define available tabs dynamically
+    const availableTabs = [
+        { key: "all", label: "All", visible: webinars.length > 0 },
+        { key: "upcoming", label: "Upcoming", visible: upcomingWebinars.length > 0 },
+        { key: "past", label: "Past", visible: pastWebinars.length > 0 },
+    ].filter((tab) => tab.visible); // hide empty categories
+
+    // ✅ Filtered list based on tab
+    let filteredWebinars = webinars;
+    if (activeTab === "upcoming") filteredWebinars = upcomingWebinars;
+    else if (activeTab === "past") filteredWebinars = pastWebinars;
+
+    // ✅ Sort “all” list so upcoming appear first
+    if (activeTab === "all") {
+        filteredWebinars.sort((a, b) => {
+            const aEnd = new Date(a.WebinarEndDateTime);
+            const bEnd = new Date(b.WebinarEndDateTime);
+            const aUpcoming = aEnd >= now;
+            const bUpcoming = bEnd >= now;
+            if (aUpcoming && !bUpcoming) return -1;
+            if (!aUpcoming && bUpcoming) return 1;
+            return new Date(a.WebinarStartDateTime) - new Date(b.WebinarStartDateTime);
+        });
+    }
+
     return (
-        <div className="py-12 px-4 bg-white font-[Poppins]">
+        <div className="py-12 px-4 bg-white font-[Poppins] container mx-auto">
             <div className="container mx-auto">
-                <div className='flex justify-center items-center'>
+                <div className="flex justify-center items-center">
                     <h2 className="text-[40px] font-bold mb-6 px-5">
-                        Our <span className="text-[#339ca0]">Courses</span>
+                        <span className="text-[#339ca0]">Webinars</span>
                     </h2>
                 </div>
 
+                {/* ✅ Dynamically show only non-empty tabs */}
                 <div className="flex justify-center flex-wrap gap-4 mb-8 px-5">
-                    {tabs.map((tab, index) => (
+                    {availableTabs.map((tab) => (
                         <button
-                            key={index}
-                            className={`tab-btn border px-4 py-2 rounded-full text-sm font-medium transition 
-                                ? "bg-slate-900 text-white"
+                            key={tab.key}
+                            onClick={() => setActiveTab(tab.key)}
+                            className={`px-5 py-2 rounded-full font-medium transition-all border ${activeTab === tab.key
+                                ? "bg-[#339ca0] text-white border-[#339ca0]"
                                 : "bg-white text-gray-700 hover:bg-gray-100"
                                 }`}
                         >
-                            {tab}
+                            {tab.label}
                         </button>
                     ))}
                 </div>
-
-                {/* Swiper */}
             </div>
-            <Swiper className='max-w-[1920px]'
+
+            {/* ✅ Swiper Slider */}
+            <Swiper
+                className="max-w-[1920px]"
                 spaceBetween={30}
                 slidesPerView={1}
                 navigation={true}
@@ -271,39 +326,61 @@ export const OurCourses = () => {
                 }}
                 modules={[Navigation]}
             >
-                {courses.map((course, index) => (
-                    <SwiperSlide key={index} >
-                        <div className="h-[330px] mx-auto bg-white w-[300px] sm:w-[310px] rounded-lg shadow hover:shadow-xl  transition-all overflow-hidden border border-black">
-                            <img
-                                src={course.image}
-                                alt={course.title}
-                                className="w-full h-50 object-cover"
-                            />
-                            <div className="p-4">
-                                <h3 className="font-bold text-md mb-2">{course.title}</h3>
-                                <p className="text-xs text-gray-600 mb-1">
-                                    BY {course.trainer.toUpperCase()}
-                                </p>
-                                <div className="flex justify-between items-center text-sm text-gray-500 mb-2">
-                                    <span className="flex items-center gap-1">
-                                        <span>⏱</span>
-                                        {course.hours}
-                                    </span>
+                {filteredWebinars.length > 0 ? (
+                    filteredWebinars.map((webinar, index) => (
+                        <SwiperSlide key={index}>
+                            <Link to={`/webinars/${webinar.WebinarSlug}`}>
+                                <div className="h-[420px] mx-auto bg-white w-[300px] sm:w-[290px] rounded-lg shadow hover:shadow-xl transition-all overflow-hidden border border-black">
+                                    <div className="h-[250px] w-full overflow-hidden">
+                                        <img
+                                            src={
+                                                webinar.Speaker?.profilePic
+                                                    ? `${baseURL}/${webinar.Speaker.profilePic}`
+                                                    : "/default-speaker.png"
+                                            }
+                                            alt={webinar.WebinarTitle}
+                                            className="w-full h-full object-cover object-center"
+                                        />
+                                    </div>
+                                    <div className="p-4 h-[120px]">
+                                        <h3 className="font-bold text-md mb-2 line-clamp-2">
+                                            {webinar.WebinarTitle}
+                                        </h3>
+                                        <div className="flex justify-between items-center text-sm text-gray-500 mb-2">
+                                            <span className="flex items-center gap-1">
+                                                <IoIosTime size={22} className="text-[#339ca0]" />
+                                                {webinar.WebinarStartDateTime.toLocaleString()} -{" "}
+                                                {webinar.WebinarEndDateTime.toLocaleString()}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-lg font-semibold">{webinar.WebinarType}</span>
+
+                                            <button
+                                                onClick={() => navigate(`/webinars/${webinar.WebinarSlug}`)}
+                                                className="bg-gradient-to-r from-[#339ca0] to-black text-white px-3 py-1 rounded text-sm transition-all hover:bg-gray-800"
+                                            >
+                                                Read More
+                                            </button>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-lg font-semibold">{course.price}</span>
-                                    <button className="bg-gradient-to-r from-[#339ca0] to-black text-white px-3 py-1 rounded text-sm  transition-all hover:bg-gray-800">
-                                        Learn More
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </SwiperSlide>
-                ))}
+                            </Link>
+                        </SwiperSlide>
+                    ))
+                ) : (
+                    <div className="w-full flex justify-center items-center py-20">
+                        <p className="text-gray-500 text-4xl font-medium italic">🎉 Coming Soon!</p>
+                    </div>
+                )}
             </Swiper>
+
             <div className="flex justify-center mt-6">
-                <button className=" bg-gradient-to-r from-[#339ca0] to-black text-white px-4 py-2 rounded hover:bg-gray-800 transition font-medium">
-                    View All Courses
+                <button
+                    onClick={() => navigate("/webinars")}
+                    className="bg-gradient-to-r from-[#339ca0] to-black text-white px-4 py-2 rounded hover:bg-gray-800 transition font-medium"
+                >
+                    View All Webinars
                 </button>
             </div>
         </div>

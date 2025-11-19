@@ -127,6 +127,11 @@ import MentorOneToOneForm from './components/MentorDashboard/MentorOneToOneForm/
 import MentorSessionsList from './components/MentorDashboard/SessionsListMentor/SessionsListMentor.jsx';
 import EditMentorDetails from './components/MentorDashboard/editMentorDetilas/editMentorDetilas.jsx';
 
+
+import PrivacyPolicy from './pages/privacyPolicy/privacyPolicy.jsx';
+import TermsConditions from './pages/Terms&Conditions/Terms&Conditions.jsx';
+import ContactPage from './pages/contactPage/contactpage.jsx';
+import ContactUserList from './components/AdminDashboard/ContactUserList/ContactUserList.jsx';
 function App() {
   return (
     <BrowserRouter>
@@ -137,11 +142,19 @@ function App() {
         <Route path="/job-details/:id" element={<><Navbar /><JobDetailsPage /><Footer /></>} />
 
         <Route path="/webinars" element={<><WebinarspageList /></>} />
-        <Route path="/webinars/:id" element={<WebinarDetailsPage />} />
+        {/* <Route path="/webinars/:id" element={<WebinarDetailsPage />} /> */}
+
+        <Route path="/webinars/:slug" element={<WebinarDetailsPage />} />
+
 
 
         <Route path="/hall-of-fame" element={<><Navbar /><HallOfFamepage /><Footer /></>} />
-        <Route path="/hall-of-fame/:speakerId" element={<><Navbar /><SpeakerDetailsPage /><Footer /></>} />
+
+          <Route path="/hall-of-fame/:speakerId" element={<><Navbar /><SpeakerDetailsPage /><Footer /></>} /> 
+        
+
+        {/* <Route path="/hall-of-fame/:slug" element={<><Navbar /><SpeakerDetailsPage /><Footer /></>}/> */}
+
         <Route path="/hall-of-fame/register" element={<><RegisterHallOfFame /></>} />
 
         <Route path='/live-mentorship' element={<><Navbar /><LiveMentorShipPage /><Footer /></>} />
@@ -151,8 +164,19 @@ function App() {
         <Route path='/about-us' element={<><Navbar /><AboutUs /><Footer /></>} />
         <Route path='/blogs' element={<><BlogsPage /></>} />
         <Route path='/blogs' element={<><BlogDetailsPage /></>} />
-        <Route path='/blogs/:id' element={<><BlogDetailsPage2 /></>} />
-        <Route path="/blogs/category/:categoryId" element={<BlogDetailsPage2 />} />
+        {/* <Route path='/blogs/:id' element={<><BlogDetailsPage2 /></>} /> */}
+        <Route path="/blogs/:slug" element={<BlogDetailsPage2 />} />
+
+        {/* <Route path="/blogs/category/:categoryId" element={<BlogDetailsPage2 />} /> */}
+        <Route path="/blogs/category/:categorySlug" element={<BlogDetailsPage2 />} />
+
+         <Route path="/privacy-policy" element={<><Navbar/><PrivacyPolicy /><Footer/></>} />
+         <Route path="/terms-conditions" element={<><Navbar/><TermsConditions /><Footer/></>} />
+         <Route path="/contact" element={<><Navbar/><ContactPage /><Footer/></>} />
+
+
+
+
 
         <Route path='/knowledge-base' element={<><Navbar /><KnowledgeBasePage /><Footer /></>} />
         <Route
@@ -314,6 +338,8 @@ function App() {
         <Route path='/admin-dashboard/knowledge-base-list' element={<><KnowledgeBaseList /></>} />
         <Route path="/admin/knowledge-base-registers" element={<KnowledgeBaseRegisterList />} />
         <Route path="/admin/become-a-mentor-registerList" element={<BecomeAMentorRegisterList />} />
+
+        <Route path="/admin-dashboard/contact-list" element={<><ContactUserList /></>} />
 
 
 

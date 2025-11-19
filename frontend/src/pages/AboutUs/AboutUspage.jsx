@@ -13,6 +13,7 @@ export default function AboutUs() {
     return (
         <>
             <div className="w-full font-[Poppins]">
+                
                 <div>
                     <StatsSection />
 
@@ -20,28 +21,25 @@ export default function AboutUs() {
                 <div className="container mx-auto">
                     <MissionVision />
                 </div>
-                <div className="container mx-auto">
+                {/* <div className="container mx-auto">
                     <JourneyTimeline />
 
-                </div>
+                </div> */}
                 <div className="container mx-auto">
                     <HowWeDoIt />
 
                 </div>
-                <div className="container mx-auto">
-                    <UniquePedagogy />
-
-                </div>
+                
                 <div className="container mx-auto">
                     <OurFounders/>
 
                 </div>
-                <div className="">
+                {/* <div className="">
                     <IndustryExperts/>
-                </div>
-                <div className="container mx-auto">
+                </div> */}
+                {/* <div className="container mx-auto">
                     <AlumniCompanies/>
-                </div>
+                </div> */}
             </div>
 
 

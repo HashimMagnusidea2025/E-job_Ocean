@@ -26,7 +26,7 @@ export default function Home() {
                 <Whatparticipantssay/>
                 <OurIndustryExperts/>
                 <WhatsAppGroupSection/>
-                <AppDownloadSection/>
+                {/* <AppDownloadSection/> */}
                 <Footer/> 
                 
 

@@ -11,8 +11,9 @@ import { JobApplicationForm } from "../../../ui/cards/cards.jsx";
 import { ViewButton, CommentButton, LikeButtonSimple, FavoriteButton } from "../../../ui/button/button.jsx";
 import { useParams } from "react-router";
 import Select from "react-select";
-
+import { useLocation } from "react-router-dom";
 const baseURL = import.meta.env.VITE_BACKEND_URL;
+
 export default function OpportunitiesSection() {
     const { id } = useParams();
     const type = "job";
@@ -30,6 +31,12 @@ export default function OpportunitiesSection() {
         city: "",
         resume: null,
     });
+
+
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const searchTitle = queryParams.get("title")?.toLowerCase() || "";
+    const searchLocation = queryParams.get("location")?.toLowerCase() || "";
 
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -79,13 +86,39 @@ export default function OpportunitiesSection() {
         // Match experience (fresher, 1-3, 3-5, 5+)
         const matchesExperience = appliedExperienceFilter ? job.experience?.toLowerCase() === appliedExperienceFilter.toLowerCase() : true;
 
+
+        // ✅ Search from HeroSection (title / keyword / location)
+        const matchesTitle = searchTitle
+            ? job.jobTitle?.toLowerCase().includes(searchTitle) ||
+            job.skills?.some((s) =>
+                (typeof s === "object" ? s.name : s)?.toLowerCase().includes(searchTitle)
+            )
+            : true;
+
+        const getLocationString = (jobId) => {
+            const loc = locationNamesMap[jobId];
+            if (!loc) return "Location not specified";
+            const parts = [loc.city, loc.state, loc.country].filter(Boolean);
+            return parts.length ? parts.join(", ") : "Location not specified";
+        };
+
+        const normalize = (str) =>
+            str?.toLowerCase().replace(/,/g, '').replace(/\s+/g, ' ').trim();
+
+        const matchesSearchLocation = searchLocation
+            ? normalize(getLocationString(job._id)).includes(normalize(searchLocation))
+            : true;
+
+
         // Combine all
         return (
             matchesCountry &&
             matchesState &&
             matchesCity &&
             matchesMode &&
-            matchesExperience
+            matchesExperience &&
+            matchesTitle &&
+            matchesSearchLocation
         );
     });
 
@@ -615,6 +648,8 @@ export default function OpportunitiesSection() {
                         modules={[Navigation, Pagination, Autoplay]}
                         spaceBetween={20}
                         slidesPerView={1}
+
+                        centerInsufficientSlides={true} //  BEST for dynamic job counts
                         navigation
                         breakpoints={{
                             640: { slidesPerView: 1 },
@@ -630,115 +665,125 @@ export default function OpportunitiesSection() {
 
                             return (
                                 <SwiperSlide key={job._id}>
-                                    <div className="bg-white rounded-xl p-4 shadow hover:shadow-lg transition flex flex-col justify-between relative border border-gray-100 h-[320px]">
-                                        {/* Company Logo - depositphotos ki jagah company logo */}
-                                        <div className="absolute -top-1 left-2">
+                                    <div className="bg-white rounded-2xl p-5 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-between relative border border-gray-200 h-[340px]">
+
+                                        {/* Company Logo */}
+                                        <div className="absolute top-2 right-5">
                                             {companyLogo ? (
                                                 <img
                                                     src={companyLogo}
                                                     alt={companyName}
-                                                    className="w-12 h-12 rounded-lg border-2 border-white shadow-md object-cover"
+                                                    className="w-16 h-16 rounded-xl border-2 border-white shadow-md object-cover bg-white"
                                                     onError={(e) => {
                                                         e.target.style.display = 'none';
-                                                        // Fallback agar logo load na ho
                                                         const fallback = document.createElement('div');
-                                                        fallback.className = 'w-12 h-12 bg-blue-100 rounded-lg border-2 border-white shadow-md flex items-center justify-center';
-                                                        fallback.innerHTML = `<span class="text-blue-600 font-bold text-xs">${companyName.charAt(0)}</span>`;
+                                                        fallback.className =
+                                                            'w-14 h-14 bg-gradient-to-br from-[#e0f7fa] to-[#b2ebf2] rounded-xl border-2 border-white shadow-md flex items-center justify-center';
+                                                        fallback.innerHTML = `<span class="text-[#00796b] font-bold text-base">${companyName.charAt(0)}</span>`;
                                                         e.target.parentNode.appendChild(fallback);
                                                     }}
                                                 />
                                             ) : (
-                                                <div className="w-12 h-12 bg-blue-100 rounded-lg border-2 border-white shadow-md flex items-center justify-center">
-                                                    <span className="text-blue-600 font-bold text-xs">
+                                                <div className="w-14 h-14 bg-gradient-to-br from-[#e0f7fa] to-[#b2ebf2] rounded-xl border-2 border-white shadow-md flex items-center justify-center">
+                                                    <span className="text-[#00796b] font-bold text-base">
                                                         {companyName.charAt(0)}
                                                     </span>
                                                 </div>
                                             )}
                                         </div>
 
-                                        {/* Company Name */}
-                                        <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
-                                            <FaBuilding className="text-gray-400" />
-                                            <span className="font-medium truncate">{companyName}</span>
-                                        </div>
+                                        {/* Card Content */}
+                                        <div className="flex flex-col h-full justify-between mt-8">
 
-                                        {/* Job Title */}
-                                        <h3 className="text-lg font-semibold text-gray-800 line-clamp-1 mt-2">
-                                            {job.jobTitle || "Untitled Job"}
-                                        </h3>
+                                            {/* Top Section */}
+                                            <div>
+                                                {/* Company Name */}
+                                                <div className="flex items-center gap-2 text-sm text-gray-600">
+                                                    <FaBuilding className="text-gray-400" />
+                                                    <span className="font-medium truncate">{companyName}</span>
+                                                </div>
 
-                                        {/* Job Type */}
-                                        {job.jobType?.name && (
-                                            <div className="flex items-center gap-2 text-sm mt-2 text-gray-600">
-                                                <FaBriefcase className="text-black" />
-                                                <span>{job.jobType.name}</span>
+                                                {/* Job Title */}
+                                                <h3 className="text-lg font-semibold text-gray-900 line-clamp-1 mt-2">
+                                                    {job.jobTitle || "Untitled Job"}
+                                                </h3>
+
+                                                {/* Job Type / Shift / Location */}
+                                                <div className="mt-2 space-y-1 text-sm text-gray-600">
+                                                    {job.jobType?.name && (
+                                                        <div className="flex items-center gap-2">
+                                                            <FaBriefcase className="text-[#339ca0]" />
+                                                            <span>{job.jobType.name}</span>
+                                                        </div>
+                                                    )}
+
+                                                    {job.jobShift?.name && (
+                                                        <div className="flex items-center gap-2">
+                                                            <FaClock className="text-[#339ca0]" />
+                                                            <span>{job.jobShift.name}</span>
+                                                        </div>
+                                                    )}
+
+                                                    <div className="flex items-center gap-2">
+                                                        <FaMapMarkerAlt className="text-[#339ca0]" />
+                                                        <span className="truncate">{getLocationString(job._id)}</span>
+                                                    </div>
+                                                </div>
+
+                                                {/* Skills */}
+                                                {job.skills?.length > 0 && (
+                                                    <div className="flex items-start gap-2 text-sm mt-3 text-gray-600">
+                                                        <FaWrench className="text-[#339ca0] mt-1" />
+                                                        <span className="line-clamp-2">
+                                                            {job.skills
+                                                                .map((skill) => (typeof skill === "object" ? skill.name : skill))
+                                                                .join(", ")}
+                                                        </span>
+                                                    </div>
+                                                )}
                                             </div>
-                                        )}
 
-                                        {/* Job Shift */}
-                                        {job.jobShift?.name && (
-                                            <div className="flex items-center gap-2 text-sm mt-1 text-gray-600">
-                                                <FaClock className="text-black" />
-                                                <span>{job.jobShift.name}</span>
+                                            {/* Interaction Buttons */}
+                                            <div className="flex justify-end gap-3 mt-4">
+                                                <FavoriteButton jobId={job._id} type="jobs" />
+                                                <LikeButtonSimple
+                                                    blogId={job._id}
+                                                    type="job"
+                                                    likeCount={jobLikes[job._id] || 0}
+                                                    setLikeCount={(count) =>
+                                                        setJobLikes((prev) => ({ ...prev, [job._id]: count }))
+                                                    }
+                                                    onClick={() => handleLike(job._id)}
+                                                />
+                                                <ViewButton blogId={job._id} type="job" />
+                                                <CommentButton
+                                                    blogId={job._id}
+                                                    type="job"
+                                                    commentCount={jobComments[job._id] || 0}
+                                                />
                                             </div>
-                                        )}
 
-                                        {/* Location */}
-                                        <div className="flex items-center gap-2 text-sm mt-1 text-gray-600">
-                                            <FaMapMarkerAlt className="text-black" />
-                                            <span>{getLocationString(job._id)}</span>
-                                        </div>
-
-                                        {/* Skills */}
-                                        {job.skills?.length > 0 && (
-                                            <div className="flex items-start gap-2 text-sm mt-2 mb-3 text-gray-600">
-                                                <FaWrench className="text-black mt-1" />
-                                                <span className="line-clamp-2">
-                                                    {job.skills
-                                                        .map((skill) => (typeof skill === "object" ? skill.name : skill))
-                                                        .join(", ")}
-                                                </span>
+                                            {/* Action Buttons */}
+                                            <div className="mt-4 flex gap-3">
+                                                <button
+                                                    onClick={() => handleReadMore(job)}
+                                                    type="button"
+                                                    className="flex-1 bg-white border border-[#339ca0] text-[#339ca0] py-2 rounded-lg font-medium hover:bg-[#339ca0] hover:text-white transition-all duration-200"
+                                                >
+                                                    Details
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleApplyClick(job)}
+                                                    className="flex-1 bg-gradient-to-r from-[#339ca0] to-black text-white py-2 rounded-lg font-medium hover:opacity-90 transition-all duration-200"
+                                                >
+                                                    Apply Now
+                                                </button>
                                             </div>
-                                        )}
-
-                                        <div className=" flex gap-3 justify-end">
-
-
-                                            <FavoriteButton jobId={job._id} type="jobs" />
-
-
-                                            <LikeButtonSimple
-                                                blogId={job._id}
-                                                type="job"
-                                                likeCount={jobLikes[job._id] || 0}
-                                                setLikeCount={(count) => setJobLikes(prev => ({
-                                                    ...prev,
-                                                    [job._id]: count
-                                                }))}
-                                                onClick={() => handleLike(job._id)}
-                                            />
-                                            <ViewButton blogId={job._id} type="job" />
-                                            <CommentButton blogId={job._id} type="job" commentCount={jobComments[job._id] || 0} />
-                                        </div>
-
-                                        {/* Buttons */}
-                                        <div className="mt-3 flex gap-3 pt-2">
-                                            <button onClick={() => handleReadMore(job)}
-                                                type="button"
-                                                className="flex-1 bg-white border border-[#339ca0] text-[#339ca0] py-2 rounded-lg font-medium hover:bg-[#339ca0] hover:text-white transition-all duration-200"
-                                            >
-                                                Details
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => handleApplyClick(job)}
-                                                className="flex-1 bg-gradient-to-r from-[#339ca0] to-black text-white py-2 rounded-lg font-medium hover:opacity-90 transition-all duration-200"
-                                            >
-                                                Apply Now
-                                            </button>
                                         </div>
                                     </div>
                                 </SwiperSlide>
+
                             );
                         })}
                     </Swiper>

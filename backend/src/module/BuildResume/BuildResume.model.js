@@ -16,7 +16,11 @@ const educationSchema = new mongoose.Schema(
     degreeType: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "DegreeTypeCategory",
-      required: true,
+      required:   false,
+    },
+     customDegreeType: {
+        type: String,
+        required: false // Custom degree type के लिए
     },
     degreeTitle: {
       type: String,

@@ -38,7 +38,7 @@ import {
 
 } from "react-share";
 
-export const BlogsPostCards = ({ id, img, title, description, button, type, Commentbtn = false, Viewbtn = false, category }) => {
+export const BlogsPostCards = ({ id, img, title, description, button, type, Commentbtn = false, Viewbtn = false, category, slug }) => {
     const navigate = useNavigate();
     const [commentCount, setCommentCount] = useState(0);
 
@@ -48,7 +48,7 @@ export const BlogsPostCards = ({ id, img, title, description, button, type, Comm
 
             await axios.post(`/blogs/like/view/${id}`);
 
-            navigate(`/blogs/${id}`);
+            navigate(`/blogs/${slug}`);
         } catch (err) {
             console.error("Error incrementing view:", err);
             //   // navigate even if API fails (optional)
@@ -138,6 +138,70 @@ export const BlogsPostCards = ({ id, img, title, description, button, type, Comm
 
     );
 };
+
+
+
+
+
+export const BlogsCategoryCards = ({ blogs = [] }) => {
+    if (!blogs.length)
+        return <p className="text-center text-gray-500">No posts available.</p>;
+
+    return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+            {blogs.map((blog) => {
+                const image =
+                    blog._embedded?.["wp:featuredmedia"]?.[0]?.media_details?.sizes?.pixwell_370x250?.source_url ||
+                    "https://via.placeholder.com/400x300";
+                const title = blog.title.rendered;
+                const category = blog._embedded?.["wp:term"]?.[0]?.[0]?.name
+                const excerpt = blog.excerpt.rendered.replace(/<[^>]+>/g, "").slice(0, 100) + "…";
+
+                return (
+                    <Link to={`/blogs/${blog.slug}`}>
+                        <div
+                            key={blog.id}
+                            className="bg-white shadow rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
+                        >
+                            <div className="relative">
+                                <img
+                                    src={image}
+                                    alt={title}
+                                    className="w-full h-64 object-cover object-center rounded-t-lg"
+                                />
+
+                                <div className="absolute bottom-3 left-3">
+                                    {category && (
+                                        <span className="absolute bottom-4 left-2 bg-[#20AEB2] text-white text-xs font-medium px-3 py-1 rounded-full">
+                                            {category}
+                                        </span>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="p-5">
+                                <h2
+                                    className="text-lg font-semibold text-gray-800 mb-2"
+                                    dangerouslySetInnerHTML={{ __html: title }}
+                                />
+
+                                <p className="text-gray-600 text-sm mb-3" dangerouslySetInnerHTML={{ __html: excerpt }} />
+                                {/* <p className="text-sm text-gray-500 mb-4">by ejobocean</p> */}
+                                <button
+                                    className="bg-black text-white text-xs px-4 py-2 rounded-md hover:bg-gray-800 transition inline-block"
+                                >
+                                    READ MORE →
+                                </button>
+                            </div>
+                        </div>
+                    </Link>
+                );
+            })}
+        </div>
+    );
+};
+
+
+
 
 
 
@@ -597,10 +661,12 @@ export const Categories = () => {
                 const apiCategories = res.data.map((cat) => ({
                     id: cat.id,
                     name: cat.name,
+                    slug: cat.slug, // ✅ add slug
+
                     count: cat.count,
                 }));
 
-                setCategories([{ id: 0, name: "All", count: null }, ...apiCategories]);
+                setCategories([{ id: 0, name: "All", slug: "all", count: null }, ...apiCategories]);
             })
             .catch((err) => console.error("Error fetching categories:", err));
     }, []);
@@ -621,7 +687,8 @@ export const Categories = () => {
                         <li
                             key={cat.id}
                             className="flex items-center justify-between border-b border-dotted border-gray-300 pb-1"
-                            onClick={() => navigate(`/blogs/category/${cat.id}`)}
+                            // onClick={() => navigate(`/blogs/category/${cat.id}`)}
+                            onClick={() => navigate(`/blogs/category/${cat.slug}`)} // ✅ use slug
                         >
                             <span className="text-gray-700 hover:text-indigo-600 cursor-pointer">
                                 {cat.name}
@@ -897,7 +964,7 @@ export const WebinarCardsList = ({ webinar, onRegisterClick }) => {
                         webinarType={webinar.WebinarType}
                     />
                     <button
-                        onClick={() => navigate(`/webinars/${webinar._id}`)}
+                        onClick={() => navigate(`/webinars/${webinar.WebinarSlug}`)}
                         className="w-full bg-[#101828] text-white text-sm py-2.5 rounded-lg font-medium hover:bg-[#1d2939] transition"
                     >
                         View Details

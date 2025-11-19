@@ -4,10 +4,16 @@ import CompanyInformationModel from "../models/CompanyInformation.model.js";
 import bcrypt from "bcrypt";
 
 import OneToOneModel from "../module/OneToOne/OneToOne.model.js";
+
 export const createUser = async (req, res) => {
   try {
-    const { firstName, lastName, email, password, confirmPassword, roleID, status,des } = req.body;
+    const { firstName, lastName, email, phone, password, confirmPassword, roleID, status, des } = req.body;
 
+    console.log(phone);
+    console.log("📩 Full req.body at backend:", req.body);
+
+
+    console.log("Register body:", req.body); // 👈 Check phone here
     if (password !== confirmPassword) {
       return res.status(400).json({ message: "Passwords do not match" });
     }
@@ -32,10 +38,11 @@ export const createUser = async (req, res) => {
       firstName,
       lastName,
       email,
+      phone,
       password: hashedPassword,
       roleID,
       status: status || "active",
-      des:null
+      des: null
     });
 
     res.status(201).json({
@@ -47,6 +54,10 @@ export const createUser = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+
+
+
+
 export const getUsers = async (req, res) => {
   try {
     const users = await UserModel.find().populate({
@@ -71,7 +82,7 @@ export const getUsers = async (req, res) => {
 export const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const { firstName, lastName, email, roleID, password, newPassword, status ,des } = req.body;
+    const { firstName, lastName, email, roleID, phone, password, newPassword, status, des } = req.body;
 
     const user = await UserModel.findById(id);
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -79,6 +90,7 @@ export const updateUser = async (req, res) => {
     const updateData = {
       firstName,
       lastName,
+      phone,
       email,
       roleID,
       status,

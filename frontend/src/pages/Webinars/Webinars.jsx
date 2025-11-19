@@ -167,7 +167,7 @@ export default function WebinarspageList({ webinar }) {
             <div className="lg:w-4/5 w-full">
               {activeTab === "Speaker" ? (
                 // ✅ SPEAKER VIEW
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 justify-items-center ">
                   {speakers.length > 0 ? (
                     speakers.map((speaker, index) => (
                       <HallOfFameCards key={index} speaker={speaker} />

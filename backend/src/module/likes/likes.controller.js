@@ -57,7 +57,7 @@ export const incrementView = async (req, res) => {
     try {
         const { id } = req.params;
         // const { blogId } = req.params;
-        const { type = "blog" } = req.query;
+        const { type = "blogs" } = req.query;
         console.log("Incrementing view for:", { id, type });
 
         let blogDoc = await LikeModel.findOne({ id: id });
@@ -75,6 +75,7 @@ export const incrementView = async (req, res) => {
         }
 
         res.json({ id, views: blogDoc.viewCount });
+
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Server error" });
@@ -86,7 +87,7 @@ export const getViewCount = async (req, res) => {
     try {
         // const { blogId } = req.params;
         const { id } = req.params;
-        const { type = "blog" } = req.query; 
+        const { type = "blogs" } = req.query; 
 
            console.log("Getting view count for:", { id, type });
         // blog ka document find karo

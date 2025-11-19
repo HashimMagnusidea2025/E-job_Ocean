@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
-
+import slugify from "slugify";
 
 const UserSchema = new mongoose.Schema({
-  name:{
-    type:String
+  name: {
+    type: String
   },
 
   firstName: {
@@ -21,16 +21,18 @@ const UserSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    
+
   },
-  phone: { type: String },
   
+  phone: { type: String},
+
+
   profilePicture: {
     type: String, // Store file path or URL
     default: ""
   },
-  des:{
-    type:String
+  des: {
+    type: String
   },
 
   status: {
@@ -39,16 +41,18 @@ const UserSchema = new mongoose.Schema({
     default: "active"
   },
 
-   Approved:{
-     type: String,
-    enum:["Approved","pending","Rejected"],
+  Approved: {
+    type: String,
+    enum: ["Approved", "pending", "Rejected"],
     default: "pending"
   },
-  type:{
-    type:String
+  type: {
+    type: String
   },
-  
 
+
+  otp: { type: String, default: null },
+  otpExpires: { type: Date, default: null },
 
 
   // Optional role label string
@@ -64,11 +68,29 @@ const UserSchema = new mongoose.Schema({
     ref: 'Role'
   },
 
+  slug: { type: String, unique: true, sparse: true },
+
 });
+
+
+// UserSchema.pre("save", function (next) {
+//   this.name = `${this.firstName} ${this.lastName}`;
+//   next();
+// });
+
 UserSchema.pre("save", function (next) {
   this.name = `${this.firstName} ${this.lastName}`;
+
+  if (this.type === "mentor" && !this.slug) {
+    this.slug = slugify(`${this.firstName}-${this.lastName}`, {
+      lower: true,
+      strict: true,
+    });
+  }
+
   next();
 });
+
 
 const UserModel = mongoose.model('User', UserSchema);
 export default UserModel;

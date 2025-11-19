@@ -39,9 +39,12 @@
 
 .swiper-button-next::after,
 .swiper-button-prev::after {
-  color: black; /* arrow ka color black kar dega */
+  color: #339ca0; /* arrow ka color black kar dega */
   font-size: 20px; /* optional - size change karne ke liye */
   font-weight: bold; /* optional - thoda mota karne ke liye */
+  
+
+
 }
 
 .gridspan-row {

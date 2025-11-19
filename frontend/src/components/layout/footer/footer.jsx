@@ -164,19 +164,20 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import axios from '../../../utils/axios.js';
 const baseURL = import.meta.env.VITE_BACKEND_URL; // Vite
-    // या CRA में: const baseURL = process.env.REACT_APP_BACKEND_URL;
+// या CRA में: const baseURL = process.env.REACT_APP_BACKEND_URL;
 export default function Footer() {
 
 
     const [companyLogo, setCompanyLogo] = useState(null);
     const [companyData, setCompanyData] = useState(); // default
+
     const fetchCompanyLogo = async () => {
         try {
             const response = await axios.get('/general-settings'); // ya aapke backend endpoint
             if (response.data && response.data.logo) {
                 setCompanyLogo(`${baseURL}${response.data.logo}`);
                 setCompanyData(response.data);
-              
+
 
             }
         } catch (error) {
@@ -236,14 +237,14 @@ export default function Footer() {
                     </div>
 
                     {/* Placements */}
-                    <div>
+                    {/* <div>
                         <h3 className="font-bold uppercase text-sm border-b-2 border-red-500 inline-block mb-2">Placements</h3>
                         <ul className="text-sm space-y-3 mt-2">
                             <li>Get Placed (Placement Program)</li>
                             <li>Vacancies</li>
                             <li>Success Stories (Hall Of Fame)</li>
                         </ul>
-                    </div>
+                    </div> */}
 
                     {/* Free Resources */}
                     <div>
@@ -257,7 +258,7 @@ export default function Footer() {
                     </div>
 
                     {/* Finance Tools */}
-                    <div>
+                    {/* <div>
                         <h3 className="font-bold uppercase text-sm border-b-2 border-red-500 inline-block mb-2">Finance Tools Masterclasses</h3>
                         <ul className="text-sm space-y-3 mt-2">
                             <li>MS-Excel MasterClass</li>
@@ -265,10 +266,10 @@ export default function Footer() {
                             <li>Power BI & Alteryx MasterClass</li>
                             <li>Python and SQL MasterClass</li>
                         </ul>
-                    </div>
+                    </div> */}
 
                     {/* Flagship */}
-                    <div className='gridspan-row'>
+                    {/* <div className='gridspan-row'>
                         <h3 className="font-bold uppercase text-sm border-b-2 border-red-500 inline-block mb-2">Flagship Masterclasses</h3>
                         <ul className="text-sm space-y-3 mt-2">
                             <li>Audit MasterClass</li>
@@ -283,13 +284,13 @@ export default function Footer() {
                             <li>Big 4 MasterClass for College Grads</li>
                             <li>All Courses</li>
                         </ul>
-                    </div>
+                    </div> */}
 
                     {/* Newsletter */}
 
 
                     {/* Interview Prep */}
-                    <div>
+                    {/* <div>
                         <h3 className="font-bold uppercase text-sm border-b-2 border-red-500 inline-block mb-2">Interview Prep & Soft Skills</h3>
                         <ul className="text-sm space-y-3 mt-2">
                             <li>Complete Interview MasterClass Package</li>
@@ -299,7 +300,7 @@ export default function Footer() {
                             <li>1:1 Resume Review</li>
                             <li>1:1 Mock Interview</li>
                         </ul>
-                    </div>
+                    </div> */}
 
                     {/* Must Read */}
                     <div>
@@ -314,10 +315,10 @@ export default function Footer() {
                     <div>
                         <h3 className="font-bold uppercase text-sm border-b-2 border-red-500 inline-block mb-2">Support</h3>
                         <ul className="text-sm space-y-3 mt-2">
-                            <li>Contact Us</li>
-                            <li>About Us</li>
-                            <li>Terms of Use</li>
-                            <li>Privacy Policy</li>
+                            <li><a href="/contact">Contact Us</a></li>
+                            <li> <a href="/about-us">About Us</a></li>
+                            <li><a href="/terms-conditions">Terms & Conditions</a></li>
+                            <li><a href="/privacy-policy">Privacy Policy</a></li>
                             <li>Refund Policy</li>
                             <li>FAQs</li>
                             <li>Verify Certificate</li>

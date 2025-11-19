@@ -3,6 +3,8 @@ import DataTable from "react-data-table-component";
 import { FaEdit, FaTrash, FaEye, FaPlus } from "react-icons/fa";
 import axios from "../../../utils/axios.js"; // adjust your path
 import Swal from "sweetalert2"; // make sure you have this import
+import ReactQuill from "react-quill-new";
+import "react-quill-new/dist/quill.snow.css";
 
 import Layout from "../../seekerDashboard/partials/layout.jsx";
 export default function CMSPage() {
@@ -449,13 +451,13 @@ export default function CMSPage() {
 
 
 
-                {modelCms && (
+                {/* {modelCms && (
                     <div
-                        className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+                        className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 "
                         onClick={() => setModelCms(false)} // ✅ close when clicking outside
                     >
                         <div
-                            className="bg-white w-full max-w-lg rounded-lg shadow-lg p-6"
+                            className="bg-white w-full max-w-lg rounded-lg shadow-lg p-6 "
                             onClick={(e) => e.stopPropagation()} // ✅ prevent closing when clicking inside modal
                         >
                             <h3 className="text-xl font-semibold mb-4 capitalize">Add CMS Page</h3>
@@ -464,11 +466,12 @@ export default function CMSPage() {
                                 {[1, 2, 3, 4, 5].map((num) => (
                                     <div key={num}>
                                         <label className="block text-gray-700">Line {num}</label>
-                                        <input
-                                            type="text"
-                                            name={`line_${num}`}
+                                        <ReactQuill
+                                            theme="snow"
                                             value={cmsContentData[`line_${num}`]}
-                                            onChange={handleCMSContentChange}
+                                            onChange={(val) =>
+                                                setCmsContentData({ ...cmsContentData, [`line_${num}`]: val })
+                                            }
                                             className="w-full border rounded px-3 py-2 mt-1"
                                         />
                                     </div>
@@ -524,7 +527,85 @@ export default function CMSPage() {
 
                         </div>
                     </div>
-                )}
+                )} */}
+
+                {modelCms && (
+  <div
+    className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+    onClick={() => setModelCms(false)} // close when clicking outside
+  >
+    <div
+      className="bg-white w-full max-w-lg rounded-lg shadow-lg p-6 max-h-[90vh] overflow-y-auto"
+      onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
+    >
+      <h3 className="text-xl font-semibold mb-4 capitalize">Add CMS Page</h3>
+
+      <form onSubmit={handleCMSContentSubmit} className="space-y-4">
+        {[1, 2, 3, 4, 5].map((num) => (
+          <div key={num}>
+            <label className="block text-gray-700 mb-1">Line {num}</label>
+            <ReactQuill
+              theme="snow"
+              value={cmsContentData[`line_${num}`]}
+              onChange={(val) =>
+                setCmsContentData({ ...cmsContentData, [`line_${num}`]: val })
+              }
+              className="bg-white border border-gray-300 rounded-lg"
+            />
+          </div>
+        ))}
+
+        <div>
+          <label className="block text-gray-700">Page Category</label>
+          <select
+            name="page"
+            value={cmsContentData.page}
+            onChange={handleCMSContentChange}
+            className="w-full border rounded px-3 py-2 mt-1"
+            required
+          >
+            <option value="">Select Page Category</option>
+            {cmsPages.map((cat) => (
+              <option key={cat._id} value={cat._id}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-gray-700">Status</label>
+          <select
+            name="status"
+            value={cmsContentData.status}
+            onChange={handleCMSContentChange}
+            className="w-full border rounded px-3 py-2 mt-1"
+          >
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+
+        <div className="flex justify-end gap-2 mt-4 sticky bottom-0 bg-white pt-2 pb-1">
+          <button
+            type="button"
+            onClick={() => setModelCms(false)}
+            className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
+            Save
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
+
 
             </div>
         </Layout>

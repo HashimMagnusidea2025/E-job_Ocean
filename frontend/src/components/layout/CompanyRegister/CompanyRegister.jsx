@@ -25,7 +25,7 @@ const CompanyRegister = () => {
         const roles = Array.isArray(res.data) ? res.data : res.data.roles || [];
 
         const employerRole = roles.find((role) =>
-          role.name?.toLowerCase() === "employer" ||
+          role.name?.toLowerCase() === "employer" || 
           role.roleID === "employer"
         );
 
@@ -97,7 +97,7 @@ const CompanyRegister = () => {
           <input
             type="text"
             name="lastName"
-            placeholder="Last Name"
+            placeholder="Last Name"      
             className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
             onChange={handleChange}
             required
