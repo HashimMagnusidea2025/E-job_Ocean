@@ -7,6 +7,7 @@ const AuthRoute = express.Router();
 
 AuthRoute.post("/send-otp-email", AuthController.sendOtpEmail);
 AuthRoute.post("/send-otp", AuthController.sendOtp);
+AuthRoute.post("/resend-otp", AuthController.ResendOtp);
 AuthRoute.post("/verify-otp", AuthController.verifyOtp);
 
     

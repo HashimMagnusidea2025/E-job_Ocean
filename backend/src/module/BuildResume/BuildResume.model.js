@@ -20,7 +20,7 @@ const educationSchema = new mongoose.Schema(
     },
      customDegreeType: {
         type: String,
-        required: false // Custom degree type के लिए
+        required: false 
     },
     degreeTitle: {
       type: String,
@@ -83,7 +83,7 @@ const experienceSchema = new mongoose.Schema(
     description: {
       type: String,
     },
-    // 🔹 ADD: isActive field
+   
     isActive: {
       type: Boolean,
       default: true
@@ -148,7 +148,7 @@ const languagesSchema = new mongoose.Schema({
 
 )
 
-// ==================== Exports ====================
+
 export const Education = mongoose.model("education", educationSchema);
 export const Experience = mongoose.model("experience", experienceSchema);
 export const Skills = mongoose.model("buildSkills", skillsSchema);

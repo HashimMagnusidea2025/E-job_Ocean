@@ -69,7 +69,7 @@ import mongoose from "mongoose";
 //     }
 // };
 
-// ✅ Create new experience
+
 export const createExperience = async (req, res) => {
     try {
         const {
@@ -86,7 +86,7 @@ export const createExperience = async (req, res) => {
 
         console.log("📝 Received experience data:", req.body);
 
-        // Validation
+       
         if (!jobTitle || !companyName || !country || !state || !city || !startDate) {
             return res.status(400).json({
                 success: false,
@@ -105,9 +105,9 @@ export const createExperience = async (req, res) => {
             userId: req.user._id,
             jobTitle,
             companyName,
-            country,  // ✅ Store as top-level field
-            state,    // ✅ Store as top-level field
-            city,     // ✅ Store as top-level field
+            country,  
+            state,    
+            city,     
             startDate,
             endDate: currentlyWorking ? null : endDate,
             currentlyWorking,
@@ -132,7 +132,7 @@ export const createExperience = async (req, res) => {
     }
 };
 
-// ✅ Get all experiences for a user
+
 export const getUserExperiences = async (req, res) => {
     try {
 
@@ -144,7 +144,7 @@ export const getUserExperiences = async (req, res) => {
             });
         }
         const experiences = await Experience.find({
-            userId: req.user._id, // Changed from user to userId
+            userId: req.user._id, 
           
         })
         .sort({ startDate: -1 });
@@ -186,7 +186,7 @@ export const toggleExperienceStatus = async (req, res) => {
             });
         }
 
-        // Toggle isActive status
+       
         experience.isActive = !experience.isActive;
         await experience.save();
 
@@ -236,7 +236,7 @@ export const toggleExperienceStatus = async (req, res) => {
 //     }
 // };
 
-// ✅ Get single experience by ID
+
 export const getExperienceById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -257,7 +257,7 @@ export const getExperienceById = async (req, res) => {
 
         const experience = await Experience.findOne({
             _id: id,
-            userId: req.user._id, // Changed from user to userId
+            userId: req.user._id, 
             isActive: true,
         });
 
@@ -282,7 +282,7 @@ export const getExperienceById = async (req, res) => {
     }
 };
 
-// ✅ Update experience
+
 export const updateExperience = async (req, res) => {
     try {
         const { id } = req.params;
@@ -304,7 +304,7 @@ export const updateExperience = async (req, res) => {
         const experience = await Experience.findOneAndUpdate(
             {
                 _id: id,
-                userId: req.user._id, // Changed from user to userId
+                userId: req.user._id, 
                 isActive: true,
             },
             updateData,
@@ -333,7 +333,7 @@ export const updateExperience = async (req, res) => {
     }
 };
 
-// ✅ Delete experience (soft delete)
+
 export const deleteExperience = async (req, res) => {
     try {
         const { id } = req.params;
@@ -356,7 +356,7 @@ export const deleteExperience = async (req, res) => {
         const experience = await Experience.findOneAndUpdate(
             {
                 _id: id,
-                userId: req.user._id, // Changed from user to userId
+                userId: req.user._id, 
                 isActive: true,
             },
             { isActive: false },
@@ -386,7 +386,7 @@ export const deleteExperience = async (req, res) => {
 
 
 
-// ✅ Create new education
+
 export const createEducation = async (req, res) => {
     try {
         const {
@@ -403,15 +403,15 @@ export const createEducation = async (req, res) => {
 
         let degreeTypeToSave = null;
 
-          // अगर custom degree type है
+         
         if (degreeType === "other" && customDegreeType) {
-            degreeTypeToSave = null; // या आप new degree type create कर सकते हैं
-            // customDegreeType field में store करें
+            degreeTypeToSave = null; 
+           
         } else {
             degreeTypeToSave = degreeType;
         }
 
-        // Validation
+     
         if (!degreeLevel ||  !degreeTitle || !country || !state || !city || !yearOfCompletion) {
             return res.status(400).json({
                 success: false,
@@ -419,7 +419,7 @@ export const createEducation = async (req, res) => {
             });
         }
 
-        // Debug: Check if user is available in request
+      
         console.log("User from request:", req.user);
 
         if (!req.user || !req.user._id) {
@@ -429,7 +429,7 @@ export const createEducation = async (req, res) => {
             });
         }
         const education = new Education({
-            userId: req.user._id, // Changed from user to userId
+            userId: req.user._id, 
             degreeLevel,
             degreeType: degreeTypeToSave,
             customDegreeType: degreeType === "other" ? customDegreeType : null,
@@ -443,7 +443,7 @@ export const createEducation = async (req, res) => {
 
         await education.save();
 
-        // Populate references for response
+   
         await education.populate("degreeLevel degreeType");
 
         res.status(201).json({
@@ -461,7 +461,7 @@ export const createEducation = async (req, res) => {
     }
 };
 
-// ✅ Get all educations for a user
+
 export const getUserEducations = async (req, res) => {
     try {
         if (!req.user || !req.user._id) {
@@ -472,7 +472,7 @@ export const getUserEducations = async (req, res) => {
         }
 
         const educations = await Education.find({
-            userId: req.user._id, // Changed from user to userId
+            userId: req.user._id, 
             
         })
             .populate("degreeLevel degreeType")
@@ -514,7 +514,7 @@ export const toggleEducationStatus = async (req, res) => {
             });
         }
 
-        // Toggle isActive status
+        
         education.isActive = !education.isActive;
         await education.save();
 
@@ -529,7 +529,7 @@ export const toggleEducationStatus = async (req, res) => {
     }
 };
 
-// ✅ Get single education by ID
+
 export const getEducationById = async (req, res) => {
     try {
         const { id } = req.params;
@@ -548,7 +548,7 @@ export const getEducationById = async (req, res) => {
         }
         const education = await Education.findOne({
             _id: id,
-            userId: req.user._id, // Changed from user to userId
+            userId: req.user._id, 
             isActive: true,
         }).populate("degreeLevel degreeType");
 
@@ -573,7 +573,7 @@ export const getEducationById = async (req, res) => {
     }
 };
 
-// ✅ Update education
+
 export const updateEducation = async (req, res) => {
     try {
         const { id } = req.params;
@@ -595,7 +595,7 @@ export const updateEducation = async (req, res) => {
         const education = await Education.findOneAndUpdate(
             {
                 _id: id,
-                userId: req.user._id, // Changed from user to userId
+                userId: req.user._id, 
                 isActive: true,
             },
             updateData,
@@ -624,7 +624,7 @@ export const updateEducation = async (req, res) => {
     }
 };
 
-//  Delete education (soft delete)
+
 
 export const deleteEducation = async (req, res) => {
     try {
@@ -646,7 +646,7 @@ export const deleteEducation = async (req, res) => {
 
         const education = await Education.findOneAndDelete({
             _id: id,
-            userId: req.user._id, // Changed from user to userId
+            userId: req.user._id,
         });
 
         if (!education) {
@@ -703,7 +703,7 @@ export const toggleSkillStatus = async (req, res) => {
             });
         }
 
-        // Toggle isActive status
+        
         skill.isActive = !skill.isActive;
         await skill.save();
 
@@ -821,7 +821,7 @@ export const createLanguage = async (req, res) => {
       return res.status(400).json({ success: false, message: "All fields required" });
     }
 
-    // Optionally link with user
+   
     const userId = req.user?._id || req.body.userId;
     const newLanguage = await Language.create({
       userId,
@@ -872,7 +872,7 @@ export const toggleLanguageStatus = async (req, res) => {
             });
         }
 
-        // Toggle isActive status
+       
         language.isActive = !language.isActive;
         await language.save();
 

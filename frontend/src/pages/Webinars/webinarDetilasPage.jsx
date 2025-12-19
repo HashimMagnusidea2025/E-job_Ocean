@@ -63,7 +63,23 @@ const WebinarDetailsPage = () => {
         return cleanContent;
     };
 
+ const getWebinarImage = (webinar) => {
+        // ✅ Multiple speakers → WebinarImage
+        if (webinar.Speakers && webinar.Speakers.length > 1 && webinar.WebinarImage) {
+            return `${baseURL}${webinar.WebinarImage}`;
+        }
 
+        // ✅ Single speaker → Speaker profilePic
+        if (
+            webinar.Speakers &&
+            webinar.Speakers.length === 1 &&
+            webinar.Speakers[0].profilePic
+        ) {
+            return `${baseURL}/${webinar.Speakers[0].profilePic}`;
+        }
+
+
+    };
     return (
         <div className="w-full font-[Poppins] bg-gray-50">
             <Navbar />
@@ -76,17 +92,18 @@ const WebinarDetailsPage = () => {
                 <div className="container mx-auto px-4 py-10 grid grid-cols-1 lg:grid-cols-3 gap-10">
                     {/* LEFT CONTENT */}
                     <div className="lg:col-span-2">
-                        {/* Webinar Header Card */}
+                       
                         <div className="flex flex-col md:flex-row bg-white p-4 md:p-6 shadow-sm rounded-2xl">
                             {/* Speaker Image */}
                             <div className="w-full md:w-1/3 bg-gray-300 aspect-[16/9] md:aspect-[4/5] rounded-xl mb-4 md:mb-0 md:mr-6 overflow-hidden">
                                 <img
-                                    src={
-                                        webinar.Speaker?.profilePic
-                                            ? `${baseURL}/${webinar.Speaker.profilePic}`
-                                            : "/default-speaker.png"
-                                    }
-                                    alt={`${webinar.Speaker?.firstName} ${webinar.Speaker?.lastName}`}
+                                    // src={
+                                    //     webinar.Speakers?.profilePic
+                                    //         ? `${baseURL}/${webinar.Speakers?.profilePic}`
+                                    //         : "/default-speaker.png"
+                                    // }
+                                    // alt={`${webinar.Speakers?.firstName} ${webinar.Speakers?.lastName}`}
+                                     src={getWebinarImage(webinar)}
                                     className="w-full h-full object-cover rounded-xl"
                                 />
                             </div>
@@ -94,10 +111,10 @@ const WebinarDetailsPage = () => {
                             {/* Webinar Title + Intro */}
                             <div className="flex flex-col justify-center w-full md:w-2/3">
                                 <h2 className="font-bold text-xl sm:text-2xl md:text-3xl lg:text-[35px] leading-snug mb-3">
-                                    {webinar.Speaker.salutation} {webinar.Speaker.firstName} {webinar.Speaker.lastName}
+                                    {webinar.Speakers.salutation} {webinar.Speakers.firstName} {webinar.Speakers.lastName}
                                 </h2>
                                 <p className="text-gray-600 leading-relaxed">
-                                    {webinar.Speaker?.introduction}
+                                    {webinar.Speakers?.introduction}
                                 </p>
                             </div>
                         </div>

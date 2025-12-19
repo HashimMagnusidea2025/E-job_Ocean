@@ -27,6 +27,7 @@ export default function PostAJob() {
         degreeLevel: "",
         experience: "",
         externalJob: "",
+        mode: "",
         isFreelance: false,
         isActive: true,
         country: "",
@@ -53,7 +54,7 @@ export default function PostAJob() {
     const [loading, setLoading] = useState(false);
 
     const [isEditing, setIdEditing] = useState(false);
-// Set editing mode based on ID
+    // Set editing mode based on ID
     useEffect(() => {
         if (id) {
             setIdEditing(true);
@@ -99,6 +100,21 @@ export default function PostAJob() {
             axios.get(`/city/state/${formData.state}`).then((res) => setCities(res.data.data));
         } else setCities([]);
     }, [formData.state]);
+
+
+
+    useEffect(() => {
+        const fetchDegreeLevels = async () => {
+            try {
+                const res = await axios.get("/degree-Level-Category/active");
+                setDegreeLevels(res.data);
+            } catch (err) {
+                console.error("Failed to fetch degree levels:", err);
+            }
+        };
+        fetchDegreeLevels();
+    }, []);
+
 
     useEffect(() => {
         const fetchCareerLevels = async () => {
@@ -166,7 +182,7 @@ export default function PostAJob() {
 
     // Fetch additional data
     useEffect(() => {
-        // Mock data for demonstration - replace with actual API calls
+
         setSalaryCurrencies([
             { _id: "1", name: "USD" },
             { _id: "2", name: "INR" },
@@ -179,12 +195,7 @@ export default function PostAJob() {
             { _id: "3", name: "Weekly" }
         ]);
 
-        setDegreeLevels([
-            { _id: "1", name: "High School" },
-            { _id: "2", name: "Bachelor's" },
-            { _id: "3", name: "Master's" },
-            { _id: "4", name: "PhD" }
-        ]);
+
 
         setExperienceLevels([
             { _id: "1", name: "0-1 years" },
@@ -223,6 +234,7 @@ export default function PostAJob() {
                         degreeLevel: job.degreeLevel || "",
                         experience: job.experience || "",
                         externalJob: job.externalJob || "",
+                        mode: job.mode || "",
                         isFreelance: job.isFreelance || false,
                         isActive: job.isActive ?? true,
                         country: job.country || "",
@@ -292,6 +304,7 @@ export default function PostAJob() {
         if (!formData.functionalArea) newErrors.functionalArea = "Functional Area is required";
         if (!formData.positions) newErrors.positions = "Number of positions is required";
         if (!formData.jobShift) newErrors.jobShift = "Job Shift is required";
+        if (!formData.mode) newErrors.mode = "Job Mode is required";
         // ✅ Check if company exists
         if (!companyId) newErrors.company = "Company profile not found. Please create company profile first.";
         setErrors(newErrors);
@@ -317,6 +330,7 @@ export default function PostAJob() {
             degreeLevel: "",
             experience: "",
             externalJob: "",
+            mode: "",
             isFreelance: false,
             isActive: true,
             country: "",
@@ -784,6 +798,23 @@ export default function PostAJob() {
                                         <option value="yes">Yes</option>
                                         <option value="no">No</option>
                                     </select>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Job Mode *</label>
+                                    <select
+                                        name="mode"
+                                        value={formData.mode}
+                                        onChange={handleInputChange}
+                                        className={`w-full border px-3 py-2 rounded text-sm ${errors.mode ? "border-red-500" : "border-gray-300"}`}
+                                    >
+                                        <option value="">Select Job Mode</option>
+                                        <option value="remote">Remote</option>
+                                        <option value="onsite">On Site</option>
+                                        <option value="hybrid">Hybrid</option>
+
+
+                                    </select>
+                                    {errors.mode && <p className="text-red-500 text-xs mt-1">{errors.mode}</p>}
                                 </div>
 
                                 <div className="flex items-center gap-2">

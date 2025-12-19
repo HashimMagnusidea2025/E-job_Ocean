@@ -14,7 +14,7 @@ export default function AdminDash() {
         caFresherCount: 0,
     });
 
-    // Fetch all counts
+
     useEffect(() => {
         fetchCounts();
     }, []);
@@ -33,10 +33,10 @@ export default function AdminDash() {
 
             setStats({
                 webinarCount: webinarsRes.data.length,
-                webinarRegistrationCount: webinarRegisterRes.data.length, // You can replace this with API later
+                webinarRegistrationCount: webinarRegisterRes.data.length, 
                 SessionRegistrationCount: sessionRegiserRes.data.length,
                 speakerCount: speakersRes.data.length,
-                caFresherCount: caFresherRes.data.data.length, // same here (placeholder)
+                caFresherCount: caFresherRes.data.data.length, 
             });
 
 
@@ -51,14 +51,14 @@ export default function AdminDash() {
             value: stats.webinarCount,
             icon: <FaCalendarAlt className="text-blue-400 text-3xl" />,
             bgColor: "bg-blue-100",
-            onClick: () => navigate("/admin-dashboard/add-webinar"), // 👈 navigate on click
+            onClick: () => navigate("/admin-dashboard/add-webinar"), 
         },
         {
             label: "Webinar Registration",
             value: stats.webinarRegistrationCount,
             icon: <FaUser className="text-green-400 text-3xl" />,
             bgColor: "bg-green-100",
-            onClick: () => navigate("/admin-dashboard/webinar-registration-list"), // 👈 navigate on click
+            onClick: () => navigate("/admin-dashboard/webinar-registration-list"), 
 
 
         },
@@ -67,7 +67,7 @@ export default function AdminDash() {
             value: stats.SessionRegistrationCount,
             icon: <FaUser className="text-yellow-400 text-3xl" />,
             bgColor: "bg-yellow-100",
-            onClick: () => navigate("/admin-dashboard/one-to-one-registration-list"), // 👈 navigate on click
+            onClick: () => navigate("/admin-dashboard/one-to-one-registration-list"), 
 
 
         },
@@ -76,21 +76,21 @@ export default function AdminDash() {
             value: stats.speakerCount,
             icon: <FaUsers className="text-orange-400 text-3xl" />,
             bgColor: "bg-orange-100",
-            onClick: () => navigate("/admin-dashboard/add-speakers"), // 👈 navigate on click
+            onClick: () => navigate("/admin-dashboard/add-speakers"), 
         },
         {
             label: "CA Freshers",
             value: stats.caFresherCount,
             icon: <FaUsers className="text-red-500 text-3xl" />,
             bgColor: "bg-red-100",
-            onClick: () => navigate("/admin-dashboard/ca-fresher-list"), // 👈 navigate on click
+            onClick: () => navigate("/admin-dashboard/ca-fresher-list"), 
         },
     ];
 
     return (
         <Layout>
             <div className="p-6">
-                {/* Header */}
+                
                 <div className="mb-6">
                     <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
                     <p className="text-sm text-gray-500">
@@ -105,7 +105,7 @@ export default function AdminDash() {
 
                 </div>
 
-                {/* Stats Cards */}
+               
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-10">
                     {cards.map((item, index) => (
                         <div
@@ -127,8 +127,8 @@ export default function AdminDash() {
                     ))}
                 </div>
 
-                {/* Footer */}
-                <footer className="text-center text-sm text-gray-600 border-t pt-4 mt-8">
+              
+                {/* <footer className="text-center text-sm text-gray-600 border-t pt-4 mt-8">
                     <p>
                         © Copyright <b>@2025</b>. All Rights Reserved
                     </p>
@@ -138,7 +138,7 @@ export default function AdminDash() {
                             Magnus Ideas Pvt. Ltd.
                         </span>
                     </p>
-                </footer>
+                </footer> */}
             </div>
         </Layout>
     );

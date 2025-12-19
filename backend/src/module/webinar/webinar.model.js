@@ -68,11 +68,14 @@ const WebinarSchema = mongoose.Schema({
     IsActive: {
         type: String, enum: ["active", "inactive"],
     },
-    Speaker: {
+    // Speaker: {
+    //     type: mongoose.Schema.Types.ObjectId,
+    //     ref: "Speaker"
+    // },
+    Speakers: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: "Speaker"
-    },
-
+    }],
     googleEventId: {
         type: String
     },

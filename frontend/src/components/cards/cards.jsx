@@ -15,7 +15,9 @@ import { Splide, SplideSlide } from "@splidejs/react-splide";
 import { AutoScroll } from "@splidejs/splide-extension-auto-scroll";
 import "@splidejs/react-splide/css";
 import axios from '../../utils/axios.js'
+import axiosExternal from "axios";
 import { useNavigate } from "react-router-dom";
+import noImage from '../../media/png/no.png';
 
 const baseURL = import.meta.env.VITE_BACKEND_URL; // Vite
 // 🔹 1. Partner Logo Marquee
@@ -95,29 +97,161 @@ export const MarqueeTagCards = () => {
 };
 
 
-// 2. Student Cards Marquee
-const students = [
-    {
-        name: "Sanchita Agarwal",
-        course: "GST MasterClass",
-        company: "KPMG",
-    },
-    {
-        name: "Som Khandelwal",
-        course: "Audit Masterclass",
-        company: "CRISIL",
-    },
-    {
-        name: "Aditi Khaitan",
-        course: "Audit MasterClass",
-        company: "Grant Thornton",
-    },
-];
+// 2. Student Cards Marquee (now Blog Cards Marquee)
 
+// export const StudentCardMarquee = () => {
+//     const [blogs, setBlogs] = useState([]);
 
+//     useEffect(() => {
+//         const fetchBlogs = async () => {
+//             try {
+//                 const { data } = await axiosExternal.get("https://blog.ejobocean.com/wp-json/wp/v2/posts?_embed");
+//                 setBlogs(data || []);
+//             } catch (error) {
+//                 console.error("Error fetching blogs:", error);
+//             }
+//         };
+//         fetchBlogs();
+//     }, []);
+
+//     const repeatedBlogs = [...blogs, ...blogs];
+
+//     return (
+//         <div className="w-full py-10 bg-[#f9fafb]">
+//             <Splide
+//                 options={{
+//                     type: "loop",
+//                     drag: false,
+//                     arrows: false,
+//                     pagination: false,
+//                     perPage: 3,
+//                     gap: "1rem",
+//                     autoScroll: {
+//                         speed: -1,
+//                         pauseOnHover: true,
+//                         pauseOnFocus: false,
+//                     },
+//                 }}
+//                 extensions={{ AutoScroll }}
+//                 className="student-marquee"
+//             >
+//                 {repeatedBlogs.map((blog, index) => {
+//                     const featuredImage = blog._embedded && blog._embedded['wp:featuredmedia'] && blog._embedded['wp:featuredmedia'][0] ? blog._embedded['wp:featuredmedia'][0].source_url : noImage;
+//                     const authorName = blog._embedded && blog._embedded.author && blog._embedded.author[0] ? blog._embedded.author[0].name : "E-Job Ocean";
+
+//                     return (
+//                         <SplideSlide key={index} className="!w-[280px] sm:!w-[340px] py-6">
+//                             <div className="px-3 h-full">
+//                                 <div
+//                                     className="
+//         relative
+//         h-[280px]
+//         sm:h-[320px]
+//         rounded-3xl
+//         overflow-hidden
+        
+//         bg-black
+//         group
+//       "
+//                                 >
+//                                     {/* Background Image */}
+//                                     <img
+//                                         src={featuredImage}
+//                                         alt={blog.title.rendered}
+//                                         className="
+//           absolute
+//           inset-0
+//           w-full
+//           h-full
+//           object-cover
+//           scale-105
+//           transition-transform
+//           duration-700
+//           group-hover:scale-110
+//         "
+//                                     />
+
+//                                     {/* Gradient Overlay */}
+//                                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+
+//                                     {/* Content */}
+//                                     <div className="relative z-10 h-full flex flex-col justify-end p-5 text-left">
+//                                         <h3
+//                                             className="
+//             text-white
+//             text-base
+//             sm:text-lg
+//             font-bold
+//             leading-snug
+//             line-clamp-2
+//           "
+//                                             dangerouslySetInnerHTML={{
+//                                                 __html: blog.title.rendered,
+//                                             }}
+//                                         />
+
+//                                         <div className="mt-3 flex items-center justify-between text-xs sm:text-sm text-gray-300">
+//                                             <span>{authorName}</span>
+//                                             {/* <span className="bg-white/20 px-3 py-1 rounded-full backdrop-blur">
+//                                                 Blog
+//                                             </span> */}
+//                                         </div>
+//                                     </div>
+//                                 </div>
+//                             </div>
+//                         </SplideSlide>
+
+//                     );
+//                 })}
+//             </Splide>
+//         </div>
+//     );
+// }
 
 export const StudentCardMarquee = () => {
-    const repeatedStudents = [...students, ...students];
+    const [blogs, setBlogs] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchBlogs = async () => {
+            try {
+                const { data } = await axiosExternal.get(
+                    "https://blog.ejobocean.com/wp-json/wp/v2/posts?_embed"
+                );
+                setBlogs(data || []);
+            } catch (error) {
+                console.error("Error fetching blogs:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchBlogs();
+    }, []);
+
+    /* 🔴 LOADER UI */
+    if (loading) {
+        return (
+            <div className="w-full py-16 flex justify-center items-center bg-[#f9fafb]">
+                <div className="flex gap-4">
+                    {[1, 2, 3,4].map((i) => (
+                        <div
+                            key={i}
+                            className="
+                                w-[280px]
+                                sm:w-[340px]
+                                h-[320px]
+                                rounded-3xl
+                                bg-gray-200
+                                animate-pulse
+                            "
+                        />
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    const repeatedBlogs = [...blogs, ...blogs];
 
     return (
         <div className="w-full py-10 bg-[#f9fafb]">
@@ -136,41 +270,48 @@ export const StudentCardMarquee = () => {
                     },
                 }}
                 extensions={{ AutoScroll }}
-                className="student-marquee"
             >
-                {repeatedStudents.map((student, index) => (
-                    <SplideSlide key={index} className="!w-[300px] py-2">
-                        <div className="relative pt-14 px-2">
-                            <div className="bg-white min-w-[280px] max-w-[280px] mx-auto rounded-xl shadow-md p-7 text-center relative">
+                {repeatedBlogs.map((blog, index) => {
+                    const featuredImage =
+                        blog._embedded?.["wp:featuredmedia"]?.[0]?.source_url ||
+                        noImage;
 
-                                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                    const authorName =
+                        blog._embedded?.author?.[0]?.name || "E-Job Ocean";
+
+                    return (
+                        <SplideSlide key={index} className="!w-[280px] sm:!w-[340px] py-6">
+                            <div className="px-3 h-full">
+                                <div className="relative h-[280px] sm:h-[320px] rounded-3xl overflow-hidden bg-black group">
                                     <img
-                                        src={profile}
-                                        alt={student.name}
-                                        className="w-[70px] h-[70px] rounded-full object-cover border-4 border-white shadow"
+                                        src={featuredImage}
+                                        alt={blog.title.rendered}
+                                        className="absolute inset-0 w-full h-full object-cover scale-105"
                                     />
-                                </div>
 
-                                <div className="mt-8">
-                                    <h3 className="text-lg font-semibold flex justify-center items-center gap-1">
-                                        {student.name}
-                                        <img src={linkedInIcon} alt="LinkedIn" className="w-4 h-4" />
-                                    </h3>
-                                    <hr className="my-2 border-gray-200" />
-                                    <p className="text-sm text-gray-600 mb-1">Course enrolled in</p>
-                                    <p className="text-[#339ca0] font-semibold mb-1">{student.course}</p>
-                                    <p className="text-sm text-gray-700">{student.company}</p>
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+
+                                    <div className="relative z-10 h-full flex flex-col justify-end p-5">
+                                        <h3
+                                            className="text-white text-base sm:text-lg font-bold leading-snug line-clamp-2"
+                                            dangerouslySetInnerHTML={{
+                                                __html: blog.title.rendered,
+                                            }}
+                                        />
+
+                                        <div className="mt-3 text-xs sm:text-sm text-gray-300">
+                                            {authorName}
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </SplideSlide>
-
-                ))}
+                        </SplideSlide>
+                    );
+                })}
             </Splide>
         </div>
     );
-}
-
+};
 
 
 
@@ -240,7 +381,7 @@ export const OurCourses = () => {
     useEffect(() => {
         const fetchWebinars = async () => {
             try {
-                const { data } = await axios.get("/webinars");
+                const { data } = await axios.get("/webinars/active");
                 const validData = data.map((w) => ({
                     ...w,
                     WebinarStartDateTime: new Date(w.WebinarStartDateTime),
@@ -285,6 +426,24 @@ export const OurCourses = () => {
         });
     }
 
+
+    const getWebinarImage = (webinar) => {
+        // ✅ Multiple speakers → WebinarImage
+        if (webinar.Speakers && webinar.Speakers.length > 1 && webinar.WebinarImage) {
+            return `${baseURL}${webinar.WebinarImage}`;
+        }
+
+        // ✅ Single speaker → Speaker profilePic
+        if (
+            webinar.Speakers &&
+            webinar.Speakers.length === 1 &&
+            webinar.Speakers[0].profilePic
+        ) {
+            return `${baseURL}/${webinar.Speakers[0].profilePic}`;
+        }
+
+
+    };
     return (
         <div className="py-12 px-4 bg-white font-[Poppins] container mx-auto">
             <div className="container mx-auto">
@@ -332,7 +491,7 @@ export const OurCourses = () => {
                             <Link to={`/webinars/${webinar.WebinarSlug}`}>
                                 <div className="h-[420px] mx-auto bg-white w-[300px] sm:w-[290px] rounded-lg shadow hover:shadow-xl transition-all overflow-hidden border border-black">
                                     <div className="h-[250px] w-full overflow-hidden">
-                                        <img
+                                        {/* <img
                                             src={
                                                 webinar.Speaker?.profilePic
                                                     ? `${baseURL}/${webinar.Speaker.profilePic}`
@@ -340,7 +499,13 @@ export const OurCourses = () => {
                                             }
                                             alt={webinar.WebinarTitle}
                                             className="w-full h-full object-cover object-center"
+                                        /> */}
+                                        <img
+                                            src={getWebinarImage(webinar)}
+                                            alt={webinar.WebinarTitle}
+                                            className="w-full h-full object-cover object-center"
                                         />
+
                                     </div>
                                     <div className="p-4 h-[120px]">
                                         <h3 className="font-bold text-md mb-2 line-clamp-2">

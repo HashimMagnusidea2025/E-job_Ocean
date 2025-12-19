@@ -18,6 +18,7 @@ export default function OpportunitiesSection() {
     const { id } = useParams();
     const type = "job";
     const navigate = useNavigate();
+
     const [activeTab, setActiveTab] = useState()
 
     // Form state
@@ -44,6 +45,7 @@ export default function OpportunitiesSection() {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     // Temporary filter states (for dropdown selection)
+
     const [tempCountryFilter, setTempCountryFilter] = useState("");
     const [tempStateFilter, setTempStateFilter] = useState("");
     const [tempCityFilter, setTempCityFilter] = useState("");
@@ -399,59 +401,59 @@ export default function OpportunitiesSection() {
         fetchJobs();
     }, []);
 
-    const handleChange = (e) => {
-        const { name, value, files } = e.target;
-        if (name === "resume") {
-            setFormData(prev => ({ ...prev, resume: files[0] }));
-        } else {
-            setFormData(prev => ({
-                ...prev,
-                [name]: value,
-                ...(name === "country" ? { state: "", city: "" } : {}),
-                ...(name === "state" ? { city: "" } : {})
-            }));
-        }
-    };
+    // const handleChange = (e) => {
+    //     const { name, value, files } = e.target;
+    //     if (name === "resume") {
+    //         setFormData(prev => ({ ...prev, resume: files[0] }));
+    //     } else {
+    //         setFormData(prev => ({
+    //             ...prev,
+    //             [name]: value,
+    //             ...(name === "country" ? { state: "", city: "" } : {}),
+    //             ...(name === "state" ? { city: "" } : {})
+    //         }));
+    //     }
+    // };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault();
 
-        if (!formData.resume) {
-            return Swal.fire({
-                icon: "warning",
-                title: "Resume Required",
-                text: "Please upload your resume before submitting.",
-            });
-        }
+    //     if (!formData.resume) {
+    //         return Swal.fire({
+    //             icon: "warning",
+    //             title: "Resume Required",
+    //             text: "Please upload your resume before submitting.",
+    //         });
+    //     }
 
-        const submissionData = new FormData();
-        for (let key in formData) {
-            submissionData.append(key, formData[key]);
-        }
-        submissionData.append("jobId", selectedJob._id);
+    //     const submissionData = new FormData();
+    //     for (let key in formData) {
+    //         submissionData.append(key, formData[key]);
+    //     }
+    //     submissionData.append("jobId", selectedJob._id);
 
-        try {
-            const response = await axios.post("/job-register", submissionData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
+    //     try {
+    //         const response = await axios.post("/job-register", submissionData, {
+    //             headers: { "Content-Type": "multipart/form-data" },
+    //         });
 
-            Swal.fire({
-                icon: "success",
-                title: "Success",
-                text: "Application submitted successfully!",
-                confirmButtonColor: "#339ca0",
-            });
+    //         Swal.fire({
+    //             icon: "success",
+    //             title: "Success",
+    //             text: "Application submitted successfully!",
+    //             confirmButtonColor: "#339ca0",
+    //         });
 
-            closeModal();
-        } catch (err) {
-            console.error(err.response?.data || err);
-            Swal.fire({
-                icon: "error",
-                title: "Submission Failed",
-                text: err.response?.data?.message || "Failed to submit application.",
-            });
-        }
-    };
+    //         closeModal();
+    //     } catch (err) {
+    //         console.error(err.response?.data || err);
+    //         Swal.fire({
+    //             icon: "error",
+    //             title: "Submission Failed",
+    //             text: err.response?.data?.message || "Failed to submit application.",
+    //         });
+    //     }
+    // };
 
     const getLocationString = (jobId) => {
         const loc = locationNamesMap[jobId];

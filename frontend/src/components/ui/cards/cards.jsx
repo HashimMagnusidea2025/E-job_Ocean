@@ -4,7 +4,7 @@ import axios from '../../../utils/axios.js'
 import { CommentButton } from "../button/button";
 import { ViewButton } from "../button/button";
 import { useState, useEffect } from "react";
-import { FaFacebook, FaTwitter, FaInstagram, FaTelegram } from "react-icons/fa";
+
 import { Link } from "react-router-dom";
 import { IoMdTime } from "react-icons/io";
 import { AiFillLike, AiOutlineLike } from "react-icons/ai";
@@ -12,7 +12,11 @@ import { LikeButton } from "../button/button";
 import axioss from 'axios';
 import { FaRegCalendarAlt } from "react-icons/fa";
 import RegisterModal from "../../../pages/Webinars/RegisterModal.jsx";
-import { FaLinkedin } from "react-icons/fa";
+
+
+
+import { FaFacebook, FaTwitter, FaLinkedin, FaPinterest, FaGlobe, FaTelegram, FaInstagram } from "react-icons/fa";
+
 const baseURL = import.meta.env.VITE_BACKEND_URL; // Vite
 // या CRA में: const baseURL = process.env.REACT_APP_BACKEND_URL;
 import noImage from '../../../media/png/no.png';
@@ -624,6 +628,109 @@ export const FollowSocials = () => {
 };
 
 
+
+export const FollowSocialsEmployer = ({ socialLinks = {} }) => {
+    // Default fallback values if socialLinks is undefined
+    const {
+        facebook = "",
+        twitter = "",
+        linkedin = "",
+        pinterest = "",
+        other = "",
+        instagram = "",
+        telegram = ""
+    } = socialLinks;
+
+    // Array of social media platforms with their respective data
+    const socialPlatforms = [
+        {
+            name: "Facebook",
+            url: facebook,
+            icon: <FaFacebook size={25} />,
+            bgColor: "bg-[#1877F2] hover:bg-[#145DBF]",
+            show: !!facebook
+        },
+        {
+            name: "Twitter",
+            url: twitter,
+            icon: <FaTwitter size={25} />,
+            bgColor: "bg-[#1DA1F2] hover:bg-[#0d8ddb]",
+            show: !!twitter
+        },
+        {
+            name: "LinkedIn",
+            url: linkedin,
+            icon: <FaLinkedin size={25} />,
+            bgColor: "bg-[#0077B5] hover:bg-[#005582]",
+            show: !!linkedin
+        },
+        {
+            name: "Instagram",
+            url: instagram,
+            icon: <FaInstagram size={25} />,
+            bgColor: "bg-gradient-to-r from-[#F58529] via-[#DD2A7B] to-[#8134AF]",
+            show: !!instagram
+        },
+        {
+            name: "Pinterest",
+            url: pinterest,
+            icon: <FaPinterest size={25} />,
+            bgColor: "bg-[#E60023] hover:bg-[#B3001B]",
+            show: !!pinterest
+        },
+        {
+            name: "Telegram",
+            url: telegram,
+            icon: <FaTelegram size={25} />,
+            bgColor: "bg-[#0088cc] hover:bg-[#006b99]",
+            show: !!telegram
+        },
+        {
+            name: "Other",
+            url: other,
+            icon: <FaGlobe size={25} />,
+            bgColor: "bg-gray-800 hover:bg-gray-700",
+            show: !!other
+        }
+    ];
+
+    // Filter only those platforms that have URLs
+    const activePlatforms = socialPlatforms.filter(platform => platform.show);
+
+    // If no social links available, show a message
+    if (activePlatforms.length === 0) {
+        return (
+            <div className="bg-white shadow-md rounded-2xl p-5">
+                <h3 className="text-lg font-semibold mb-4">Follow Socials</h3>
+                <p className="text-gray-500 text-center py-4">
+                    No social media links added yet
+                </p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="bg-white shadow-md rounded-2xl p-5">
+            <h3 className="text-lg font-semibold mb-4">Follow Socials</h3>
+            <div className="flex flex-col space-y-3">
+                {activePlatforms.map((platform, index) => (
+                    <a
+                        key={index}
+                        href={platform.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`flex gap-4 px-4 py-2 ${platform.bgColor} text-white rounded-lg text-center items-center justify-center`}
+                    >
+                        {platform.icon}
+                        <span>{platform.name}</span>
+                    </a>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+
 export const SubscribeNow = () => {
 
     return (
@@ -858,7 +965,7 @@ export const ReactShareButton = ({
 
 
 
-export const WebinarCardsList = ({ webinar, onRegisterClick }) => {
+export const WebinarCardsList = ({ webinar,image, onRegisterClick }) => {
     const start = new Date(webinar.WebinarStartDateTime);
     const end = new Date(webinar.WebinarEndDateTime);
     const now = new Date(); // current time
@@ -879,17 +986,18 @@ export const WebinarCardsList = ({ webinar, onRegisterClick }) => {
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
             <div className="relative">
                 {/* Speaker Banner Image */}
-                {webinar.Speaker && (
+                
                     <img
-                        src={
-                            webinar.Speaker?.profilePic
-                                ? `${baseURL}/${webinar.Speaker.profilePic}`
-                                : "/default-avatar.png"
-                        }
+                        // src={
+                        //     webinar.Speaker?.profilePic
+                        //         ? `${baseURL}/${webinar.Speaker.profilePic}`
+                        //         : "/default-avatar.png"
+                        // }
+                        src={image}
                         alt="Speaker"
                         className="w-full h-52 object-contain bg-gray-100"
                     />
-                )}
+               
 
 
                 {/* Webinar Type Badge */}
@@ -903,17 +1011,14 @@ export const WebinarCardsList = ({ webinar, onRegisterClick }) => {
 
             <div className="p-5">
                 {/* Speaker Info */}
-                {webinar.Speaker && (
+                
                     <div className="flex items-center gap-3 mb-4">
                         <img
-                            src={
-                                webinar.Speaker.profilePic
-                                    ? `${baseURL}/${webinar.Speaker.profilePic}`
-                                    : "/default-avatar.png"
-                            }
+                            src={image}
                             alt="Speaker"
                             className="w-12 h-12 rounded-full object-cover border border-gray-200 shadow-sm"
                         />
+                        {webinar.Speaker && (
                         <span className="text-sm font-medium text-gray-900">
                             {capitalizeFirst(webinar.Speaker.salutation)}
                             {capitalizeFirst(webinar.Speaker.firstName)}{" "}
@@ -921,8 +1026,9 @@ export const WebinarCardsList = ({ webinar, onRegisterClick }) => {
                             {capitalizeFirst(webinar.Speaker.lastName)}
 
                         </span>
+                          )}
                     </div>
-                )}
+              
 
                 {/* Webinar Title */}
                 <h3 className="text-lg font-semibold text-gray-900 mb-3 line-clamp-2">
@@ -1110,11 +1216,13 @@ export const JobApplicationForm = ({ jobId, closeModal, initialData = {} }) => {
     const [countries, setCountries] = useState([]);
     const [states, setStates] = useState([]);
     const [cities, setCities] = useState([]);
+
     const [loadingDropdown, setLoadingDropdown] = useState({
         countries: false,
         states: false,
         cities: false,
     });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         const loadCountries = async () => {
@@ -1223,6 +1331,9 @@ export const JobApplicationForm = ({ jobId, closeModal, initialData = {} }) => {
         //     });
         // }
         if (!validateForm()) return;
+
+        setIsSubmitting(true); // ⬅️ Start Loader
+
         const submissionData = new FormData();
         for (let key in formData) {
             submissionData.append(key, formData[key]);
@@ -1233,6 +1344,8 @@ export const JobApplicationForm = ({ jobId, closeModal, initialData = {} }) => {
             const response = await axios.post("/job-register", submissionData, {
                 headers: { "Content-Type": "multipart/form-data" },
             });
+            console.log(response);
+
             Swal.fire({
                 icon: "success",
                 title: "Success",
@@ -1247,6 +1360,9 @@ export const JobApplicationForm = ({ jobId, closeModal, initialData = {} }) => {
                 title: "Submission Failed",
                 text: err.response?.data?.message || "Failed to submit application.",
             });
+        }
+        finally {
+            setIsSubmitting(false); // ⬅️ Stop Loader
         }
     };
 
@@ -1389,10 +1505,19 @@ export const JobApplicationForm = ({ jobId, closeModal, initialData = {} }) => {
 
             <button
                 type="submit"
-                className="bg-[#339ca0] text-white py-2 rounded hover:opacity-90 transition font-medium mt-2"
+                disabled={isSubmitting}
+                className={`bg-[#339ca0] text-white py-2 rounded transition font-medium mt-2 w-full flex items-center justify-center 
+        ${isSubmitting ? "opacity-70 cursor-not-allowed" : "hover:opacity-90"}`}
             >
-                Submit Application
+
+                {isSubmitting ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                    "Submit Application"
+                )}
+
             </button>
+
         </form>
     );
 }

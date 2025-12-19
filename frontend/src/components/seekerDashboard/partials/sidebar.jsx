@@ -6,6 +6,7 @@ import {
   FaUserAlt, FaCog, FaBuilding, FaList, FaArrowDown, FaArrowUp,
   FaAngleUp
 } from "react-icons/fa";
+import { FaBookOpen } from "react-icons/fa";
 import { RiMoneyDollarCircleLine } from "react-icons/ri";
 import { CiBoxList } from "react-icons/ci";
 import { FaAngleDown } from "react-icons/fa";
@@ -83,7 +84,7 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
     // { path: "/employer-dashboard/unloced-seekers", icon: <FaBullhorn />, label: "Unlocked Users" },
     // { path: "/employer-dashboard/company-messages", icon: <FaUser />, label: "Company Messages" },
     // { path: "/employer-dashboard/company-followers", icon: <FaUser />, label: "Company Followings" },
-    
+
     { icon: <FaSignOutAlt />, label: "Logout", onClick: handleLogout }
 
   ];
@@ -155,8 +156,8 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
       icon: <FaUser />, label: " Registrations List",
       children: [
 
-       
-        
+
+
         {
           path: "/admin-dashboard/job-register-list", icon: <GoDotFill size={12} className="dot" />,
           label: "Job Registration list"
@@ -234,6 +235,18 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
 
       ]
     },
+   
+    {
+      icon: <FaBookOpen /> , label: "Course Management",
+
+      children: [
+        { path: '/admin-dashboard/course', icon: <GoDotFill size={12} className=" dot" />, label: "Course List" },
+
+
+      ]
+    },
+     { path: "/admin-dashboard/our-founders", label: "Our Founders", icon: <GoDotFill size={12} className="dot" /> },
+    
     {
       icon: <IoMdSettings />, label: "Master Settings",
       children: [

@@ -42,7 +42,10 @@ const JobPostSchema = mongoose.Schema({
     expiryDate: { type: Date },
     degreeLevel: { type: mongoose.Schema.Types.ObjectId, ref: "DegreeLevelCategory" },
     experience: { type: String },
-    mode: { type: String, enum: ["remote", "online", "offline"]},
+    mode: {
+        type: String,
+        enum: ["remote", "onsite", "hybrid"]
+    },
     externalJob: { type: Boolean, default: false },
     isFreelance: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },

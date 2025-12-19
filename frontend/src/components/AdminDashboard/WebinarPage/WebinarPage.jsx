@@ -2,7 +2,14 @@ import React from "react";
 import { useState, useEffect } from "react";
 import axios from "../../../utils/axios.js";
 import Layout from "../../seekerDashboard/partials/layout.jsx";
-import DataTable from "react-data-table-component";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  flexRender,
+} from "@tanstack/react-table";
+
 import { FaEdit, FaTrash, FaEye } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
@@ -34,7 +41,7 @@ const WebinarPage = () => {
     WebinarType: "",
     IncludingGST: false,
     IsActive: false,
-    Speaker: "",
+    Speakers: [], // Changed from Speaker to Speakers (array)
     WebinarImage: null,
     WebinarLogo: null,
     WebinarVideoOptional: null,
@@ -66,21 +73,65 @@ const WebinarPage = () => {
   const fetchWebinars = async () => {
     try {
       const res = await axios.get("/webinars");
-      setWebinars(res.data);
-      setFilteredWebinars(res.data);
+      const webinarsData = res.data;
+      console.log(res.data);
+
+      // Fetch registrations to count per webinar
+      const regRes = await axios.get("/registrations/webinar");
+      const registrationsData = regRes.data;
+
+      // Count registrations per webinar
+      const countMap = {};
+      registrationsData.forEach(reg => {
+        const id = reg.webinarId?._id || reg.webinarId;
+        countMap[id] = (countMap[id] || 0) + 1;
+      });
+
+      // Add count to webinars
+      const webinarsWithCount = webinarsData.map(webinar => ({
+        ...webinar,
+        Registrations: countMap[webinar._id] || 0
+      }));
+
+      setWebinars(webinarsWithCount);
+      setFilteredWebinars(webinarsWithCount);
     } catch (err) {
       console.error(err);
     }
   };
 
+  // const handleChange = (e) => {
+  //   const { name, value, type, checked } = e.target;
+  //   setFormData({
+  //     ...formData,
+  //     [name]: type === "checkbox" ? checked : value,
+  //   });
+  // };
+
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === "checkbox" ? checked : value,
-    });
-  };
 
+    if (name === "Speakers") {
+      // Handle multiple speaker selection
+      const options = e.target.options;
+      const selectedSpeakers = [];
+      for (let i = 0; i < options.length; i++) {
+        if (options[i].selected) {
+          selectedSpeakers.push(options[i].value);
+        }
+      }
+      setFormData({
+        ...formData,
+        Speakers: selectedSpeakers,
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: type === "checkbox" ? checked : value,
+      });
+    }
+  };
   const handleFileChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.files[0] });
   };
@@ -103,7 +154,7 @@ const WebinarPage = () => {
       WebinarType: "",
       IncludingGST: false,
       IsActive: false,
-      Speaker: "",
+      Speakers: [], // Empty array for multiple speakers
       WebinarImage: null,
       WebinarLogo: null,
       WebinarVideoOptional: null,
@@ -114,21 +165,70 @@ const WebinarPage = () => {
     setModalOpen(true);
   };
 
+  // const handleEdit = (row) => {
+  //   setEditData(row);
+  //   setFormData({
+  //     ...row,
+  //     Speaker: row.Speaker?._id || ""
+  //   });
+  //   setModalOpen(true);
+  // };
   const handleEdit = (row) => {
     setEditData(row);
+    // Convert array of speaker objects to array of speaker IDs
+    const speakerIds = row.Speakers?.map(speaker => speaker._id) || [];
     setFormData({
       ...row,
-      Speaker: row.Speaker?._id || ""
+      Speakers: speakerIds,
     });
     setModalOpen(true);
   };
-
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   const data = new FormData();
+  //   Object.keys(formData).forEach((key) => {
+  //     data.append(key, formData[key]);
+  //   });
+  //   const token = localStorage.getItem("token");
+  //   try {
+  //     if (editData) {
+  //       await axios.put(`/webinars/${editData._id}`, data, {
+  //         headers: {
+  //           "Content-Type": "multipart/form-data",
+  //           "Authorization": `Bearer ${token}`,
+  //         },
+  //       });
+  //       alert("Webinar updated!");
+  //     } else {
+  //       await axios.post("/webinars", data, {
+  //         headers: {
+  //           "Content-Type": "multipart/form-data",
+  //           "Authorization": `Bearer ${token}`,  //  Add this
+  //         },
+  //       });
+  //       alert("Webinar created!");
+  //     }
+  //     setModalOpen(false);
+  //     fetchWebinars();
+  //   } catch (err) {
+  //     console.error(err);
+  //     alert("Error saving webinar");
+  //   }
+  // };
   const handleSubmit = async (e) => {
     e.preventDefault();
     const data = new FormData();
+
+    // Append all form data to FormData
     Object.keys(formData).forEach((key) => {
-      data.append(key, formData[key]);
+      if (key === 'Speakers') {
+        // Join multiple speaker IDs with comma
+        data.append(key, formData[key].join(','));
+      } else {
+        data.append(key, formData[key]);
+      }
     });
+
     const token = localStorage.getItem("token");
     try {
       if (editData) {
@@ -143,7 +243,7 @@ const WebinarPage = () => {
         await axios.post("/webinars", data, {
           headers: {
             "Content-Type": "multipart/form-data",
-            "Authorization": `Bearer ${token}`,  //  Add this
+            "Authorization": `Bearer ${token}`,
           },
         });
         alert("Webinar created!");
@@ -176,68 +276,198 @@ const WebinarPage = () => {
 
 
 
+  // const handleSearch = (e) => {
+  //   const value = e.target.value.toLowerCase();
+  //   setSearchText(value);
+
+  //   const filtered = webinars.filter((webinar) => {
+  //     // Yahan aap jo columns filter karna chahte ho unhe check kar sakte ho
+  //     return (
+  //       webinar.WebinarTitle.toLowerCase().includes(value) ||
+  //       webinar.Introduction.toLowerCase().includes(value) ||
+  //       webinar.Speaker?.firstName.toLowerCase().includes(value) ||
+  //       webinar.Speaker?.lastName.toLowerCase().includes(value) ||
+  //       webinar.IsActive.toLowerCase().includes(value) ||
+  //       webinar.WebinarStartDateTime.toLowerCase().includes(value) ||
+  //       webinar.WebinarEndDateTime.toLowerCase().includes(value)
+  //     );
+  //   });
+
+  //   setFilteredWebinars(filtered);
+  // };
+
   const handleSearch = (e) => {
     const value = e.target.value.toLowerCase();
     setSearchText(value);
 
     const filtered = webinars.filter((webinar) => {
-      // Yahan aap jo columns filter karna chahte ho unhe check kar sakte ho
+      const speakerNames = webinar.Speakers?.map(speaker =>
+        `${speaker.firstName} ${speaker.lastName}`.toLowerCase()
+      ).join(' ') || '';
+
       return (
         webinar.WebinarTitle.toLowerCase().includes(value) ||
         webinar.Introduction.toLowerCase().includes(value) ||
-        webinar.Speaker?.firstName.toLowerCase().includes(value) ||
-        webinar.Speaker?.lastName.toLowerCase().includes(value) ||
-        webinar.IsActive.toLowerCase().includes(value) ||
-        webinar.WebinarStartDateTime.toLowerCase().includes(value) ||
-        webinar.WebinarEndDateTime.toLowerCase().includes(value)
+        speakerNames.includes(value) ||
+        (webinar.IsActive || '').toLowerCase().includes(value) ||
+        (webinar.WebinarStartDateTime || '').toLowerCase().includes(value) ||
+        (webinar.WebinarEndDateTime || '').toLowerCase().includes(value)
       );
     });
 
     setFilteredWebinars(filtered);
   };
+
+  // const columns = [
+  //   {
+  //     name: "ID",
+  //     cell: (row, index) => index + 1,
+  //     width: "80px",
+  //   },
+  //   { name: "Title", selector: (row) => row.WebinarTitle, sortable: true },
+  //   { name: "Introduction", selector: (row) => row.Introduction },
+  //   {
+  //     name: "Speakers",
+  //     cell: (row) => (
+  //       <div>
+  //         {row.Speakers?.slice(0, 2).map((speaker, idx) => (
+  //           <div key={idx} className="text-sm">
+  //             {speaker.firstName} {speaker.lastName}
+  //           </div>
+  //         ))}
+  //         {row.Speakers?.length > 2 && (
+  //           <div className="text-xs text-gray-500">
+  //             +{row.Speakers.length - 2} more
+  //           </div>
+  //         )}
+  //       </div>
+  //     ),
+  //     width: "150px"
+  //   },
+  //   { name: "Start Date", selector: (row) => row.WebinarStartDateTime },
+  //   { name: "End Date", selector: (row) => row.WebinarEndDateTime },
+  //   {
+  //     name: "Active Webinar",
+  //     selector: (row) =>
+  //       row.IsActive === "active" ? "Active" : "Inactive",
+  //   },
+  //   {
+  //     name: "Actions",
+  //     cell: (row) => (
+  //       <div className="flex gap-3">
+  //         <button
+  //           className="text-blue-500 hover:text-blue-700"
+  //           onClick={() => handleView(row)}
+  //         >
+  //           <FaEye size={22} />
+  //         </button>
+  //         <button
+  //           className="text-green-500 hover:text-green-700"
+  //           onClick={() => handleEdit(row)}
+  //         >
+  //           <FaEdit size={22} />
+  //         </button>
+  //         <button
+  //           className="text-red-500 hover:text-red-700"
+  //           onClick={() => handleDelete(row._id)}
+  //         >
+  //           <FaTrash size={22} />
+  //         </button>
+  //       </div>
+  //     ),
+  //   }
+
+  // ];
+
   const columns = [
     {
-      name: "ID",
-      cell: (row, index) => index + 1,
-      width: "80px",
-    },
-    { name: "Title", selector: (row) => row.WebinarTitle, sortable: true },
-    { name: "Introduction", selector: (row) => row.Introduction },
-    { name: "Start Date", selector: (row) => row.WebinarStartDateTime },
-    { name: "End Date", selector: (row) => row.WebinarEndDateTime },
-    {
-      name: "Active Webinar",
-      selector: (row) =>
-        row.IsActive === "active" ? "Active" : "Inactive",
+      header: "ID",
+      cell: ({ row }) => row.index + 1,
     },
     {
-      name: "Actions",
-      cell: (row) => (
+      accessorKey: "WebinarTitle",
+      header: "Title",
+    },
+    {
+      accessorKey: "Introduction",
+      header: "Introduction",
+    },
+    // {
+    //   header: "Speakers",
+    //   cell: ({ row }) => (
+    //     <div>
+    //       {row.original.Speakers?.slice(0, 2).map((spk, i) => (
+    //         <div key={i} className="text-sm">
+    //           {spk.firstName} {spk.lastName}
+    //         </div>
+    //       ))}
+    //       {row.original.Speakers?.length > 2 && (
+    //         <div className="text-xs text-gray-500">
+    //           +{row.original.Speakers.length - 2} more
+    //         </div>
+    //       )}
+    //     </div>
+    //   ),
+    // },
+
+    {
+      header: "Start Date",
+      accessorKey: "WebinarStartDateTime",
+    },
+    {
+      header: "End Date",
+      accessorKey: "WebinarEndDateTime",
+    },
+    {
+      header: "Registrations",
+      accessorKey: "Registrations",
+    },
+    {
+      header: "Status",
+      cell: ({ row }) =>
+        row.original.IsActive === "active" ? (
+          <span className="text-green-600 font-semibold">Active</span>
+        ) : (
+          <span className="text-red-600 font-semibold">Inactive</span>
+        ),
+    },
+    {
+      header: "Actions",
+      cell: ({ row }) => (
         <div className="flex gap-3">
           <button
-            className="text-blue-500 hover:text-blue-700"
-            onClick={() => handleView(row)}
+            onClick={() => handleView(row.original)}
+            className="text-blue-600"
           >
-            <FaEye size={22} />
+            <FaEye size={20} />
           </button>
           <button
-            className="text-green-500 hover:text-green-700"
-            onClick={() => handleEdit(row)}
+            onClick={() => handleEdit(row.original)}
+            className="text-green-600"
           >
-            <FaEdit size={22} />
+            <FaEdit size={20} />
           </button>
           <button
-            className="text-red-500 hover:text-red-700"
-            onClick={() => handleDelete(row._id)}
+            onClick={() => handleDelete(row.original._id)}
+            className="text-red-600"
           >
-            <FaTrash size={22} />
+            <FaTrash size={20} />
           </button>
         </div>
       ),
-    }
-
+    },
   ];
-
+  const table = useReactTable({
+    data: filteredWebinars,
+    columns,
+    state: {
+      globalFilter: searchText,
+    },
+    onGlobalFilterChange: setSearchText,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+  });
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "";
@@ -254,7 +484,7 @@ const WebinarPage = () => {
 
   return (
     <Layout>
-      <div className="p-6">
+      <div className="p-2">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-3xl font-bold text-gray-800">Webinars</h2>
@@ -274,9 +504,79 @@ const WebinarPage = () => {
         </div>
 
         {/* Data Table */}
-        <div className="bg-white p-4 rounded-lg shadow">
-          <DataTable columns={columns} data={filteredWebinars} pagination highlightOnHover />
+
+        {/* <DataTable columns={columns} data={filteredWebinars} pagination highlightOnHover /> */}
+
+        <div className="bg-white rounded-lg shadow overflow-x-auto">
+          <table className="min-w-full border">
+            <thead className="bg-gray-100">
+              {table.getHeaderGroups().map(headerGroup => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map(header => (
+                    <th
+                      key={header.id}
+                      className="px-4 py-3 text-left text-sm font-semibold border"
+                    >
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+
+            <tbody>
+              {table.getRowModel().rows.map(row => (
+                <tr key={row.id} className="hover:bg-gray-50">
+                  {row.getVisibleCells().map(cell => (
+                    <td key={cell.id} className="px-4 py-2 border text-sm">
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+
+              {table.getRowModel().rows.length === 0 && (
+                <tr>
+                  <td colSpan={columns.length} className="text-center py-6 text-gray-500">
+                    No webinars found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+
+          {/* Pagination */}
+          <div className="flex justify-between items-center p-4">
+            <button
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+              className="px-4 py-2 border rounded disabled:opacity-50"
+            >
+              Previous
+            </button>
+
+            <span className="text-sm">
+              Page {table.getState().pagination.pageIndex + 1} of{" "}
+              {table.getPageCount()}
+            </span>
+
+            <button
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+              className="px-4 py-2 border rounded disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
         </div>
+
+
 
         {/* Modal */}
         {modalOpen && (
@@ -455,7 +755,6 @@ const WebinarPage = () => {
                 </label>
 
                 {/* Webinar Mode */}
-                {/* Webinar Mode */}
                 <label className="block">
                   <span className="text-gray-700">Webinar Mode</span>
                   <select
@@ -499,7 +798,6 @@ const WebinarPage = () => {
                   </label>
                 )}
 
-
                 {/* Webinar Type */}
                 <label className="block">
                   <span className="text-gray-700">Webinar Type</span>
@@ -541,30 +839,30 @@ const WebinarPage = () => {
                   </label>
                 )}
 
-
-                {/* GST + Active */}
-
-
-                {/* Speaker */}
+                {/* Multiple Speakers Selection */}
                 <label className="block md:col-span-2">
                   <span className="text-gray-700 flex items-center gap-1">
-                    Speaker <span className="text-red-500">*</span>
+                    Speakers <span className="text-red-500">*</span>
+                    <span className="text-sm text-gray-500">(Hold Ctrl/Cmd to select multiple)</span>
                   </span>
                   <select
-                    name="Speaker"
-                    value={formData.Speaker}
+                    multiple
+                    name="Speakers"
+                    value={formData.Speakers}
                     onChange={handleChange}
-                    className="w-full border p-2 rounded mt-1"
+                    className="w-full border p-2 rounded mt-1 h-32"
+                    required
                   >
-                    <option value="">-- Select Speaker --</option>
                     {speakers.map((spk) => (
                       <option key={spk._id} value={spk._id}>
                         {spk.salutation} {spk.firstName} {spk.lastName}
                       </option>
                     ))}
                   </select>
+                  <div className="text-sm text-gray-500 mt-1">
+                    Selected: {formData.Speakers.length} speaker(s)
+                  </div>
                 </label>
-
 
                 {/* YouTube Link */}
                 <label className="block md:col-span-2">
@@ -626,7 +924,6 @@ const WebinarPage = () => {
                       />
                       <span className="text-gray-700">Including GST</span>
                     </label>
-
 
                   </div>
                 )}
@@ -699,12 +996,10 @@ const WebinarPage = () => {
 
                     {viewData.WebinarMode === "online" && (
 
-
                       <div className="md:col-span-2 p-6 bg-white rounded-xl border shadow-sm">
                         <h4 className="text-lg font-semibold mb-2 text-gray-900">Webinar Link:</h4>
                         <a href={viewData.webinarlink} target="_blank" className="text-blue-600 underline">{viewData.webinarlink}</a>
                       </div>
-
 
                     )}
                     {viewData.WebinarMode === "offline" && (
@@ -719,8 +1014,30 @@ const WebinarPage = () => {
                     )}
                   </div>
                 </div>
+                {/* Multiple Speakers - UPDATED */}
+                <div className="md:col-span-2 p-6 bg-white rounded-xl border shadow-sm">
+                  <h4 className="text-lg font-semibold mb-4 border-b pb-2 text-gray-900">
+                    Speakers ({viewData.Speakers?.length || 0})
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-2">
+                    {viewData.Speakers?.map((speaker, index) => (
+                      <div key={index} className="p-3 border rounded-lg bg-gray-50">
+                        <p className="font-semibold">
+                          {speaker.salutation} {speaker.firstName} {speaker.lastName}
+                        </p>
+                        {speaker.email && (
+                          <p className="text-sm text-gray-600">Email: {speaker.email}</p>
+                        )}
+                        {speaker.phone && (
+                          <p className="text-sm text-gray-600">Phone: {speaker.phone}</p>
+                        )}
+                      </div>
+                    )) || (
+                        <p className="text-gray-500">No speakers assigned</p>
+                      )}
+                  </div>
+                </div>
 
-                {/* Dates */}
                 <div className="md:col-span-2 p-6 bg-white rounded-xl border shadow-sm">
                   <h4 className="text-lg font-semibold mb-4 border-b pb-2 text-gray-900">Dates</h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
@@ -732,26 +1049,46 @@ const WebinarPage = () => {
                 </div>
 
                 {/* Speaker */}
-                <div className="md:col-span-2 p-6 bg-white rounded-xl border shadow-sm">
+                {/* <div className="md:col-span-2 p-6 bg-white rounded-xl border shadow-sm">
                   <h4 className="text-lg font-semibold mb-4 border-b pb-2 text-gray-900">Speaker</h4>
                   <p className="text-gray-800">{viewData.Speaker?.salutation} {viewData.Speaker?.firstName} {viewData.Speaker?.lastName}</p>
-                </div>
+                </div> */}
 
-                {/* Media */}
+
 
                 {/* Media Section */}
                 <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Webinar Image */}
-                  {viewData.WebinarImage && (
-                    <div className="p-6 bg-white rounded-xl border shadow-sm flex flex-col items-center">
+
+                  {/* Image Display */}
+                  {viewData.Speakers && viewData.Speakers.length === 2 && viewData.WebinarImage && (
+                    <div className="md:col-span-2 p-6 bg-white rounded-xl border shadow-sm flex flex-col items-center">
                       <h4 className="text-lg font-semibold mb-4 border-b pb-2 text-gray-900 w-full text-center">
                         Webinar Image
                       </h4>
                       <img
                         src={`${baseURL}${viewData.WebinarImage}`}
-                        alt="Webinar"
+                        alt="Webinar Image"
                         className="w-60 h-auto rounded-lg shadow"
                       />
+                    </div>
+                  )}
+                  {viewData.Speakers && viewData.Speakers.length === 1 && (
+                    <div className="md:col-span-2 p-6 bg-white rounded-xl border shadow-sm flex flex-col items-center">
+                      <h4 className="text-lg font-semibold mb-4 border-b pb-2 text-gray-900 w-full text-center">
+                        Speaker Image
+                      </h4>
+                      <img
+                        src={
+                          viewData.Speakers[0].profilePic
+                            ? `${baseURL}/${viewData.Speakers[0].profilePic}`
+                            : "/default-user.png"
+                        }
+                        alt={`${viewData.Speakers[0].firstName} ${viewData.Speakers[0].lastName}`}
+                        className="w-32 h-32 object-cover rounded-full border shadow"
+                      />
+                      <p className="mt-2 text-sm font-semibold text-gray-700 text-center">
+                        {viewData.Speakers[0].salutation} {viewData.Speakers[0].firstName} {viewData.Speakers[0].lastName}
+                      </p>
                     </div>
                   )}
 

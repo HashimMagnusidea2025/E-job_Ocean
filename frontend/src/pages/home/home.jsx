@@ -16,19 +16,23 @@ export default function Home() {
     return (
         <>
             <div className='w-full font-[Poppins]'>
-                <Navbar/>
+                <Navbar />
                 <HeroSection />
-                <MarqueeTagCards />
-                <StudentCardMarquee />
+                {/* <MarqueeTagCards /> */}
+                <div className='mt-14  flex flex-col items-center justify-center'>
+                    <h2 className='text-5xl mb-10 font-bold text-[#339ca0]'>Our Blogs</h2>
+                    <StudentCardMarquee />
+                </div>
+
                 <OurCourses />
-                <OurFreeCourses/>
-                <WhoWeAre/>
-                <Whatparticipantssay/>
-                <OurIndustryExperts/>
-                <WhatsAppGroupSection/>
+                <OurFreeCourses />
+                <WhoWeAre />
+                <Whatparticipantssay />
+                <OurIndustryExperts />
+                <WhatsAppGroupSection />
                 {/* <AppDownloadSection/> */}
-                <Footer/> 
-                
+                <Footer />
+
 
 
             </div>

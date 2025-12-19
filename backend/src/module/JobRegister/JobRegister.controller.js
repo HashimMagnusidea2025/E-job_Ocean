@@ -5,17 +5,23 @@ import path from "path";
 import nodemailer from "nodemailer";
 import JobPostModel from "../jobPost/jobPost.model.js";
 const logoUrl = `https://talent.ejobocean.com/upload/settings/1747379111_1739879134_ejob_oceanlogo.png`;
+
+
 export const CreateJobRegisteration = async (req, res) => {
 
   try {
     const { jobId, firstName, lastName, email, mobile, country, state, city } = req.body;
     const resume = req.file ? req.file.path : null;
 
+    console.log("📥 Received job application data:", {
+      jobId, firstName, lastName, email, mobile, country, state, city, resume
+    });
+
     if (!resume) return res.status(400).json({ success: false, message: "Resume is required" });
 
     const settings = await generalSettingModel.findOne();
     const companyName = settings?.companyName || "Your Company";
-    const companyEmail = settings?.companyEmail || "your email"
+    const companyEmail = settings?.companyEmail || "your email";
 
     const existingRegistration = await JobRegisterModel.findOne({
       jobId,
@@ -186,7 +192,7 @@ export const CreateJobRegisteration = async (req, res) => {
       employerMailOptions = {
         from: `"${companyName}" <${process.env.SMTP_EMAIL}>`,
         to: job.postedBy.email,
-        subject: `New Application Received - ${job.jobTitle}`,
+        subject: `New Application Received -${job.jobTitle}`,
         html: `
             <body style="margin:0; padding:0; background-color:#f8f9fa; font-family: Arial, sans-serif;">
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" align="center" style="background-color:#f8f9fa;">
@@ -203,7 +209,7 @@ export const CreateJobRegisteration = async (req, res) => {
                                     <td style="padding:25px; font-size:16px; line-height:1.6; color:#333333; text-align:left;">
                                         <h3>Hello ${job.postedBy.name || 'Employer'},</h3>
                                         <p>You have received a new application for your job posting: <strong>${job.jobTitle}</strong>.</p>
-                                        
+
                                         <p><strong>Applicant Details:</strong></p>
                                         <table style="width:100%; border-collapse: collapse; margin:15px 0;">
                                             <tr>
@@ -226,13 +232,13 @@ export const CreateJobRegisteration = async (req, res) => {
                                                 <td style="padding:8px; border:1px solid #ddd; background:#f9f9f9;"><strong>Applied On:</strong></td>
                                                 <td style="padding:8px; border:1px solid #ddd;">${new Date().toLocaleString()}</td>
                                             </tr>
-                                            
+
                                         </table>
-                                        
+
                                         <p style="margin-top:20px; color:#4CAF50; font-weight:bold;">
                                             📎 Resume file is attached with this email.
                                         </p>
-                                        
+
                                         <p style="margin-top:20px;">Please login to your dashboard to review this application.</p>
                                     </td>
                                 </tr>
@@ -265,7 +271,9 @@ export const CreateJobRegisteration = async (req, res) => {
       console.log("Confirmation email sent to applicant:", email);
 
       // Send to job poster if available
+
       if (employerMailOptions) {
+
         await transporter.sendMail(employerMailOptions);
         console.log("Notification email sent to job poster:", job.postedBy.email);
       } else {
@@ -276,7 +284,6 @@ export const CreateJobRegisteration = async (req, res) => {
       console.error("Error sending emails:", emailError);
       // Don't fail the registration if email fails
     }
-
 
 
 
@@ -328,7 +335,7 @@ export const CreateJobRegisteration = async (req, res) => {
     //                       <a href="https://www.linkedin.com/" target="_blank" style="background:#0077B5; padding:8px 12px; border-radius:6px; color:#fff; text-decoration:none;">LinkedIn</a>
     //                     </td>
     //                     <td align="center" style="padding:5px;">
-    //                       <a href="https://twitter.com/" target="_blank" style="background:#1DA1F2; padding:8px 12px; border-radius:6px; color:#fff; text-decoration:none;">Twitter</a>
+    //                       <a href="https://www.twitter.com/" target="_blank" style="background:#1DA1F2; padding:8px 12px; border-radius:6px; color:#fff; text-decoration:none;">Twitter</a>
     //                     </td>
     //                   </tr>
     //                 </table>
@@ -343,7 +350,6 @@ export const CreateJobRegisteration = async (req, res) => {
     //     </table>
     //   </body>
     // `
-
     //     };
 
     //     transporter.sendMail(mailOptions, (err, info) => {
@@ -361,6 +367,7 @@ export const CreateJobRegisteration = async (req, res) => {
 }
 
 //  Get all registrations
+
 export const GetAllJobRegistrations = async (req, res) => {
   try {
     const registrations = await JobRegisterModel.find().populate("jobId", "jobTitle")
@@ -414,25 +421,24 @@ export const DeleteJobRegistration = async (req, res) => {
   }
 };
 
-
-
 export const GetRegistrationsByJobId = async (req, res) => {
-    try {
-        const { jobId } = req.params;
-        
-        const registrations = await JobRegisterModel.find({ jobId })
-            .populate("jobId", "jobTitle")
-            .sort({ createdAt: -1 });
+  try {
+    const { jobId } = req.params;
 
-        res.status(200).json({ 
-            success: true, 
-            registrations,
-            count: registrations.length
-        });
-    } catch (err) {
-        res.status(500).json({ success: false, message: err.message });
-    }
+    const registrations = await JobRegisterModel.find({ jobId })
+      .populate("jobId", "jobTitle")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      registrations,
+      count: registrations.length
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
 };
+
 
 
 // Get job registrations by user email or mobile
@@ -440,11 +446,11 @@ export const GetRegistrationsByJobId = async (req, res) => {
 // export const GetRegistrationsByUser = async (req, res) => {
 //   try {
 //     const { email, mobile } = req.query;
-    
+
 //     if (!email && !mobile) {
-//       return res.status(400).json({ 
-//         success: false, 
-//         message: "Email or mobile is required" 
+//       return res.status(400).json({
+//         success: false,
+//         message: "Email or mobile is required"
 //       });
 //     }
 
@@ -466,8 +472,8 @@ export const GetRegistrationsByJobId = async (req, res) => {
 //       })
 //       .sort({ createdAt: -1 });
 
-//     res.status(200).json({ 
-//       success: true, 
+//     res.status(200).json({
+//       success: true,
 //       registrations,
 //       count: registrations.length
 //     });
@@ -482,11 +488,11 @@ export const GetRegistrationsByJobId = async (req, res) => {
 export const GetRegistrationsByUser = async (req, res) => {
   try {
     const { email, mobile } = req.query;
-    
+
     if (!email && !mobile) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Email or mobile is required" 
+      return res.status(400).json({
+        success: false,
+        message: "Email or mobile is required"
       });
     }
 
@@ -524,8 +530,8 @@ export const GetRegistrationsByUser = async (req, res) => {
 
     console.log("Populated registrations:", JSON.stringify(registrations[0]?.jobId?.skills, null, 2));
 
-    res.status(200).json({ 
-      success: true, 
+    res.status(200).json({
+      success: true,
       registrations,
       count: registrations.length
     });

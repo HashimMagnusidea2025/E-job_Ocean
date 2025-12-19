@@ -29,11 +29,20 @@ export const CreateWebinarRegistration = async (req, res) => {
     const { email, mobile, webinarId, firstName } = req.body;
 
     // Step 1: Check for existing registration
+    // const existing = await webinarRegistrationModel.findOne({
+    //   email,
+    //   mobile,
+    //   webinarId,
+    //   type: "webinar",
+    // });
+
     const existing = await webinarRegistrationModel.findOne({
-      email,
-      mobile,
       webinarId,
       type: "webinar",
+      $or: [
+        { email },
+        { mobile }
+      ]
     });
 
     if (existing) {
@@ -43,7 +52,6 @@ export const CreateWebinarRegistration = async (req, res) => {
           "You are already registered for this webinar with this email and mobile.",
       });
     }
-
 
 
     // Step 2: Create new registration

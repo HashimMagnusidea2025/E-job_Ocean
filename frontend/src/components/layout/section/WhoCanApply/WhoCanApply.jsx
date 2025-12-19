@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import applyImage from '../../../../media/jpg/sss1.jpg';
 import { FaRegCheckCircle } from "react-icons/fa";
 import AOS from 'aos';
+import FAQ from '../../../../media/png/Whoareyou.avif';
 import 'aos/dist/aos.css';
 
 const WhoCanApply = () => {
@@ -24,7 +25,7 @@ const WhoCanApply = () => {
                     data-aos-delay="100"
                 >
                     <img
-                        src={applyImage}
+                        src={FAQ}
                         alt="Finance Team"
                         className="w-full h-full object-cover"
                     />

@@ -17,14 +17,13 @@ const transporter = nodemailer.createTransport({
 });
 
 
-
 class AuthController {
 
   static async register(req, res) {
     try {
       const { firstName, lastName, email, password, phone, confirmPassword, role, roleID } = req.body;
 
-      // Check if passwords match
+    
       if (password !== confirmPassword) {
         return res.status(400).json({ message: "Passwords do not match" });
       };
@@ -34,12 +33,10 @@ class AuthController {
         return res.status(400).json({ message: "User already exists" });
       }
 
-
-      // Hash password
+ 
       const hashedPassword = await bcrypt.hash(password, 10);
 
-
-      // Create new user
+      
       const user = await UserModel.create({
         firstName,
         lastName,
@@ -62,9 +59,7 @@ class AuthController {
     }
   }
 
-
   static async MentorRegister(req, res) {
-
 
     try {
       const { firstName, lastName, email, phone, roleID, type } = req.body;
@@ -78,7 +73,7 @@ class AuthController {
         email,
         phone,
         roleID,
-        Approved: "pending", // pending until admin approval
+        Approved: "pending", // pending  admin approval
         type: "mentor"
       });
       res.status(201).json({
@@ -99,7 +94,7 @@ class AuthController {
       const mentors = await UserModel.find({ Approved: { $in: ["pending", "Approved", "Rejected"] } })
         .populate("roleID")
         .sort({ createdAt: -1 });
-      // ✅ Filter where role name is "Mentor"
+      
       const mentorOnly = mentors.filter(
         (user) => user.roleID?.name?.toLowerCase() === "mentor"
       );
@@ -217,7 +212,7 @@ class AuthController {
         populate: { path: "permissions" },
       });
 
-      // 🔹 Handle Google login
+      //  Handle Google login
       if (password === "google_oauth") {
         if (!user) {
           const defaultRole = await roleModel.findOne({
@@ -237,7 +232,7 @@ class AuthController {
           user = await UserModel.findById(user._id).populate("roleID");
         }
 
-        // 🚫 NEW CHECK for Mentor approval
+        //  NEW CHECK for Mentor approval
         if (
           user.roleID?.name?.toLowerCase() === "mentor" &&
           user.Approved !== "Approved"
@@ -255,7 +250,7 @@ class AuthController {
       if (!user)
         return res.status(401).json({ message: "Invalid email or password" });
 
-      // 🚫 NEW CHECK for mentor approval
+      //  NEW CHECK for mentor approval
       if (
         user.roleID?.name?.toLowerCase() === "mentor" &&
         user.Approved !== "Approved"
@@ -334,8 +329,6 @@ class AuthController {
       res.status(500).json({ message: err.message });
     }
   }
-
-
 
   static async forgetPassword(req, res) {
 
@@ -426,7 +419,7 @@ class AuthController {
 
   static async slugMentor(req, res) {
     try {
-      const { slug } = req.params; // extract slug properly
+      const { slug } = req.params; 
 
       console.log("Fetching mentor with slug:", slug);
 
@@ -448,7 +441,7 @@ class AuthController {
 
 
 
-  // 📩 Send OTP to Email
+  //  Send OTP to Email
   static async sendOtpEmail(req, res) {
     try {
       const { email } = req.body;
@@ -506,88 +499,88 @@ class AuthController {
   //   }
   // }
 
-//  static async sendOtp(req, res) {
-//   try {
-//     const { phone } = req.body;
-//     if (!phone) return res.status(400).json({ message: "Phone number is required" });
+  //  static async sendOtp(req, res) {
+  //   try {
+  //     const { phone } = req.body;
+  //     if (!phone) return res.status(400).json({ message: "Phone number is required" });
 
-//     const user = await UserModel.findOne({ phone }).populate("roleID");
-//     if (!user) return res.status(404).json({ message: "User not found" });
+  //     const user = await UserModel.findOne({ phone }).populate("roleID");
+  //     if (!user) return res.status(404).json({ message: "User not found" });
 
-//     // Generate OTP
-//     const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  //     // Generate OTP
+  //     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-//     // Save OTP in DB
-//     user.otp = otp;
-//     user.otpExpires = Date.now() + 5 * 60 * 1000; // 5 mins expiry
-//     await user.save();
+  //     // Save OTP in DB
+  //     user.otp = otp;
+  //     user.otpExpires = Date.now() + 5 * 60 * 1000; // 5 mins expiry
+  //     await user.save();
 
-//     // ✅ SMS Text (required parameter)
-//     const message = `Dear Admin, your OTP is ${otp}. Do not share it. - Star Agro`;
+  //     // ✅ SMS Text (required parameter)
+  //     const message = `Dear Admin, your OTP is ${otp}. Do not share it. - Star Agro`;
 
-//     // Prepare POST data (including message)
-//     const postData = {
-//       authkey: "453039Aehzt6VtnMYS682d82c5P1",
-//       mobiles: phone,
-//       sender: "NSKFST",
-//       route: "4",
-//       country: "91",
-//       DLT_TE_ID: "1207162399931698582",
-//       message, // ✅ this was missing
-//     };
+  //     // Prepare POST data (including message)
+  //     const postData = {
+  //       authkey: "453039Aehzt6VtnMYS682d82c5P1",
+  //       mobiles: phone,
+  //       sender: "NSKFST",
+  //       route: "4",
+  //       country: "91",
+  //       DLT_TE_ID: "1207162399931698582",
+  //       message, // ✅ this was missing
+  //     };
 
-//     // Send SMS
-//     const { data } = await axios.post(
-//       "http://control.bestsms.co.in/api/sendhttp.php",
-//       null,
-//       { params: postData }
-//     );
+  //     // Send SMS
+  //     const { data } = await axios.post(
+  //       "http://control.bestsms.co.in/api/sendhttp.php",
+  //       null,
+  //       { params: postData }
+  //     );
 
-//     console.log("📨 SMS API Response:", data);
+  //     console.log("📨 SMS API Response:", data);
 
-//     if (data.toLowerCase().includes("error")) {
-//       return res.status(400).json({ success: false, message: "SMS sending failed", response: data });
-//     }
+  //     if (data.toLowerCase().includes("error")) {
+  //       return res.status(400).json({ success: false, message: "SMS sending failed", response: data });
+  //     }
 
-//     res.json({ success: true, message: "OTP sent successfully" });
-//   } catch (err) {
-//     console.error("Send SMS OTP error:", err.message);
-//     res.status(500).json({ message: "Failed to send OTP", error: err.message });
-//   }
-// }
+  //     res.json({ success: true, message: "OTP sent successfully" });
+  //   } catch (err) {
+  //     console.error("Send SMS OTP error:", err.message);
+  //     res.status(500).json({ message: "Failed to send OTP", error: err.message });
+  //   }
+  // }
 
 
-// 📲 Dummy OTP (No SMS)
-static async sendOtp(req, res) {
-  try {
-    const { phone } = req.body;
-    if (!phone)
-      return res.status(400).json({ message: "Phone number is required" });
+  // 📲 Dummy OTP (No SMS)
+  // static async sendOtp(req, res) {
+  //   try {
+  //     const { phone } = req.body;
+  //     if (!phone)
+  //       return res.status(400).json({ message: "Phone number is required" });
 
-    const user = await UserModel.findOne({ phone }).populate("roleID");
-    if (!user) return res.status(404).json({ message: "User not found" });
+  //     const user = await UserModel.findOne({ phone }).populate("roleID");
+  //     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Generate 6-digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  //     // Generate 6-digit OTP
+  //     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-    // Save OTP in DB
-    
-    user.otp = otp;
-    user.otpExpires = Date.now() + 5 * 60 * 1000; // 5 minutes
-    await user.save();
+  //     // Save OTP in DB
 
-    console.log("📌 Dummy OTP:", otp);
+  //     user.otp = otp;
+  //     user.otpExpires = Date.now() + 5 * 60 * 1000; // 5 minutes
+  //     await user.save();
 
-    return res.json({
-      success: true,
-      message: "Dummy OTP generated (no SMS sent)",
-      otp, // 👉 remove this in production
-    });
-  } catch (err) {
-    console.error("Dummy OTP error:", err);
-    res.status(500).json({ message: "Server error" });
-  }
-}
+  //     console.log("📌 Dummy OTP:", otp);
+
+  //     return res.json({
+  //       success: true,
+  //       message: "Dummy OTP generated (no SMS sent)",
+  //       otp, // 👉 remove this in production
+  //     });
+  //   } catch (err) {
+  //     console.error("Dummy OTP error:", err);
+  //     res.status(500).json({ message: "Server error" });
+  //   }
+  // }
 
 
 
@@ -617,45 +610,148 @@ static async sendOtp(req, res) {
   //   }
   // }
 
+  static async sendOtp(req, res) {
+    try {
+      const { phone } = req.body;
+      if (!phone)
+        return res.status(400).json({ message: "Phone number is required" });
+
+      const user = await UserModel.findOne({ phone }).populate("roleID");
+      if (!user) return res.status(404).json({ message: "User not found" });
+
+      // Generate OTP
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+      // Save OTP
+      user.otp = otp;
+      user.otpExpires = Date.now() + 10 * 60 * 1000; // 10 min
+      await user.save();
+
+      // Prepare SMS
+      const message = encodeURIComponent(
+        `Dear User, your OTP is ${otp}. Valid for 10 mins. Do not share with anyone.`
+      );
+
+      // BestSMS API
+      const smsUrl = `http://control.bestsms.co.in/api/sendhttp.php?authkey=74499AuRsBHOF65828953P1&mobiles=${phone}&sender=SWLCRM&route=4&country=91&DLT_TE_ID=1707166152169848224&message=SMS%20Dear%20User%20OTP%20is%20${otp}%20Valid%20for%20only%2010%20mins.%20For%20safety%20dont%20share%20with%20anyone.%20From%20Best%20SMS%20Call%20SWLCRM`;
+
+      await axios.get(smsUrl);
+
+      return res.json({
+        success: true,
+        message: "OTP sent successfully via SMS",
+      });
+    } catch (err) {
+      console.error("OTP SMS Error:", err);
+      res.status(500).json({ message: "SMS Send Error" });
+    }
+  }
+
+
+
+  static async ResendOtp(req, res) {
+    try {
+      const { phone } = req.body;
+      if (!phone)
+        return res.status(400).json({ message: "Phone number is required" });
+
+      const user = await UserModel.findOne({ phone }).populate("roleID");
+      if (!user) return res.status(404).json({ message: "User not found" });
+
+      // Generate OTP
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+      // Save OTP
+      user.otp = otp;
+      user.otpExpires = Date.now() + 10 * 60 * 1000; // 10 min
+      await user.save();
+
+      // Prepare SMS
+      const message = encodeURIComponent(
+        `Dear User, your OTP is ${otp}. Valid for 10 mins. Do not share with anyone.`
+      );
+
+      // BestSMS API
+      const smsUrl = `http://control.bestsms.co.in/api/sendhttp.php?authkey=74499AuRsBHOF65828953P1&mobiles=${phone}&sender=SWLCRM&route=4&country=91&DLT_TE_ID=1707166152169848224&message=SMS%20Dear%20User%20OTP%20is%20${otp}%20Valid%20for%20only%2010%20mins.%20For%20safety%20dont%20share%20with%20anyone.%20From%20Best%20SMS%20Call%20SWLCRM`;
+
+      await axios.get(smsUrl);
+
+      return res.json({
+        success: true,
+        message: "OTP sent successfully via SMS",
+      });
+    } catch (err) {
+      console.error("OTP SMS Error:", err);
+      res.status(500).json({ message: "SMS Send Error" });
+    }
+  }
+
+
+  static async verifyOtp(req, res) {
+    try {
+      const { email, phone, otp } = req.body;
+
+      const query = email ? { email } : { phone };
+      const user = await UserModel.findOne(query).populate("roleID");
+
+      if (!user) return res.status(404).json({ message: "User not found" });
+      if (user.otp !== otp)
+        return res.status(400).json({ message: "Invalid OTP" });
+      if (Date.now() > user.otpExpires)
+        return res.status(400).json({ message: "OTP expired" });
+
+      // Clear OTP
+      user.otp = null;
+      user.otpExpires = null;
+      await user.save();
+
+      const token = generateToken(user._id);
+
+      return res.json({ success: true, token, user });
+    } catch (err) {
+      console.error("Verify OTP error:", err);
+      res.status(500).json({ message: "Server error" });
+    }
+  }
 
 
   // ✅ Verify OTP for email or phone login
-static async verifyOtp(req, res) {
-  try {
-    const { email, phone, otp } = req.body;
+  // static async verifyOtp(req, res) {
+  //   try {
+  //     const { email, phone, otp } = req.body;
 
-    let user;
+  //     let user;
 
-    if (email) user = await UserModel.findOne({ email }).populate("roleID");
-    if (phone) user = await UserModel.findOne({ phone }).populate("roleID");
+  //     if (email) user = await UserModel.findOne({ email }).populate("roleID");
+  //     if (phone) user = await UserModel.findOne({ phone }).populate("roleID");
 
-    if (!user) return res.status(404).json({ message: "User not found" });
+  //     if (!user) return res.status(404).json({ message: "User not found" });
 
-    if (user.otp !== otp)
-      return res.status(400).json({ message: "Invalid OTP" });
+  //     if (user.otp !== otp)
+  //       return res.status(400).json({ message: "Invalid OTP" });
 
-    if (user.otpExpires < Date.now())
-      return res.status(400).json({ message: "OTP expired" });
+  //     if (user.otpExpires < Date.now())
+  //       return res.status(400).json({ message: "OTP expired" });
 
-    // Login success
-    const token = generateToken(user._id);
+  //     // Login success
+  //     const token = generateToken(user._id);
 
-    // clear otp after success
-    user.otp = null;
-    user.otpExpires = null;
-    await user.save();
+  //     // clear otp after success
+  //     user.otp = null;
+  //     user.otpExpires = null;
+  //     await user.save();
 
-    return res.json({
-      success: true,
-      message: "OTP verified successfully",
-      token,
-      user,
-    });
-  } catch (err) {
-    console.error("OTP Verify Error:", err);
-    res.status(500).json({ message: "Server error" });
-  }
-}
+  //     return res.json({
+  //       success: true,
+  //       message: "OTP verified successfully",
+  //       token,
+  //       user,
+  //     });
+  //   } catch (err) {
+  //     console.error("OTP Verify Error:", err);
+  //     res.status(500).json({ message: "Server error" });
+  //   }
+  // }
 
 
 

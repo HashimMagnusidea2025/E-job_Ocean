@@ -83,7 +83,7 @@ export const PostComment = async (req, res) => {
 
         await newComment.save();
 
-        //  Get updated count  saving
+        
         const updatedCount = await CommentModel.countDocuments({ id: id, type, otpVerified: true });
 
         res.status(201).json({
@@ -108,18 +108,18 @@ export const GetCommentsByBlog = async (req, res) => {
         console.log("Request query type:", type);
         console.log("id type:", typeof id);
 
-           // ✅ Smart ID handling - dono Number aur String support karega
+           
         let queryId;
         
-        // Check if the ID is a valid number
+
         if (!isNaN(id) && id.trim() !== '') {
-            queryId = Number(id); // Convert to number for blogs
+            queryId = Number(id); 
         } else {
-            queryId = id; // Keep as string for jobs
+            queryId = id; 
         }
 
         console.log("Final queryId:", queryId, "Type:", typeof queryId);
-   // Database mein check karein kya hai
+
         const allComments = await CommentModel.find({ type: type }).limit(10);
         
          console.log(`First 10 ${type} comments in DB:`, allComments.map(c => ({ 
@@ -127,19 +127,19 @@ export const GetCommentsByBlog = async (req, res) => {
             idType: typeof c.id,
             type: c.type 
         })));
-        // const blogId = Number(id);
+        
         const comments = await CommentModel.find({
           id: queryId,
             type,
             otpVerified: true
         })
-            .populate("user", "name email") // agar user login hai
+            .populate("user", "name email") 
             .sort({ createdAt: -1 });
 
         const commentCount = await CommentModel.countDocuments({  id: queryId,  type, otpVerified: true });
        console.log("Found comments for query:", comments.length);
         console.log("Comments details:", comments.map(c => ({ id: c.id, type: c.type, comment: c.comment })));
-        //  Add likedByUser flag
+       
         const userId = req.user?._id?.toString();
 
         res.status(200).json({
@@ -193,21 +193,21 @@ export const LikeComment = async (req, res) => {
     const comment = await CommentModel.findById(commentId);
     if (!comment) return res.status(404).json({ msg: "Comment not found" });
 
-    // 🔹 Identify user (login or guest)
+   
     let userIdentifier;
     if (req.user) {
-      userIdentifier = req.user._id.toString(); // logged-in user
+      userIdentifier = req.user._id.toString(); 
     } else {
-      // Guest user — use IP or random anonymous ID
+
       userIdentifier = req.ip || "guest_" + Math.random().toString(36).substr(2, 9);
     }
 
-    // 🔹 Agar pehle like nahi kiya hai to like add karo
+  
     if (!comment.likes.includes(userIdentifier)) {
       comment.likes.push(userIdentifier);
       await comment.save();
     } else {
-      // ✅ Toggle like — agar already liked, to unlike karo
+     
       comment.likes = comment.likes.filter((id) => id !== userIdentifier);
       await comment.save();
     }

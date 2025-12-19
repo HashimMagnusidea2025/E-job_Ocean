@@ -104,7 +104,7 @@ export default function IndustryExperts() {
                 <h2 className="text-[32px] font-bold mb-8">
                     Our <span className="text-[#339ca0]">Speakers</span>
                 </h2>
-                <h2 className="text-[22px] font-semibold mb-8 flex items-center gap-2">
+                {/* <h2 className="text-[22px] font-semibold mb-8 flex items-center gap-2">
                     <span>
                         View All
                     </span>
@@ -113,7 +113,7 @@ export default function IndustryExperts() {
                     </span>
 
 
-                </h2>
+                </h2> */}
 
 
             </div>

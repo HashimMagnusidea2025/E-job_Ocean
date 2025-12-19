@@ -54,10 +54,10 @@ export default function KnowledgeBasePage() {
           )
         );
       }
-
-      if (item.fromStatus === "Enabled") {
+      
+      if (item.fromStatus === "Disabled") {
         window.open(`${baseURL}/${item.uploadPDF}`, "_blank");
-      } else if (item.fromStatus === "Disabled") {
+      } else if (item.fromStatus === "Enabled") {
         setSelectedItem(item);
         setModalMode("download"); // show form
         setShowModal(true);
@@ -139,7 +139,7 @@ export default function KnowledgeBasePage() {
             >
               <div>
                 <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
-                <p className="text-gray-600 mb-2">{item.description}</p>
+                <p className="text-gray-600 mb-2 line-clamp-4">{item.description}</p>
               </div>
 
               <div className="mt-4 flex gap-2">
@@ -166,7 +166,7 @@ export default function KnowledgeBasePage() {
 
       {/* 🔹 Modal (for both View & Disabled cases) */}
       {showModal && selectedItem && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 overflow-y-auto">
           <div className="bg-white rounded-lg p-6 w-11/12 max-w-md relative">
             <button
               className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl font-bold"
@@ -181,7 +181,11 @@ export default function KnowledgeBasePage() {
                 : `${selectedItem.title} Form`}
             </h3>
 
-            <p className="text-gray-600 mb-4">{selectedItem.description}</p>
+
+            {/* 🔹 Description only in VIEW mode */}
+            {modalMode === "view" && (
+              <p className="text-gray-600 mb-4">{selectedItem.description}</p>
+            )}
 
             {modalMode === "view" ? (
               // ✅ View-only modal

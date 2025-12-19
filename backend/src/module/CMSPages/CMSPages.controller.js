@@ -1,7 +1,7 @@
-// 📘 Create CMS Content
+
 
 import CMSContentModel from "./CMSPages.model.js";
-// ✅ Create CMS Content
+//  Create CMS Content
 export const createCMSContent = async (req, res) => {
   try {
     const content = await CMSContentModel.create(req.body);
@@ -11,7 +11,7 @@ export const createCMSContent = async (req, res) => {
   }
 };
 
-// ✅ Get All CMS Content (with populated page info)
+//  Get All CMS Content 
 export const getAllCMSContent = async (req, res) => {
   try {
     const contents = await CMSContentModel.find()
@@ -23,7 +23,7 @@ export const getAllCMSContent = async (req, res) => {
   }
 };
 
-// ✅ Get One
+//  Get One
 export const getCMSContentById = async (req, res) => {
   try {
     const content = await CMSContentModel.findById(req.params.id).populate("page", "name status");
@@ -34,7 +34,7 @@ export const getCMSContentById = async (req, res) => {
   }
 };
 
-// ✅ Update
+//  Update
 export const updateCMSContent = async (req, res) => {
   try {
     const updated = await CMSContentModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -45,7 +45,7 @@ export const updateCMSContent = async (req, res) => {
   }
 };
 
-// ✅ Delete
+//  Delete
 export const deleteCMSContent = async (req, res) => {
   try {
     await CMSContentModel.findByIdAndDelete(req.params.id);

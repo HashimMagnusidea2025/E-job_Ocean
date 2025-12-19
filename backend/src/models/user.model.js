@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import slugify from "slugify";
-
+import crypto from "crypto";
 const UserSchema = new mongoose.Schema({
   name: {
     type: String
@@ -16,7 +16,7 @@ const UserSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    unique: true,
+    // unique: true,
     required: true
   },
   password: {
@@ -78,14 +78,26 @@ const UserSchema = new mongoose.Schema({
 //   next();
 // });
 
-UserSchema.pre("save", function (next) {
+UserSchema.pre("save", async function (next) {
   this.name = `${this.firstName} ${this.lastName}`;
 
   if (this.type === "mentor" && !this.slug) {
-    this.slug = slugify(`${this.firstName}-${this.lastName}`, {
+    const baseSlug = slugify(`${this.firstName}-${this.lastName}`, {
       lower: true,
       strict: true,
     });
+
+    let slug = baseSlug;
+    let isExists = await mongoose.models.User.findOne({ slug });
+
+    while (isExists) {
+      // generate 4 random characters
+      const randomStr = crypto.randomBytes(2).toString("hex"); // ex: a9f3
+      slug = `${baseSlug}-${randomStr}`;
+      isExists = await mongoose.models.User.findOne({ slug });
+    }
+
+    this.slug = slug;
   }
 
   next();

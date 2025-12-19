@@ -1,15 +1,25 @@
 import React, { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
 import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
+import { useMemo } from "react";
 import axios from "../../../utils/axios.js";
 import Swal from "sweetalert2";
 import Layout from "../../seekerDashboard/partials/layout.jsx";
 import KnowledgeBaseForm from "../KnowledgeBaseForm/KnowledgeBaseForm.jsx";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  flexRender,
+} from "@tanstack/react-table";
 const baseURL = import.meta.env.VITE_BACKEND_URL;
 export default function KnowledgeBaseList() {
     const [data, setData] = useState([]);
     const [selectedData, setSelectedData] = useState(null); // For edit mode
     const [showForm, setShowForm] = useState(false);
+      const [globalFilter, setGlobalFilter] = useState("");
+
     // Fetch Data
     const fetchData = async () => {
         try {
@@ -138,87 +148,89 @@ export default function KnowledgeBaseList() {
             }
         });
     };
-    // Columns
-    const columns = [
-        {
-      name: "ID",
-      selector: (row, index) => index + 1,
-      width: "70px",
-    },
-        {
-            name: "Title",
-            selector: (row) => row.title,
-            sortable: true,
-        },
-        {
-            name: "description",
-            selector: (row) => row.description || "-",
-            sortable: true,
-        },
-        {
-            name: "keywords",
-            selector: (row) => (row.keywords),
-            sortable: true,
-        },
-        {
-            name: "PDF",
-            cell: (row) =>
-                row.uploadPDF ? (
-                    <button
-                        onClick={() => window.open(`${baseURL}/${row.uploadPDF}`, "_blank")}
-                        className="text-blue-500 hover:text-blue-700 underline"
-                    >
-                        View PDF
-                    </button>
-                ) : (
-                    "-"
-                ),
-            ignoreRowClick: true,
+   // ================= COLUMNS =================
+  const columns = useMemo(
+    () => [
+      {
+        header: "ID",
+        cell: ({ row }) => row.index + 1,
+      },
+      {
+        header: "Title",
+        accessorKey: "title",
+      },
+      {
+        header: "Description",
+        accessorKey: "description",
+        cell: (info) => info.getValue() || "-",
+      },
+      {
+        header: "Keywords",
+        accessorKey: "keywords",
+      },
+      {
+        header: "PDF",
+        cell: ({ row }) =>
+          row.original.uploadPDF ? (
+            <a
+              href={`${baseURL}/${row.original.uploadPDF}`}
+              target="_blank"
+              className="text-blue-600 underline"
+            >
+              View PDF
+            </a>
+          ) : (
+            "-"
+          ),
+      },
+      {
+        header: "From Status",
+        accessorKey: "fromStatus",
+      },
+      {
+        header: "Status",
+        accessorKey: "status",
+      },
+      {
+        header: "Count",
+        accessorKey: "count",
+      },
+      {
+        header: "Actions",
+        cell: ({ row }) => (
+          <div className="flex gap-3">
+            <FaEye size={20}
+              className="text-blue-500 cursor-pointer"
+              onClick={() => handleView(row.original)}
+            />
+            <FaEdit size={20}
+              className="text-green-500 cursor-pointer"
+              onClick={() => {
+                setSelectedData(row.original);
+                setShowForm(true);
+              }}
+            />
+            <FaTrash size={20}
+              className="text-red-500 cursor-pointer"
+              onClick={() => handleDelete(row.original._id)}
+            />
+          </div>
+        ),
+      },
+    ],
+    []
+  );
 
-            button: true,
-        },
-        {
-            name: "from status",
-            selector: (row) => (row.fromStatus),
-            sortable: true,
-        },
-        {
-            name: "status",
-            selector: (row) => (row.status),
-            sortable: true,
-        },
-        {
-            name: "Count",
-            selector: (row) => (row.count),
-            sortable: true,
-        },
-
-        {
-            name: "Actions",
-            cell: (row) => (
-                <div className="flex gap-3 text-lg">
-                    <FaEye size={22}
-                        className="text-blue-500 hover:text-blue-700 cursor-pointer"
-                        title="View"
-                        onClick={() => handleView(row)}
-                    />
-                    <FaEdit size={22}
-                        className="text-green-500 hover:text-green-700 cursor-pointer"
-                        title="Edit"
-                        onClick={() => {
-                            setSelectedData(row);
-                            setShowForm(true);
-                        }}
-                    />
-                    <FaTrash size={22}
-                        className="text-red-500 hover:text-red-700 cursor-pointer"
-                        title="Delete"
-                        onClick={() => handleDelete(row._id)}
-                    />
-                </div>
-            ),
-        },
-    ];
+  // ================= TABLE INSTANCE =================
+  const table = useReactTable({
+    data,
+    columns,
+    state: { globalFilter },
+    onGlobalFilterChange: setGlobalFilter,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+  });
 
 
 
@@ -231,17 +243,87 @@ export default function KnowledgeBaseList() {
         return <KnowledgeBaseForm selectedData={selectedData} onSuccess={() => { fetchData(); setShowForm(false); }} />;
     return (
         <Layout>
-            <div className="p-6">
-                <h2 className="text-2xl font-semibold mb-5 text-gray-800">📚 Knowledge Base List</h2>
-                <button
-                    onClick={() => { setSelectedData(null); setShowForm(true); }}
-                    className="mb-5 px-4 py-2 bg-[#339ca0] text-white rounded-lg"
-                >
-                    + Add Knowledge Base
-                </button>
+      <div className="p-6">
+        <h2 className="text-2xl font-semibold mb-4"> Knowledge Base List</h2>
 
-                <DataTable columns={columns} data={data} pagination highlightOnHover striped responsive />
-            </div>
-        </Layout>
+        {/* Search + Add */}
+        <div className="flex justify-between mb-4">
+          <input
+            value={globalFilter ?? ""}
+            onChange={(e) => setGlobalFilter(e.target.value)}
+            placeholder="Search..."
+            className="border px-3 py-2 rounded w-64"
+          />
+          <button
+            onClick={() => {
+              setSelectedData(null);
+              setShowForm(true);
+            }}
+            className="bg-[#339ca0] text-white px-4 py-2 rounded"
+          >
+            + Add Knowledge Base
+          </button>
+        </div>
+
+        {/* Table */}
+        <div className="overflow-x-auto bg-white shadow rounded">
+          <table className="w-full border-collapse">
+            <thead className="bg-gray-100">
+              {table.getHeaderGroups().map((hg) => (
+                <tr key={hg.id}>
+                  {hg.headers.map((header) => (
+                    <th key={header.id} className="p-3 text-left border">
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+
+            <tbody>
+              {table.getRowModel().rows.map((row) => (
+                <tr key={row.id} className="hover:bg-gray-50">
+                  {row.getVisibleCells().map((cell) => (
+                    <td key={cell.id} className="p-3 border">
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="flex justify-between items-center mt-4">
+          <button
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            className="px-3 py-1 border rounded"
+          >
+            Previous
+          </button>
+
+          <span>
+            Page {table.getState().pagination.pageIndex + 1} of{" "}
+            {table.getPageCount()}
+          </span>
+
+          <button
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            className="px-3 py-1 border rounded"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    </Layout>
     );
 }

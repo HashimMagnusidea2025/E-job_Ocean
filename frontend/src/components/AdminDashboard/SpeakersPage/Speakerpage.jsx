@@ -3,6 +3,13 @@ import DataTable from "react-data-table-component";
 import axios from "../../../utils/axios.js";
 import Layout from "../../seekerDashboard/partials/layout.jsx";
 import { FaEye, FaEdit, FaTrash, FaToggleOn, FaToggleOff } from "react-icons/fa";
+import {
+    useReactTable,
+    getCoreRowModel,
+    getFilteredRowModel,
+    getPaginationRowModel,
+    flexRender,
+} from "@tanstack/react-table";
 const baseURL = import.meta.env.VITE_BACKEND_URL; // Vite
 // या CRA में: const baseURL = process.env.REACT_APP_BACKEND_URL;
 const Speakerpage = () => {
@@ -10,6 +17,8 @@ const Speakerpage = () => {
     const [open, setOpen] = useState(false);
     const [editId, setEditId] = useState(null);
     const [previewImage, setPreviewImage] = useState(null);
+    const [globalFilter, setGlobalFilter] = useState("");
+
     const [loading, setLoading] = useState({
         countries: false,
         states: false,
@@ -275,33 +284,109 @@ const Speakerpage = () => {
             alert("Error updating status");
         }
     };
+    // const columns = [
+    //     {
+    //   name: "ID",
+    //   cell: (row, index) => index + 1,
+    //   width: "80px",
+    // },
+    //     {
+    //         name: "Full Name",
+    //         selector: (row) => `${row.firstName || ""} ${row.lastName || ""}`,
+    //         sortable: true,
+    //     },
+    //     ,
+    //     { name: "Email", selector: (row) => row.email },
+    //     { name: "Introduction", selector: (row) => row.introduction?.name || row.introduction },
+    //     { name: "Qualification", selector: (row) => row.qualification?.name || row.qualification },
+    //     {
+    //         name: "Status",
+    //         cell: (row) => (
+    //             <div className="flex items-center gap-2">
+    //                 <span
+    //                     className={`px-2 py-1 text-xs rounded text-white ${row.status === "active" ? "bg-green-500" : "bg-red-500"
+    //                         }`}
+    //                 >
+    //                     {row.status}
+    //                 </span>
+    //                 <button onClick={() => handleToggleStatus(row._id)}>
+    //                     {row.status === "active" ? (
+    //                         <FaToggleOn size={22} className="text-green-500" />
+    //                     ) : (
+    //                         <FaToggleOff size={22} className="text-red-500" />
+    //                     )}
+    //                 </button>
+    //             </div>
+    //         ),
+    //     },
+    //     {
+    //         name: "Actions",
+    //         cell: (row) => (
+    //             <div className="flex gap-3">
+    //                 {/* View */}
+    //                 <button
+    //                     className="text-blue-500 hover:text-blue-700"
+    //                     onClick={() => handleView(row)}
+    //                 >
+    //                     <FaEye size={20} />
+    //                 </button>
+
+    //                 {/* Edit */}
+    //                 <button
+    //                     className="text-green-500 hover:text-green-700"
+    //                     onClick={() => handleEdit(row)}
+    //                 >
+    //                     <FaEdit size={20} />
+    //                 </button>
+
+    //                 {/* Delete */}
+    //                 <button
+    //                     className="text-red-500 hover:text-red-700"
+    //                     onClick={() => handleDelete(row._id)}
+    //                 >
+    //                     <FaTrash size={20} />
+    //                 </button>
+    //             </div>
+    //         ),
+    //     },
+    // ];
+
     const columns = [
         {
-      name: "ID",
-      cell: (row, index) => index + 1,
-      width: "80px",
-    },
-        {
-            name: "Full Name",
-            selector: (row) => `${row.firstName || ""} ${row.lastName || ""}`,
-            sortable: true,
+            header: "ID",
+            cell: ({ row }) => row.index + 1,
         },
-        ,
-        { name: "Email", selector: (row) => row.email },
-        { name: "Introduction", selector: (row) => row.introduction?.name || row.introduction },
-        { name: "Qualification", selector: (row) => row.qualification?.name || row.qualification },
         {
-            name: "Status",
-            cell: (row) => (
+            header: "Full Name",
+            accessorFn: (row) => `${row.firstName || ""} ${row.lastName || ""}`,
+        },
+        {
+            header: "Email",
+            accessorKey: "email",
+        },
+        {
+            header: "Introduction",
+            accessorKey: "introduction",
+        },
+        {
+            header: "Qualification",
+            accessorKey: "qualification",
+        },
+        {
+            header: "Status",
+            cell: ({ row }) => (
                 <div className="flex items-center gap-2">
                     <span
-                        className={`px-2 py-1 text-xs rounded text-white ${row.status === "active" ? "bg-green-500" : "bg-red-500"
+                        className={`px-2 py-1 text-xs rounded text-white ${row.original.status === "active"
+                                ? "bg-green-500"
+                                : "bg-red-500"
                             }`}
                     >
-                        {row.status}
+                        {row.original.status}
                     </span>
-                    <button onClick={() => handleToggleStatus(row._id)}>
-                        {row.status === "active" ? (
+
+                    <button onClick={() => handleToggleStatus(row.original._id)}>
+                        {row.original.status === "active" ? (
                             <FaToggleOn size={22} className="text-green-500" />
                         ) : (
                             <FaToggleOff size={22} className="text-red-500" />
@@ -311,37 +396,39 @@ const Speakerpage = () => {
             ),
         },
         {
-            name: "Actions",
-            cell: (row) => (
+            header: "Actions",
+            cell: ({ row }) => (
                 <div className="flex gap-3">
-                    {/* View */}
-                    <button
-                        className="text-blue-500 hover:text-blue-700"
-                        onClick={() => handleView(row)}
-                    >
-                        <FaEye size={20} />
-                    </button>
-
-                    {/* Edit */}
-                    <button
-                        className="text-green-500 hover:text-green-700"
-                        onClick={() => handleEdit(row)}
-                    >
-                        <FaEdit size={20} />
-                    </button>
-
-                    {/* Delete */}
-                    <button
-                        className="text-red-500 hover:text-red-700"
-                        onClick={() => handleDelete(row._id)}
-                    >
-                        <FaTrash size={20} />
-                    </button>
+                    <FaEye
+                        size={20}
+                        className="text-blue-500 cursor-pointer"
+                        onClick={() => handleView(row.original)}
+                    />
+                    <FaEdit
+                        size={20}
+                        className="text-green-500 cursor-pointer"
+                        onClick={() => handleEdit(row.original)}
+                    />
+                    <FaTrash
+                        size={20}
+                        className="text-red-500 cursor-pointer"
+                        onClick={() => handleDelete(row.original._id)}
+                    />
                 </div>
             ),
         },
     ];
-
+    const table = useReactTable({
+        data: speakers,
+        columns,
+        state: {
+            globalFilter,
+        },
+        onGlobalFilterChange: setGlobalFilter,
+        getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+    });
 
 
     const getLocationString = () => {
@@ -377,12 +464,76 @@ const Speakerpage = () => {
                     </button>
                 </div>
 
-                <DataTable
-                    columns={columns}
-                    data={speakers}
-                    pagination
-                    highlightOnHover
-                />
+                {/* Search */}
+                <div className="mb-4">
+                    <input
+                        value={globalFilter ?? ""}
+                        onChange={(e) => setGlobalFilter(e.target.value)}
+                        placeholder="Search speakers..."
+                        className="border px-3 py-2 rounded w-64"
+                    />
+                </div>
+
+                {/* Table */}
+                <div className="overflow-x-auto bg-white shadow rounded">
+                    <table className="w-full border">
+                        <thead className="bg-gray-100">
+                            {table.getHeaderGroups().map((headerGroup) => (
+                                <tr key={headerGroup.id}>
+                                    {headerGroup.headers.map((header) => (
+                                        <th key={header.id} className="p-3 border text-left">
+                                            {flexRender(
+                                                header.column.columnDef.header,
+                                                header.getContext()
+                                            )}
+                                        </th>
+                                    ))}
+                                </tr>
+                            ))}
+                        </thead>
+
+                        <tbody>
+                            {table.getRowModel().rows.map((row) => (
+                                <tr key={row.id} className="hover:bg-gray-50">
+                                    {row.getVisibleCells().map((cell) => (
+                                        <td key={cell.id} className="p-3 border">
+                                            {flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext()
+                                            )}
+                                        </td>
+                                    ))}
+                                </tr>
+                                
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Pagination */}
+                <div className="flex justify-between items-center mt-4">
+                    <button
+                        onClick={() => table.previousPage()}
+                        disabled={!table.getCanPreviousPage()}
+                        className="px-3 py-1 border rounded"
+                    >
+                        Previous
+                    </button>
+
+                    <span>
+                        Page {table.getState().pagination.pageIndex + 1} of{" "}
+                        {table.getPageCount()}
+                    </span>
+
+                    <button
+                        onClick={() => table.nextPage()}
+                        disabled={!table.getCanNextPage()}
+                        className="px-3 py-1 border rounded"
+                    >
+                        Next
+                    </button>
+                </div>
+
 
                 {/* ✅ View Modal */}
 

@@ -132,6 +132,11 @@ import PrivacyPolicy from './pages/privacyPolicy/privacyPolicy.jsx';
 import TermsConditions from './pages/Terms&Conditions/Terms&Conditions.jsx';
 import ContactPage from './pages/contactPage/contactpage.jsx';
 import ContactUserList from './components/AdminDashboard/ContactUserList/ContactUserList.jsx';
+import CourseList from './components/AdminDashboard/Course/course.jsx';
+import OurFounders from './components/AdminDashboard/OurFounders/OurFounders.jsx';
+
+// Course File
+
 function App() {
   return (
     <BrowserRouter>
@@ -340,6 +345,8 @@ function App() {
         <Route path="/admin/become-a-mentor-registerList" element={<BecomeAMentorRegisterList />} />
 
         <Route path="/admin-dashboard/contact-list" element={<><ContactUserList /></>} />
+        <Route path="/admin-dashboard/course" element={<><CourseList /></>} />
+        <Route path="/admin-dashboard/our-founders" element={<><OurFounders /></>} />
 
 
 

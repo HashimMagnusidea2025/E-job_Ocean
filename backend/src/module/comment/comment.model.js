@@ -13,9 +13,9 @@ const CommentSchema = mongoose.Schema({
     },
 
     // id: { type: Number, required: true },
-     // ✅ Dono type ke IDs handle karne ke liye
+   
     id: { 
-        type: mongoose.Schema.Types.Mixed, // ✅ Number ya String dono accept karega
+        type: mongoose.Schema.Types.Mixed, //  Number aur String 
         required: true 
     },
 
@@ -28,7 +28,7 @@ const CommentSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
     },
-    // ✅ store users who liked this comment
+    
     likes: [
         {
             type: mongoose.Schema.Types.ObjectId,
@@ -43,7 +43,7 @@ const CommentSchema = mongoose.Schema({
         type: Number
     },
 
-    otp: { type: String }, // guest user  OTP
+    otp: { type: String }, 
     otpVerified: { type: Boolean, default: false },
 
     createdAt: { type: Date, default: Date.now },

@@ -399,7 +399,7 @@ export default function JobDetailsPage() {
                     <div className="bg-white rounded-3xl overflow-hidden shadow-2xl border border-gray-100 transform transition-all duration-300 hover:shadow-3xl">
 
                         {/* Hero Header Section */}
-                        <div className="relative bg-gradient-to-br from-[#00b6bd] via-[#339ca0] to-[#2a7f83] p-12 text-white overflow-hidden">
+                        <div className="relative bg-gradient-to-br from-[#00b6bd] via-[#339ca0] to-[#2a7f83] p-6 text-white overflow-hidden">
                             {/* Animated Background Elements */}
                             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mt-20 -mr-20 animate-pulse"></div>
                             <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full -mb-20 -ml-20 animate-pulse delay-1000"></div>
@@ -427,7 +427,7 @@ export default function JobDetailsPage() {
                                     {job.jobTitle}
                                 </h1>
 
-                                <p className="text-white/90 text-lg leading-relaxed max-w-4xl backdrop-blur-sm bg-white/10 p-6 rounded-2xl border border-white/20">
+                                <p className="text-white/90 text-lg leading-relaxed max-w-4xl backdrop-blur-sm bg-white/10 p-3 rounded-2xl border border-white/20">
                                     {job.description}
                                 </p>
                             </div>

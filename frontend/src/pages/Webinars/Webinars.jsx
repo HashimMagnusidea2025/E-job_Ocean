@@ -4,7 +4,7 @@ import Navbar from "../../components/layout/navbar/navbar";
 import Footer from "../../components/layout/footer/footer";
 import { WebinarCardsList, HallOfFameCards } from "../../components/ui/cards/cards";
 import axios from "../../utils/axios.js";
-
+const baseURL = import.meta.env.VITE_BACKEND_URL;
 export default function WebinarspageList({ webinar }) {
   const [webinars, setWebinars] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
@@ -15,7 +15,7 @@ export default function WebinarspageList({ webinar }) {
   };
 
 
-  // ✅ Fetch Active Speakers
+  //  Fetch Active Speakers
   useEffect(() => {
     const fetchSpeakers = async () => {
       try {
@@ -32,7 +32,7 @@ export default function WebinarspageList({ webinar }) {
   useEffect(() => {
     const fetchWebinars = async () => {
       try {
-        const { data } = await axios.get("/webinars");
+        const { data } = await axios.get("/webinars/active");
         // Ensure all dates are valid
         const validData = data.map((w) => ({
           ...w,
@@ -48,6 +48,50 @@ export default function WebinarspageList({ webinar }) {
     };
     fetchWebinars();
   }, []);
+
+// const getWebinarImage = (webinar) => {
+//   // Multiple speakers → WebinarImage
+//   if (webinar.Speakers && webinar.Speakers.length > 1 && webinar.WebinarImage) {
+//     return `${baseURL}${webinar.WebinarImage}`;
+//   }
+
+//   // Single speaker → Speaker profilePic
+//   if (
+//     webinar.Speakers &&
+//     webinar.Speakers.length === 1 &&
+//     webinar.Speakers[0].profilePic
+//   ) {
+//     return `${baseURL}/${webinar.Speakers[0].profilePic}`;
+//   }
+
+//   // Fallback image
+//   return "/default-webinar.png";
+// };
+
+const getWebinarImage = (webinar) => {
+  // ✅ CASE 1: Multiple speakers → WebinarImage
+  if (webinar.Speakers && webinar.Speakers.length > 1 && webinar.WebinarImage) {
+    return `${baseURL}${webinar.WebinarImage}`;
+  }
+
+  // ✅ CASE 2: Single speaker (NEW structure)
+  if (
+    webinar.Speakers &&
+    webinar.Speakers.length === 1 &&
+    webinar.Speakers[0]?.profilePic
+  ) {
+    return `${baseURL}/${webinar.Speakers[0].profilePic}`;
+  }
+
+  // ✅ CASE 3: Single speaker (OLD structure)
+  if (webinar.Speaker?.profilePic) {
+    return `${baseURL}/${webinar.Speaker.profilePic}`;
+  }
+
+  // ✅ FALLBACK
+  return "/default-webinar.png";
+};
+
 
   const now = new Date();
 
@@ -186,6 +230,7 @@ export default function WebinarspageList({ webinar }) {
                       <WebinarCardsList
                         key={webinar._id}
                         webinar={webinar}
+                        image={getWebinarImage(webinar)}   // ✅ yahan image pass
                         onRegisterClick={handleRegisterClick}
                       />
                     ))

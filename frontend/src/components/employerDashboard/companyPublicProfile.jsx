@@ -17,8 +17,8 @@ import Layout from "../seekerDashboard/partials/layout";
 import { useState, useEffect } from "react";
 import axios from '../../utils/axios.js';
 const baseURL = import.meta.env.VITE_BACKEND_URL; // Vite
-    // या CRA में: const baseURL = process.env.REACT_APP_BACKEND_URL;
-
+// या CRA में: const baseURL = process.env.REACT_APP_BACKEND_URL;
+import { FollowSocialsEmployer } from "../ui/cards/cards.jsx";
 export default function CompanyPublicProfile() {
 
     const [companyData, setCompanyData] = useState(null);
@@ -27,6 +27,7 @@ export default function CompanyPublicProfile() {
         state: "",
         city: ""
     });
+    const [mapEmbedCode, setMapEmbedCode] = useState('');
 
     useEffect(() => {
         fetchCompanyData();
@@ -34,6 +35,10 @@ export default function CompanyPublicProfile() {
     useEffect(() => {
         if (companyData && companyData.company && companyData.company.address) {
             fetchLocationNames();
+
+            if (companyData.company.address.companyLocation) {
+                generateMapEmbedCode(companyData.company.address.companyLocation);
+            }
         }
     }, [companyData]);
 
@@ -51,8 +56,33 @@ export default function CompanyPublicProfile() {
             console.error("Error fetching company data:", err);
         }
 
-
     };
+
+    // Function to generate map embed code from location
+    const generateMapEmbedCode = (location) => {
+        if (!location) {
+            setMapEmbedCode('');
+            return;
+        }
+
+        // ✅ Check if the location is already an iframe code (from old data)
+        if (location.includes('<iframe')) {
+            // Extract the src URL from iframe code
+            const srcMatch = location.match(/src="([^"]*)"/);
+            if (srcMatch && srcMatch[1]) {
+                setMapEmbedCode(srcMatch[1]);
+            } else {
+                // If we can't extract src, use the location as plain text
+                const encodedLocation = encodeURIComponent(location);
+                setMapEmbedCode(`https://maps.google.com/maps?q=${encodedLocation}&output=embed`);
+            }
+        } else {
+            // ✅ Normal address - generate map URL
+            const encodedLocation = encodeURIComponent(location);
+            setMapEmbedCode(`https://maps.google.com/maps?q=${encodedLocation}&output=embed`);
+        }
+    };
+
     const fetchLocationNames = async () => {
         try {
             const address = companyData.company.address;
@@ -85,7 +115,7 @@ export default function CompanyPublicProfile() {
             }
 
             // Fetch city name
-            
+
             if (address.city) {
                 try {
                     const cityResponse = await axios.get(`/city/${address.city}`);
@@ -146,7 +176,7 @@ export default function CompanyPublicProfile() {
 
     return (
         <Layout>
-            <div className="w-full mx-auto  py-6 space-y-6">
+            <div className="w-full mx-auto  py-6 space-y-6 font-[Poppins]">
 
                 <div className="flex flex-col lg:flex-row gap-6">
 
@@ -194,15 +224,15 @@ export default function CompanyPublicProfile() {
                         <div className="bg-white rounded-lg p-12 shadow-sm border">
                             <h3 className="text-lg sm:text-2xl font-semibold mb-3">About Company</h3>
                             <p className="text-sm text-gray-700 leading-relaxed">
-                               {companyData?.company?.description || "Company Description"}
-                               
+                                {companyData?.company?.description || "Company Description"}
+
                             </p>
                         </div>
                     </div>
 
                     <div className="w-full lg:w-[320px] flex flex-col gap-6">
 
-                        <div className="w-full bg-white shadow-lg rounded-xl p-6 space-y-4 border">
+                        {/* <div className="w-full bg-white shadow-lg rounded-xl p-6 space-y-4 border">
                             <h2 className="text-xl font-semibold text-blue-600 text-center">Company Detail</h2>
 
                             <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 text-sm text-gray-700">
@@ -244,25 +274,109 @@ export default function CompanyPublicProfile() {
                                 )}
 
                             </div>
+                        </div> */}
+
+                        <div className="w-full bg-white shadow-xl rounded-2xl p-6 border border-gray-200">
+
+                            {/* Header */}
+                            <h2 className="text-xl font-bold t border-b pb-3">
+                                Company Details
+                            </h2>
+
+                            {/* Content Grid */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4 text-gray-700 text-sm">
+
+                                {/* Offices */}
+                                {companyData?.company?.officesCount && (
+                                    <div className="flex items-start gap-3">
+                                        <FaMapMarkerAlt className="text-[#1A3B66] mt-1" size={20} />
+                                        <div>
+                                            <p className="font-semibold text-gray-900">Offices</p>
+                                            <p>{companyData.company.officesCount}</p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Founded */}
+                                {companyData?.company?.foundedYear && (
+                                    <div className="flex items-start gap-3">
+                                        <FaCalendarAlt className="text-[#1A3B66] mt-1" size={20} />
+                                        <div>
+                                            <p className="font-semibold text-gray-900">Founded</p>
+                                            <p>{companyData.company.foundedYear}</p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Employees */}
+                                {companyData?.company?.employeesCount && (
+                                    <div className="flex items-start gap-3">
+                                        <BsPersonVcard className="text-[#1A3B66] mt-1" size={20} />
+                                        <div>
+                                            <p className="font-semibold text-gray-900">Employees</p>
+                                            <p>{companyData.company.employeesCount}</p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Ownership */}
+                                {companyData?.company?.ownershipType && (
+                                    <div className="flex items-start gap-3">
+                                        <FaBriefcase className="text-[#1A3B66] mt-1" size={20} />
+                                        <div>
+                                            <p className="font-semibold text-gray-900">Ownership</p>
+                                            <p>{companyData.company.ownershipType}</p>
+                                        </div>
+                                    </div>
+                                )}
+
+                            </div>
                         </div>
+
+
+                        <FollowSocialsEmployer
+                            socialLinks={{
+                                facebook: companyData?.company?.socialLinks?.facebook || "",
+                                twitter: companyData?.company?.socialLinks?.twitter || "",
+                                linkedin: companyData?.company?.socialLinks?.linkedin || "",
+                                pinterest: companyData?.company?.socialLinks?.pinterest || "",
+                                other: companyData?.company?.socialLinks?.other || "",
+                                // Add instagram and telegram if they exist in your data
+                                instagram: companyData?.company?.socialLinks?.instagram || "",
+                                telegram: companyData?.company?.socialLinks?.telegram || ""
+                            }}
+                        />
                     </div>
+
+
                 </div>
 
 
                 <div className="bg-white rounded-lg p-4 shadow-sm border w-full">
-                    <iframe
-                        title="Company Map"
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3021.9348742292115!2d-74.006015!3d40.712776!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzTCsDQyJzQ2LjAiTiA3NMKwMDAnMjEuMiJX!5e0!3m2!1sen!2sus!4v1614372821213!5m2!1sen!2sus"
-                        width="100%"
-                        height="300"
-                        allowFullScreen
-                        loading="lazy"
-                        className="w-full h-72 rounded"
-                    ></iframe>
+                    {mapEmbedCode ? (
+                        <iframe
+                            title="Company Map"
+                            src={mapEmbedCode}
+                            width="100%"
+                            height="300"
+                            allowFullScreen
+                            loading="lazy"
+                            className="w-full h-72 rounded"
+                        ></iframe>
+                    ) : (
+                        <div className="h-72 bg-gray-100 flex items-center justify-center rounded">
+                            <p className="text-gray-500">
+                                {companyData?.company?.address?.companyLocation
+                                    ? "Loading map..."
+                                    : "No location specified"
+                                }
+                            </p>
+                        </div>
+                    )}
                 </div>
 
 
-                <div className="pt-10">
+                {/* <div className="pt-10">
                     <h2 className="text-xl font-semibold sm:text-[25px]">Current Openings</h2>
                     <div className="flex flex-wrap justify-center sm:justify-start gap-4 mt-4">
                         {[1, 2, 3, 4].map((_, i) => (
@@ -301,7 +415,7 @@ export default function CompanyPublicProfile() {
                             </div>
                         ))}
                     </div>
-                </div>
+                </div> */}
             </div>
         </Layout>
     );

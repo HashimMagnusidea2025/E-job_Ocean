@@ -37,7 +37,7 @@ export default function Placementpage() {
     }, []);
 
     return (
-        <div className="w-full">
+        <div className="w-full overflow-x-hidden">
             <Navbar />
 
 

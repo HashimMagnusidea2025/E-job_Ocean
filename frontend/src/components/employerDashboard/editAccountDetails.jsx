@@ -14,7 +14,6 @@ export default function EditAccountDetails() {
     const [previewHiringCompanies, setPreviewHiringCompanies] = useState(null);
 
     const [isCompanyCreated, setIsCompanyCreated] = useState(false);
-
     const [companyId, setCompanyId] = useState(null);
     const [companyCategories, setCompanyCategories] = useState([]);
     const [ownershipCategories, setOwnershipCategories] = useState([]);
@@ -51,13 +50,14 @@ export default function EditAccountDetails() {
         twitter: "",
         linkedin: "",
         pinterest: "",
+        other:"",
         address: { country: "", state: "", city: "", companyAddress: "", companyLocation: "" },
         hrName: "",
         hrEmail: "",
         designation: "",
         registrationNumber: "",
         logo: "",
-        hiringcompanies: "", // ✅ New field added
+        hiringcompanies: "", //  New field added
     });
 
     // Function to get full image URL
@@ -138,6 +138,7 @@ export default function EditAccountDetails() {
                             twitter: companyData.company?.socialLinks?.twitter || "",
                             linkedin: companyData.company?.socialLinks?.linkedin || "",
                             pinterest: companyData.company?.socialLinks?.pinterest || "",
+                             other: companyData.company?.socialLinks?.other || "",
                             address: {
                                 country: companyData.company?.address?.country?.toString() || "",
                                 state: companyData.company?.address?.state?.toString() || "",
@@ -187,6 +188,7 @@ export default function EditAccountDetails() {
                     twitter: prev.twitter || "",
                     linkedin: prev.linkedin || "",
                     pinterest: prev.pinterest || "",
+                    other: prev.other || "",
                     address: {
                         country: prev.address?.country || "",
                         state: prev.address?.state || "",
@@ -273,7 +275,7 @@ export default function EditAccountDetails() {
         }
 
         const encodedLocation = encodeURIComponent(location);
-        const embedCode = `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3749.004085869492!2d73.75379047512966!3d20.00834322204287!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bddeb705d8d581d%3A0x15b55e47c4a7f07a!2sTreemiti%20Informatics!5e0!3m2!1sen!2sin!4v1756789749121!5m2!1sen!2sin`;
+        const embedCode = `https://maps.google.com/maps?q=${encodedLocation}&output=embed`;
         setMapEmbedCode(embedCode);
     };
 
@@ -317,6 +319,7 @@ export default function EditAccountDetails() {
                     twitter: formData.twitter,
                     linkedin: formData.linkedin,
                     pinterest: formData.pinterest,
+                    other: formData.other,
                 },
                 address: addressData,
             };
@@ -563,7 +566,7 @@ export default function EditAccountDetails() {
                             accept="image/*"
                             className="hidden"
                             id="logo-upload"
-                           onChange={(e) => handleLogoChange(e, 'employerLogo')}
+                            onChange={(e) => handleLogoChange(e, 'employerLogo')}
 
                         />
                         <label htmlFor="logo-upload" className="px-4 py-2 bg-blue-600 text-white rounded cursor-pointer hover:bg-blue-700">
@@ -723,7 +726,7 @@ export default function EditAccountDetails() {
 
                 {/* Social Links */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                    {["facebook", "twitter", "linkedin", "pinterest"].map((platform) => (
+                    {["facebook", "twitter", "linkedin", "pinterest","other" ].map((platform) => (
                         <div key={platform}>
                             <label className="block text-sm font-medium mb-1">
                                 {platform.charAt(0).toUpperCase() + platform.slice(1)}
@@ -813,7 +816,7 @@ export default function EditAccountDetails() {
                         />
                     </div>
 
-                    <div className="mt-6">
+                    {/* <div className="mt-6">
                         <label className="block text-sm font-medium mb-2">Location Preview</label>
                         <div className="border rounded-md overflow-hidden">
                             {mapEmbedCode ? (
@@ -836,7 +839,7 @@ export default function EditAccountDetails() {
                         <p className="text-xs text-gray-500 mt-2">
                             Preview of your company location. Make sure the address above is accurate.
                         </p>
-                    </div>
+                    </div> */}
                 </section>
 
                 {/* HR Info */}

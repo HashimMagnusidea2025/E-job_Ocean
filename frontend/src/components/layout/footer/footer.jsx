@@ -207,7 +207,7 @@ export default function Footer() {
                     </div>
 
                     {/* Newsletter Form */}
-                    <div className="max-w-sm w-full">
+                    {/* <div className="max-w-sm w-full">
                         <h3 className="font-bold text-sm mb-2">Subscribe to Our Newsletter</h3>
                         <div className="flex gap-2">
                             <input
@@ -219,7 +219,7 @@ export default function Footer() {
                                 Subscribe
                             </button>
                         </div>
-                    </div>
+                    </div> */}
                 </div>
                 <div className="pt-10 max-w-[1400px] mx-auto grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-5 gap-6 ">
 

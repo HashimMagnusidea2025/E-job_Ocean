@@ -10,8 +10,8 @@ export default function KnowledgeBaseForm({ selectedData, onSuccess }) {
         description: "",
         tags: "",
         keywords: "",
-         fromStatus: "Enabled", // ✅ default
-    status: "active",      // ✅ default
+        fromStatus: "Enabled", // ✅ default
+        status: "active",      // ✅ default
     });
     const [uploadPDF, setUploadPDF] = useState(null);
 
@@ -24,7 +24,7 @@ export default function KnowledgeBaseForm({ selectedData, onSuccess }) {
                 tags: selectedData.tags || "",
                 keywords: selectedData.keywords || "",
                 fromStatus: selectedData.fromStatus || "Enabled",
-                 status: selectedData.status || "active",
+                status: selectedData.status || "active",
             });
             setUploadPDF(null);
         }
@@ -69,7 +69,7 @@ export default function KnowledgeBaseForm({ selectedData, onSuccess }) {
                     tags: "",
                     keywords: "",
                     fromStatus: "Enabled",
-                    status:""
+                    status: ""
                 });
                 setUploadPDF(null);
                 e.target.reset();
@@ -151,7 +151,7 @@ export default function KnowledgeBaseForm({ selectedData, onSuccess }) {
 
                     <div>
                         <label className="block text-gray-700 font-medium mb-1">
-                           From Status 
+                            From Status
                         </label>
                         <select
                             name="fromStatus"

@@ -5,7 +5,8 @@ import { FaBriefcase, FaBuilding, FaUsers, FaPlusCircle } from 'react-icons/fa';
 import CountUp from 'react-countup';
 import { useInView } from 'react-intersection-observer';
 import headerImage from '../../../media/png/headerImage.png'; // Adjust path
-import axios from '../../../utils/axios.js'
+import axios from '../../../utils/axios.js';
+import snowfall from 'react-snowfall'
 export default function HeroSection() {
   const stats = [
     { label: 'Live Jobs', value: '1,75,324', numeric: 175324, icon: <FaBriefcase size={22} className="text-xl text-[#339ca0]" /> },
@@ -46,6 +47,7 @@ export default function HeroSection() {
 
   return (
     <section className=" font-[Poppins] px-4 md:px-8 py-20  bg-[linear-gradient(to_right,_#090A47,_#20AEB2)] to-black">
+     
       <div className='container mx-auto'>
 
 

@@ -30,6 +30,7 @@ hiringcompanies: {
       twitter: { type: String },
       linkedin: { type: String },
       pinterest: { type: String },
+      other: { type: String },
     },
     address: {
       country: {

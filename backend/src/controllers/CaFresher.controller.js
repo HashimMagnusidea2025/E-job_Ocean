@@ -53,7 +53,7 @@ export const CreateCAFresher = async (req, res) => {
 
 export const GetAllCAFresher = async (req, res) => {
   try {
-    const caFreshers = await CaFresherModel.find().sort({ createdAt: -1 }); // newest first
+    const caFreshers = await CaFresherModel.find().sort({ createdAt: -1 }); 
 
     res.status(200).json({
       success: true,

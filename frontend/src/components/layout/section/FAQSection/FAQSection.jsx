@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import applyImage from '../../../../media/jpg/sss1.jpg'; 
+import applyImage from '../../../../media/jpg/sss1.jpg';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { useEffect } from 'react';
+import FAQ from '../../../../media/png/FAQ.avif';
 
 
 const faqs = [
@@ -45,7 +46,7 @@ const FAQSection = () => {
         {/* Left: Image with AOS */}
         <div data-aos="fade-right" data-aos-delay="200">
           <img
-            src={applyImage}
+            src={FAQ}
             alt="FAQ illustration"
             className="w-full h-full object-cover rounded-md"
           />

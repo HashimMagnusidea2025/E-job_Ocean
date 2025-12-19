@@ -18,18 +18,18 @@ export const createContact = async (req, res) => {
             return res.status(400).json({ message: "Captcha verification required" });
         }
 
-        // ✅ Step 1: Check if CAPTCHA token exists
+        
         if (!captchaToken) {
             return res.status(400).json({ message: "Captcha verification required" });
         }
 
-        // ✅ Step 2: Verify CAPTCHA with Google
+      
         const verifyUrl = `https://www.google.com/recaptcha/api/siteverify`;
         const { data: captchaRes } = await axios.post(
             verifyUrl,
             new URLSearchParams({
-                secret: process.env.CAPTCHA_SECRET_KEY, // from your .env
-                response: captchaToken, // from frontend
+                secret: process.env.CAPTCHA_SECRET_KEY, 
+                response: captchaToken, 
             }),
             {
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -52,7 +52,7 @@ export const createContact = async (req, res) => {
 
 
         if (companyEmail) {
-            // ✅ Configure mail transporter (using your Gmail or SMTP)
+           
             const transporter = nodemailer.createTransport({
                 service: "gmail",
                 auth: {
@@ -61,7 +61,7 @@ export const createContact = async (req, res) => {
                 },
             });
 
-            // ✅ Email content
+            
             const mailOptions = {
                 from: `"Ejobocean Contact Form" <${process.env.SMTP_USER}>`,
                 to: companyEmail,
@@ -77,7 +77,7 @@ export const createContact = async (req, res) => {
         `,
             };
 
-            // ✅ Send email
+           
             await transporter.sendMail(mailOptions);
         }
 

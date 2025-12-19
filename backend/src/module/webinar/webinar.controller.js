@@ -23,10 +23,15 @@ export const CreateWebinar = async (req, res) => {
             data.WebinarVideoOptional = undefined; // explicitly set undefined if no file
         }
 
+        // Convert Speakers string to array if it's comma separated
+        if (data.Speakers && typeof data.Speakers === 'string') {
+            data.Speakers = data.Speakers.split(',').map(id => id.trim());
+        }
+
         // Save webinar in DB   
         const webinar = await WebinarModel.create(data);
 
-        // 🔥 Create Google Calendar Event
+        //  Create Google Calendar Event
         try {
             const event = await createCalendarEvent({ webinar, registration: { name: "Initial" }, attendees: [] });
 
@@ -41,49 +46,81 @@ export const CreateWebinar = async (req, res) => {
         } catch (calendarErr) {
             console.error("Google Calendar error:", calendarErr.message);
         }
+        // Populate speakers for response - FIXED: 'Speakers' instead of 'Speaker'
+        const populatedWebinar = await WebinarModel.findById(webinar._id)
+            .populate('Speakers');
 
-        res.status(201).json(webinar);
+        res.status(201).json(populatedWebinar);
     } catch (err) {
         res.status(400).json({ message: err.message });
     }
-};  
+};
 
 
+// export const getWebinars = async (req, res) => {
 
+//     try {
+//         const webinars = await WebinarModel.find().populate('Speaker');
+//         res.json(webinars);
+//     } catch (err) {
+//         res.status(500).json({ message: err.message });
+//     }
 
-
+// }
+// Get all webinars with multiple speakers
 export const getWebinars = async (req, res) => {
-
-
     try {
-        const webinars = await WebinarModel.find().populate('Speaker');
+        const webinars = await WebinarModel.find().populate('Speakers'); 
         res.json(webinars);
     } catch (err) {
+        console.error("Get webinars error:", err);
         res.status(500).json({ message: err.message });
     }
+};
+export const getActiveWebinars = async (req, res) => {
+  try {
+    const webinars = await WebinarModel
+      .find({ IsActive: "active" })
+      .populate("Speakers");
 
-}
+    res.status(200).json(webinars);
+  } catch (err) {
+    console.error("Get active webinars error:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
 
+
+// export const getWebinarById = async (req, res) => {
+
+//     try {
+
+//         const webinar = await WebinarModel.findById(req.params.id).populate('Speaker');
+
+//         if (!webinar) return res.status(404).json({ message: "Webinar not found" });
+//         res.json(webinar);
+
+//     } catch (err) {
+//         res.status(500).json({ message: err.message })
+//     }
+// }
+
+// Get webinar by ID with multiple speakers - FIXED
 export const getWebinarById = async (req, res) => {
-
     try {
-
-
-        const webinar = await WebinarModel.findById(req.params.id).populate('Speaker');
+        const webinar = await WebinarModel.findById(req.params.id)
+            .populate('Speakers'); // Changed from 'Speaker' to 'Speakers'
 
         if (!webinar) return res.status(404).json({ message: "Webinar not found" });
         res.json(webinar);
-
     } catch (err) {
-        res.status(500).json({ message: err.message })
+        console.error("Get webinar by ID error:", err);
+        res.status(500).json({ message: err.message });
     }
-}
-
+};
 export const updateWebinar = async (req, res) => {
 
     try {
-
-
 
         let data = req.body;
 
@@ -99,8 +136,16 @@ export const updateWebinar = async (req, res) => {
         } else {
             data.WebinarVideoOptional = undefined; // explicitly set undefined if no file
         }
-        const webinar = await WebinarModel.findByIdAndUpdate(req.params.id, data,
-            { new: true, runValidators: true });
+
+        // Convert Speakers string to array if it's comma separated
+        if (data.Speakers && typeof data.Speakers === 'string') {
+            data.Speakers = data.Speakers.split(',').map(id => id.trim());
+        }
+        const webinar = await WebinarModel.findByIdAndUpdate(
+            req.params.id,
+            data,
+            { new: true, runValidators: true }
+        ).populate('Speakers'); // Changed from 'Speaker' to 'Speakers'     
 
         if (!webinar) {
             return res.status(404).json({ message: "Webinar not found" });
@@ -122,12 +167,10 @@ export const deleteWebinar = async (req, res) => {
 
 
     } catch (err) {
+        console.error("Delete webinar error:", err);
         res.status(500).json({ massage: err.massage })
     }
 }
-
-
-
 
 
 export const createGoogleEvent = async (req, res) => {
@@ -190,17 +233,17 @@ export const createGoogleEvent = async (req, res) => {
 
 // GET webinar by slug
 export const getWebinarBySlug = async (req, res) => {
-  try {
-    const webinar = await WebinarModel.findOne({ WebinarSlug: req.params.slug })
-      .populate("Speaker");
+    try {
+        const webinar = await WebinarModel.findOne({ WebinarSlug: req.params.slug })
+            .populate("Speakers"); // Changed from "Speaker" to "Speakers"
 
-    if (!webinar) {
-      return res.status(404).json({ message: "Webinar not found" });
+        if (!webinar) {
+            return res.status(404).json({ message: "Webinar not found" });
+        }
+
+        res.json(webinar);
+    } catch (err) {
+        console.error("Error fetching webinar by slug:", err);
+        res.status(500).json({ message: "Server error" });
     }
-
-    res.json(webinar);
-  } catch (err) {
-    console.error("Error fetching webinar by slug:", err);
-    res.status(500).json({ message: "Server error" });
-  }
 };

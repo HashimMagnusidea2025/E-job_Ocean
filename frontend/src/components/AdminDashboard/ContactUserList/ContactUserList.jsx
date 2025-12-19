@@ -82,37 +82,16 @@ export default function ContactUserList() {
                     onClick={() => handleDelete(row._id)}
                     className="text-red-500 cursor-pointer"
                 >
-                   <FaTrash size={22}/>
+                    <FaTrash size={22} />
                 </button>
             ),
         },
     ];
 
-    // ✅ Table custom styles
-    const customStyles = {
-        headCells: {
-            style: {
-                fontWeight: "bold",
-                fontSize: "14px",
-                backgroundColor: "#008080",
-                color: "white",
-            },
-        },
-        rows: {
-            style: {
-                fontSize: "14px",
-                backgroundColor: "white",
-                '&:nth-of-type(odd)': {
-                    backgroundColor: "#f9f9f9",
-                },
-            },
-        },
-    };
-
     return (
         <Layout>
             <div className="p-6 bg-gray-100 min-h-screen">
-                <h2 className="text-2xl font-bold mb-4 text-[#008080]">📋 Contact User List</h2>
+                <h2 className="text-2xl font-bold mb-4 text-[#008080]"> Contact User List</h2>
 
                 <div className="bg-white p-4 rounded-lg shadow-md">
                     <DataTable
@@ -122,7 +101,7 @@ export default function ContactUserList() {
                         pagination
                         highlightOnHover
                         striped
-                        customStyles={customStyles}
+
                     />
                 </div>
             </div>

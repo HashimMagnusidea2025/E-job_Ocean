@@ -532,7 +532,7 @@ const ViewPublicProfile = () => {
                     </div>
 
                     {/* youtube video */}
-                    <div className=" w-full">
+                    {/* <div className=" w-full">
                         <div className="rounded-lg overflow-hidden border border-white shadow-lg">
                             <iframe
                                 width="100%"
@@ -544,7 +544,7 @@ const ViewPublicProfile = () => {
                                 allowFullScreen
                             />
                         </div>
-                    </div>
+                    </div> */}
 
 
 

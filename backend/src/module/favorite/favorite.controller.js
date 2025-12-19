@@ -1,6 +1,6 @@
 import FavoriteModel from "./favorite.model.js";
 
-// ✅ Toggle favorite (Add or Remove)
+//  Toggle favorite 
 export const toggleFavorite = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -12,11 +12,11 @@ export const toggleFavorite = async (req, res) => {
         .json({ success: false, message: "Job ID and type are required" });
     }
 
-    // Check if already favorited
+   
     const existing = await FavoriteModel.findOne({ user: userId, jobId, type });
 
     if (existing) {
-      // Unfavorite (remove)
+     
       await FavoriteModel.deleteOne({ _id: existing._id });
       return res.status(200).json({
         success: true,
@@ -25,7 +25,7 @@ export const toggleFavorite = async (req, res) => {
       });
     }
 
-    // Add to favorite
+  
     const favorite = await FavoriteModel.create({ user: userId, jobId, type });
     return res.status(201).json({
       success: true,
@@ -39,7 +39,7 @@ export const toggleFavorite = async (req, res) => {
   }
 };
 
-// ✅ Get all favorites (Admin or debugging)
+//  Get all favorites 
 export const getAllFavorites = async (req, res) => {
   try {
     const favorites = await FavoriteModel.find()
@@ -48,7 +48,7 @@ export const getAllFavorites = async (req, res) => {
         path: "jobId",
         populate: {
           path: "companyId",
-          // select: "company.name company.employerLogo company.industry company.website"
+        
         }
       })
       .sort({ createdAt: -1 });
@@ -60,7 +60,7 @@ export const getAllFavorites = async (req, res) => {
   }
 };
 
-// ✅ Get logged-in user's favorites
+//  Get logged-in user's favorites
 export const getMyFavorites = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -70,7 +70,7 @@ export const getMyFavorites = async (req, res) => {
         path: "jobId",
         populate: {
           path: "companyId",
-          // select: "company.name company.employerLogo company.industry company.website" // Add fields you need
+         
         }
       })
       .sort({ createdAt: -1 });
@@ -82,7 +82,7 @@ export const getMyFavorites = async (req, res) => {
   }
 };
 
-// ✅ Delete favorite by ID
+//  Delete favorite by ID
 export const deleteFavorite = async (req, res) => {
   try {
     const { id } = req.params;

@@ -325,6 +325,13 @@ export default function ManageJobs() {
                                             )}
                                         </div>
                                     )}
+                                    <div className="flex gap-2">
+                                        <h2 className="font-semibold">Job Mode: </h2>
+                                        <h2 className="text-md text-gray-800 ">
+                                        {job.mode}
+                                    </h2>
+                                    </div>
+                                    
 
                                     {/* Action Buttons */}
                                     <div className="flex justify-between items-center pt-3 border-t">

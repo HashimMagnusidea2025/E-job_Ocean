@@ -16,7 +16,7 @@ export default function Login() {
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [role, setRole] = useState("");
-  
+
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -30,6 +30,23 @@ export default function Login() {
   // 🔍 Helper: check if input is email or phone
   const isEmail = (value) => /\S+@\S+\.\S+/.test(value);
   const isPhone = (value) => /^[0-9]{10}$/.test(value);
+
+
+  const handleResendOtp = async () => {
+    try {
+      if (!isPhone(contact)) {
+        Swal.fire("Invalid Phone", "Enter valid phone number", "warning");
+        return;
+      }
+
+      const { data } = await axios.post("/auth/resend-otp", { phone: contact });
+
+      Swal.fire("OTP Resent!", data.message, "success");
+    } catch (err) {
+      Swal.fire("Error", err.response?.data?.message || "Failed to resend OTP", "error");
+    }
+  };
+
 
   // 📩 Send OTP intelligently (email or phone)
   const handleSendOTP = async (e) => {
@@ -248,7 +265,7 @@ export default function Login() {
             <form onSubmit={otpSent ? handleVerifyOtp : handleSendOTP} className="space-y-4">
               <div className="flex flex-col">
                 <label className="text-sm text-gray-600 mb-1">
-                  Email Your Number
+                  Email or Your Number
                 </label>
                 <input
                   type="text"
@@ -268,11 +285,22 @@ export default function Login() {
                     placeholder="Enter OTP"
                     value={otp}
                     onChange={(e) => setOtp(e.target.value)}
-                    required
+
                     className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                   />
                 </div>
               )}
+
+              {otpSent && (
+                <button
+                  type="button"
+                  onClick={handleResendOtp}
+                  className="text-blue-600 text-sm underline"
+                >
+                  Resend OTP
+                </button>
+              )}
+
 
               <button
                 type="submit"

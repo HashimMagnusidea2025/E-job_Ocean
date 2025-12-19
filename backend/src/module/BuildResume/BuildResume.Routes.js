@@ -29,94 +29,90 @@ import {
   createLanguage,
   updateLanguage,
   deleteLanguage,
-} from "./BuildResume.controller.js"; // Adjust path as per your structure
-import { protect } from '../../middleware/auth.Middleware.js' // Your auth middleware
+} from "./BuildResume.controller.js"; 
+import { protect } from '../../middleware/auth.Middleware.js' 
 
 const buildResumeRoute = express.Router();
 
 // Apply auth middleware to all routes
 buildResumeRoute.use(protect);
 
-// =============================================
-// ✅ EXPERIENCE ROUTES
-// =============================================
+
 
 /**
- * @route   POST /api/experiences
- * @desc    Create new experience
- * @access  Private
+ * @route  
+ * @desc    
+ * @access 
  */
 buildResumeRoute.post("/experiences", createExperience);
 
 buildResumeRoute.patch('/experiences/:id/toggle-status', toggleExperienceStatus);
 
 /**
- * @route   GET /api/experiences
- * @desc    Get all experiences for logged in user
- * @access  Private
+ * @route 
+ * @desc   
+ * @access  
  */
 
 buildResumeRoute.get("/experiences", getUserExperiences);
 
 /**
- * @route   GET /api/experiences/:id
- * @desc    Get single experience by ID
- * @access  Private
+ * @route   
+ * @desc    
+ * @access 
  */
 buildResumeRoute.get("/experiences/:id", getExperienceById);
 
 /**
- * @route   PUT /api/experiences/:id
- * @desc    Update experience
- * @access  Private
+ * @route   
+ * @desc    
+ * @access  
  */
 buildResumeRoute.put("/experiences/:id", updateExperience);
 
 /**
- * @route   DELETE /api/experiences/:id
- * @desc    Delete experience (soft delete)
- * @access  Private
+ * @route   
+ * @desc    
+ * @access  
  */
 buildResumeRoute.delete("/experiences/:id", deleteExperience);
 
-// =============================================
-// ✅ EDUCATION ROUTES
-// =============================================
+
 
 /**
- * @route   POST /api/educations
- * @desc    Create new education
- * @access  Private
+ * @route   
+ * @desc   
+ * @access  
  */
 buildResumeRoute.post("/educations", createEducation);
 
 buildResumeRoute.patch('/educations/:id/toggle-status', toggleEducationStatus);
 
 /**
- * @route   GET /api/educations
- * @desc    Get all educations for logged in user
- * @access  Private
+ * @route  
+ * @desc    
+ * @access  
  */
 buildResumeRoute.get("/educations", getUserEducations);
 
 /**
- * @route   GET /api/educations/:id
- * @desc    Get single education by ID
- * @access  Private
+ * @route   
+ * @desc    
+ * @access  
  */
 buildResumeRoute.get("/educations/:id", getEducationById);
 
 /**
- * @route   PUT /api/educations/:id
- * @desc    Update education
- * @access  Private
+ * @route  
+ * @desc   
+ * @access 
  */
 buildResumeRoute.put("/educations/:id", updateEducation);
 
 /**
- * @route   DELETE /api/educations/:id
- * @desc    Delete education (soft delete)
- * @access  Private
+ * @route  
+ * @desc    
+ * @access 
  */
 buildResumeRoute.delete("/educations/:id", deleteEducation);
 

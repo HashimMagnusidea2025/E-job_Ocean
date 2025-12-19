@@ -2,7 +2,7 @@ import express from 'express';
 import multer from "multer";
 import path from "path";
 import { protect } from '../../middleware/auth.Middleware.js';
-import { CreateWebinar, getWebinars,getWebinarBySlug, getWebinarById, updateWebinar, deleteWebinar,createGoogleEvent } from './webinar.controller.js';
+import { CreateWebinar, getWebinars,getActiveWebinars,getWebinarBySlug, getWebinarById, updateWebinar, deleteWebinar,createGoogleEvent } from './webinar.controller.js';
 const WebinarRouter = express.Router();
 
 
@@ -18,6 +18,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
+WebinarRouter.get('/active', getActiveWebinars);
 
 WebinarRouter.post('/', upload.fields([
     { name: "WebinarImage", maxCount: 1 },

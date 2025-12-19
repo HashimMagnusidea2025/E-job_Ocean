@@ -54,7 +54,7 @@ const ProfileForm = () => {
 
         // Newsletter
         subscribeToNewsletter: false,
-        summary:""
+        summary: ""
     });
 
     // Fetch user and seeker info
@@ -89,9 +89,13 @@ const ProfileForm = () => {
                         streetAddress: s.streetAddress || "",
                         youTubeVideoLink: s.youTubeVideoLink || "", // ✅ Fixed field name mapping
                         jobExperience: s.jobExperience || "",
-                        careerLevel: s.careerLevel || "",
-                        industry: s.industry || "",
-                        functionalArea: s.functionalArea || "",
+                        // careerLevel: s.careerLevel || "",
+                        // industry: s.industry || "",
+                        // functionalArea: s.functionalArea || "",
+                        careerLevel: s.careerLevel?._id || s.careerLevel || "",
+                        industry: s.industry?._id || s.industry || "",
+                        functionalArea: s.functionalArea?._id || s.functionalArea || "",
+
                         salaryCurrency: s.salaryCurrency || "",
                         currentSalary: s.currentSalary || "",
                         expectedSalary: s.expectedSalary || "",
@@ -231,6 +235,7 @@ const ProfileForm = () => {
             }));
         }
         // For checkbox inputs
+
         else if (type === "checkbox") {
             setFormData((prev) => ({
                 ...prev,
@@ -325,104 +330,104 @@ const ProfileForm = () => {
     //         setLoading(false);
     //     }
     // };
-const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
 
-    try {
-        const token = localStorage.getItem("token");
-        const form = new FormData();
+        try {
+            const token = localStorage.getItem("token");
+            const form = new FormData();
 
-        // ✅ Map frontend field names to backend expected names
-        form.append("firstName", formData.firstName);
-        form.append("middletName", formData.middleName); // ✅ Fixed spelling: MiddletName -> middletName
-        form.append("nickName", formData.nickName);
-        form.append("gender", formData.gender);
-        form.append("maritalStatus", formData.maritalStatus);
-        form.append("phone", formData.phone);
-        form.append("mobile", formData.mobile);
-        form.append("streetAddress", formData.streetAddress);
-        form.append("youTubeVideoLink", formData.youTubeVideoLink); 
-        form.append("jobExperience", formData.jobExperience);
-        form.append("careerLevel", formData.careerLevel);
-        form.append("industry", formData.industry);
-        form.append("functionalArea", formData.functionalArea);
-        form.append('salaryCurrency', formData.salaryCurrency);
-        form.append("currentSalary", formData.currentSalary);
-        form.append("expectedSalary", formData.expectedSalary);
-        form.append("subscribetoNewsletter", formData.subscribeToNewsletter);
-        form.append("dateofBirth", formData.dateOfBirth);
-        form.append("country", formData.address.country);
-        form.append("state", formData.address.state);
-        form.append("city", formData.address.city);
-        form.append("summary",formData.summary)
+            // ✅ Map frontend field names to backend expected names
+            form.append("firstName", formData.firstName);
+            form.append("middletName", formData.middleName); // ✅ Fixed spelling: MiddletName -> middletName
+            form.append("nickName", formData.nickName);
+            form.append("gender", formData.gender);
+            form.append("maritalStatus", formData.maritalStatus);
+            form.append("phone", formData.phone);
+            form.append("mobile", formData.mobile);
+            form.append("streetAddress", formData.streetAddress);
+            form.append("youTubeVideoLink", formData.youTubeVideoLink);
+            form.append("jobExperience", formData.jobExperience);
+            form.append("careerLevel", formData.careerLevel);
+            form.append("industry", formData.industry);
+            form.append("functionalArea", formData.functionalArea);
+            form.append('salaryCurrency', formData.salaryCurrency);
+            form.append("currentSalary", formData.currentSalary);
+            form.append("expectedSalary", formData.expectedSalary);
+            form.append("subscribetoNewsletter", formData.subscribeToNewsletter);
+            form.append("dateofBirth", formData.dateOfBirth);
+            form.append("country", formData.address.country);
+            form.append("state", formData.address.state);
+            form.append("city", formData.address.city);
+            form.append("summary", formData.summary)
 
-        if (imageFile) {
-            form.append("profileImage", imageFile);
-        }
+            if (imageFile) {
+                form.append("profileImage", imageFile);
+            }
 
-        console.log("Submitting form data..."); // Debug log
+            console.log("Submitting form data..."); // Debug log
 
-        const res = await axios.post("/seeker/update", form, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "multipart/form-data",
-            },
-        });
-
-        if (res.data.success) {
-            console.log("Profile update successful:", res.data); // Debug log
-            
-            // ✅ IMPORTANT: Refresh seeker data after update
-            const seekerRes = await axios.get("/seeker/me", {
-                headers: { Authorization: `Bearer ${token}` },
+            const res = await axios.post("/seeker/update", form, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "multipart/form-data",
+                },
             });
 
-            if (seekerRes.data.success && seekerRes.data.data) {
-                const updatedSeeker = seekerRes.data.data;
-                console.log("Updated seeker data:", updatedSeeker); // Debug log
-                
-                // Update preview image immediately
-                if (updatedSeeker.profileImage) {
-                    const cleanBase = baseURL.replace(/\/+$/, "");
-                    const cleanPath = updatedSeeker.profileImage.replace(/^\/+/, "");
-                    const imageUrl = `${cleanBase}/${cleanPath}`;
-                    console.log("Setting preview image:", imageUrl); // Debug log
-                    setPreviewImage(imageUrl);
-                }
+            if (res.data.success) {
+                console.log("Profile update successful:", res.data); // Debug log
 
-                // Update localStorage with fresh data
-                const userRes = await axios.get("/auth/me", {
+                // ✅ IMPORTANT: Refresh seeker data after update
+                const seekerRes = await axios.get("/seeker/me", {
                     headers: { Authorization: `Bearer ${token}` },
                 });
 
-                const updatedUser = {
-                    ...userRes.data,
-                    profilePicture: updatedSeeker.profileImage // Use profileImage from seeker
-                };
-                
-                localStorage.setItem("user", JSON.stringify(updatedUser));
-                console.log("Updated user in localStorage:", updatedUser); // Debug log
-                
-                // Trigger custom event with detailed data
-                window.dispatchEvent(new CustomEvent("userUpdated", { 
-                    detail: { 
-                        user: updatedUser,
-                        seeker: updatedSeeker 
-                    } 
-                }));
+                if (seekerRes.data.success && seekerRes.data.data) {
+                    const updatedSeeker = seekerRes.data.data;
+                    console.log("Updated seeker data:", updatedSeeker); // Debug log
+
+                    // Update preview image immediately
+                    if (updatedSeeker.profileImage) {
+                        const cleanBase = baseURL.replace(/\/+$/, "");
+                        const cleanPath = updatedSeeker.profileImage.replace(/^\/+/, "");
+                        const imageUrl = `${cleanBase}/${cleanPath}`;
+                        console.log("Setting preview image:", imageUrl); // Debug log
+                        setPreviewImage(imageUrl);
+                    }
+
+                    // Update localStorage with fresh data
+                    const userRes = await axios.get("/auth/me", {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+
+                    const updatedUser = {
+                        ...userRes.data,
+                        profilePicture: updatedSeeker.profileImage // Use profileImage from seeker
+                    };
+
+                    localStorage.setItem("user", JSON.stringify(updatedUser));
+                    console.log("Updated user in localStorage:", updatedUser); // Debug log
+
+                    // Trigger custom event with detailed data
+                    window.dispatchEvent(new CustomEvent("userUpdated", {
+                        detail: {
+                            user: updatedUser,
+                            seeker: updatedSeeker
+                        }
+                    }));
+                }
+
+                Swal.fire("Success", "Profile updated successfully", "success");
             }
-            
-            Swal.fire("Success", "Profile updated successfully", "success");
+        } catch (err) {
+            console.error("❌ Update Error:", err);
+            console.error("Error response:", err.response); // Detailed error log
+            Swal.fire("Error", err.response?.data?.message || "Something went wrong", "error");
+        } finally {
+            setLoading(false);
         }
-    } catch (err) {
-        console.error("❌ Update Error:", err);
-        console.error("Error response:", err.response); // Detailed error log
-        Swal.fire("Error", err.response?.data?.message || "Something went wrong", "error");
-    } finally {
-        setLoading(false);
-    }
-};
+    };
 
 
     if (loading && !formData.email) {
@@ -433,7 +438,7 @@ const handleSubmit = async (e) => {
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
                     </div>
                     <p className="mt-4">Loading your profile...</p>
-                    
+
                 </div>
             </Layout>
         );

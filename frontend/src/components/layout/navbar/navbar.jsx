@@ -283,7 +283,7 @@ useEffect(() => {
   };
 
   return (
-    <div className='bg-[#edf1f9]'>
+    <div className='sticky top-0 z-50 bg-[#edf1f9]'>
       <div className='container mx-auto'>
         <nav className="h-[70px] text-black px-10 flex items-center justify-between relative font-[Poppins] z-50">
           <div className="flex items-center">

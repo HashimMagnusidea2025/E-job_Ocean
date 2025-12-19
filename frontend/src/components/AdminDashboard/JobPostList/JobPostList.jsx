@@ -133,7 +133,7 @@ export default function JobPostList() {
                             <p><strong>Job Type:</strong> {selectedJob.jobType?.name || "N/A"}</p>
                             <p><strong>Job Shift:</strong> {selectedJob.jobShift?.name || "N/A"}</p>
                             <p><strong>expiryDate:</strong> {selectedJob.expiryDate}</p>
-                            <p><strong>degreeLevel:</strong> {selectedJob.degreeLevel}</p>
+                            <p><strong>degreeLevel:</strong> {selectedJob.degreeLevel?.name || "N/A"}</p>
                             <p><strong>experience:</strong> {selectedJob.experience}</p>
                             <p><strong>externalJob:</strong> {selectedJob.externalJob}</p>
                             <p><strong>isFreelance:</strong> {selectedJob.isFreelance}</p>
