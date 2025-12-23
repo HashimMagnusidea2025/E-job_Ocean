@@ -580,7 +580,6 @@ export default function BlogDetailsPage2({ blogs }) {
                                     <FollowSocials />
 
 
-
                                     <div className="bg-white shadow-md rounded-2xl p-5">
                                         <div>
                                             <h3 className="mb-4 text-lg font-semibold text-gray-800">

@@ -41,7 +41,14 @@ const WebinarDetailsPage = () => {
     const now = new Date();
     const start = new Date(webinar.WebinarStartDateTime);
     const end = new Date(webinar.WebinarEndDateTime);
+    console.log(start);
+    console.log(end);
+
+
+
     const isUpcoming = end > now;
+    console.log(isUpcoming);
+    
     const duration = Math.round((end.getTime() - start.getTime()) / (1000 * 60));
     const convertToOrderedList = (htmlContent) => {
         // Remove Quill span tags
@@ -63,7 +70,7 @@ const WebinarDetailsPage = () => {
         return cleanContent;
     };
 
- const getWebinarImage = (webinar) => {
+    const getWebinarImage = (webinar) => {
         // ✅ Multiple speakers → WebinarImage
         if (webinar.Speakers && webinar.Speakers.length > 1 && webinar.WebinarImage) {
             return `${baseURL}${webinar.WebinarImage}`;
@@ -92,7 +99,7 @@ const WebinarDetailsPage = () => {
                 <div className="container mx-auto px-4 py-10 grid grid-cols-1 lg:grid-cols-3 gap-10">
                     {/* LEFT CONTENT */}
                     <div className="lg:col-span-2">
-                       
+
                         <div className="flex flex-col md:flex-row bg-white p-4 md:p-6 shadow-sm rounded-2xl">
                             {/* Speaker Image */}
                             <div className="w-full md:w-1/3 bg-gray-300 aspect-[16/9] md:aspect-[4/5] rounded-xl mb-4 md:mb-0 md:mr-6 overflow-hidden">
@@ -103,7 +110,7 @@ const WebinarDetailsPage = () => {
                                     //         : "/default-speaker.png"
                                     // }
                                     // alt={`${webinar.Speakers?.firstName} ${webinar.Speakers?.lastName}`}
-                                     src={getWebinarImage(webinar)}
+                                    src={getWebinarImage(webinar)}
                                     className="w-full h-full object-cover rounded-xl"
                                 />
                             </div>
@@ -207,7 +214,7 @@ const WebinarDetailsPage = () => {
 
                             </div>
                             <div className="mt-6 flex items-center justify-center">
-                                {isUpcoming && (
+                                {!isUpcoming && (
                                     <button
                                         onClick={openRegisterModal}
                                         className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg transition"
@@ -217,34 +224,7 @@ const WebinarDetailsPage = () => {
                                 )}
                             </div>
 
-
-
                         </div>
-
-
-                        {/* Latest Posts */}
-                        {/* <div className="bg-white shadow-md rounded-2xl p-5">
-                                    <h3 className="mb-4 text-lg font-semibold text-gray-800">
-                                        LATEST POSTS
-                                    </h3>
-                                    <div className="flex flex-col gap-5">
-                                        {posts.map((value, idx) => (
-                                            <Link
-                                                key={idx}
-                                                to={`/blogs/${value.id}`}
-                                                className="flex items-start gap-3 rounded-lg bg-white p-3 shadow-sm hover:shadow-md transition"
-                                            >
-                                                <LatestPost
-                                                    key={value.id}
-                                                    id={value.id}
-                                                    img={value.featuredImage}
-                                                    title={value.title}
-                                                    date={value.date?.split("T")[0]}
-                                                />
-                                            </Link>
-                                        ))}
-                                    </div>
-                                </div> */}
 
                         {/* <SubscribeNow /> */}
                     </div>

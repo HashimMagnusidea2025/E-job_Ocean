@@ -19,6 +19,7 @@ import axiosExternal from "axios";
 import { useNavigate } from "react-router-dom";
 import noImage from '../../media/png/no.png';
 
+
 const baseURL = import.meta.env.VITE_BACKEND_URL; // Vite
 // 🔹 1. Partner Logo Marquee
 
@@ -281,6 +282,7 @@ export const StudentCardMarquee = () => {
 
                     return (
                         <SplideSlide key={index} className="!w-[280px] sm:!w-[340px] py-6">
+                          <Link to={`/blogs/${blog.slug}`}>
                             <div className="px-3 h-full">
                                 <div className="relative h-[280px] sm:h-[320px] rounded-3xl overflow-hidden bg-black group">
                                     <img
@@ -305,6 +307,7 @@ export const StudentCardMarquee = () => {
                                     </div>
                                 </div>
                             </div>
+                            </Link>
                         </SplideSlide>
                     );
                 })}

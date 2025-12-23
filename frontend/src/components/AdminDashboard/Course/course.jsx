@@ -1,13 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import axios from '../../../utils/axios';
 import Layout from '../../seekerDashboard/partials/layout';
-import { FaEdit, FaTrash, FaToggleOn, FaToggleOff } from "react-icons/fa";
-export default function CourseList() {
+import { FaEdit, FaTrash, FaToggleOn, FaToggleOff, FaEye } from "react-icons/fa";
+import Select from "react-select";
+import Swal from 'sweetalert2';
+const baseURL = import.meta.env.VITE_BACKEND_URL; // Vite
+export default function CourseList()  {
   const [courses, setCourses] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [speakers, setSpeakers] = useState([]);
+  const [skillsOptions, setSkillsOptions] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [isEditing, setIsEditing] = useState(false);
+  const [isViewing, setIsViewing] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
 
   const [formData, setFormData] = useState({
@@ -17,7 +24,8 @@ export default function CourseList() {
     RegisterStartDate: '',
     RegisterEndDate: '',
     fees: '',
-    skills: '',
+
+    skills: [],
     duration: '',
     instructor: '',
     prerequisites: '',
@@ -25,7 +33,8 @@ export default function CourseList() {
     level: '',
     mode: '',
     capacity: '',
-    certification: false
+    status: 'active',
+    image: null,
   });
 
   // Fetch courses
@@ -40,76 +49,216 @@ export default function CourseList() {
     }
   };
 
+  // Fetch categories
+  const fetchCategories = async () => {
+    try {
+      const res = await axios.get('/course-category');
+      setCategories(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error('Failed to fetch categories', err);
+      setCategories([]);
+    }
+  };
+
+  // Fetch speakers
+  const fetchSpeakers = async () => {
+    try {
+      const res = await axios.get('/speakers');
+      setSpeakers(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error('Failed to fetch speakers', err);
+      setSpeakers([]);
+    }
+  };
+
+  // Fetch skills
+  const fetchSkills = async () => {
+    try {
+      const res = await axios.get('/skills-categories');
+      setSkillsOptions(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error('Failed to fetch skills', err);
+      setSkillsOptions([]);
+    }
+  };
+
   useEffect(() => {
     fetchCourses();
+    fetchCategories();
+    fetchSpeakers();
+    fetchSkills();
   }, []);
 
   // Handle input change
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({ 
-      ...formData, 
-      [name]: type === 'checkbox' ? checked : value 
+    setFormData({
+      ...formData,
+      [name]: type === 'checkbox' ? checked : value
+    });
+  };
+  const handleImageChange = (e) => {
+    setFormData({
+      ...formData,
+      image: e.target.files[0], //  file object
     });
   };
 
   // Submit form
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+  //   setError('');
+
+  //   try {
+  //     let res;
+  //     if (isEditing) {
+  //       res = await axios.put(`/courses/${selectedCourse._id}`, formData);
+  //     } else {
+  //       res = await axios.post('/courses', formData);
+  //     }
+  //     if (res.data.success) {
+  //       if (isEditing) {
+  //         setCourses(courses.map(course => course._id === selectedCourse._id ? res.data.data : course));
+  //       } else {
+  //         setCourses([res.data.data, ...courses]);
+  //       }
+  //       setShowModal(false);
+  //       setIsEditing(false);
+  //       setSelectedCourse(null);
+  //       setFormData({
+  //         courseTitle: '',
+  //         courseDescription: '',
+  //         content: '',
+  //         RegisterStartDate: '',
+  //         RegisterEndDate: '',
+  //         fees: '',
+  //         skills: [],
+  //         duration: '',
+  //         instructor: '',
+  //         prerequisites: '',
+  //         category: '',
+  //         level: '',
+  //         mode: '',
+  //         capacity: '',
+
+  //         status: 'active'
+  //       });
+  //     }
+  //   } catch (err) {
+  //     setError(err.response?.data?.message || `Failed to ${isEditing ? 'update' : 'create'} course`);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
+      const payload = new FormData();
+
+      Object.keys(formData).forEach((key) => {
+        if (key === 'skills') {
+          formData.skills.forEach(skill => payload.append('skills', skill));
+        } else if (key === 'image' && formData.image) {
+          payload.append('image', formData.image);
+        } else {
+          payload.append(key, formData[key]);
+        }
+      });
+
       let res;
       if (isEditing) {
-        res = await axios.put(`/courses/${selectedCourse._id}`, formData);
+        res = await axios.put(`/courses/${selectedCourse._id}`, payload, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
       } else {
-        res = await axios.post('/courses', formData);
+        res = await axios.post('/courses', payload, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        });
       }
+
       if (res.data.success) {
-        if (isEditing) {
-          setCourses(courses.map(course => course._id === selectedCourse._id ? res.data.data : course));
-        } else {
-          setCourses([res.data.data, ...courses]);
-        }
+        fetchCourses();
         setShowModal(false);
         setIsEditing(false);
         setSelectedCourse(null);
-        setFormData({
-          courseTitle: '',
-          courseDescription: '',
-          content: '',
-          RegisterStartDate: '',
-          RegisterEndDate: '',
-          fees: '',
-          skills: '',
-          duration: '',
-          instructor: '',
-          prerequisites: '',
-          category: '',
-          level: '',
-          mode: '',
-          capacity: '',
-          certification: false
+
+        // ✅ SWEET ALERT SUCCESS
+        Swal.fire({
+          icon: 'success',
+          title: isEditing ? 'Course Updated 🎉' : 'Course Created 🎉',
+          text: isEditing
+            ? 'Course has been updated successfully'
+            : 'Course has been created successfully',
+          timer: 2000,
+          showConfirmButton: false,
         });
       }
     } catch (err) {
-      setError(err.response?.data?.message || `Failed to ${isEditing ? 'update' : 'create'} course`);
+      const msg =
+        err.response?.data?.message || 'Something went wrong';
+
+      // ❌ SWEET ALERT ERROR
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops!',
+        text: msg,
+      });
+
+      setError(msg);
     } finally {
       setLoading(false);
     }
   };
 
+
   // Delete course
+  // const handleDelete = async (courseId) => {
+  //   if (window.confirm('Are you sure you want to delete this course?')) {
+  //     try {
+  //       const res = await axios.delete(`/courses/${courseId}`);
+  //       if (res.data.success) {
+  //         setCourses(courses.filter(course => course._id !== courseId));
+  //       }
+  //     } catch (err) {
+  //       setError('Failed to delete course');
+  //     }
+  //   }
+  // };
   const handleDelete = async (courseId) => {
-    if (window.confirm('Are you sure you want to delete this course?')) {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: 'This course will be deleted permanently!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#dc2626',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Yes, delete it!',
+    });
+
+    if (result.isConfirmed) {
       try {
         const res = await axios.delete(`/courses/${courseId}`);
         if (res.data.success) {
           setCourses(courses.filter(course => course._id !== courseId));
+
+          Swal.fire({
+            icon: 'success',
+            title: 'Deleted!',
+            text: 'Course has been deleted.',
+            timer: 1500,
+            showConfirmButton: false,
+          });
         }
       } catch (err) {
-        setError('Failed to delete course');
+        Swal.fire({
+          icon: 'error',
+          title: 'Failed!',
+          text: 'Failed to delete course',
+        });
       }
     }
   };
@@ -144,7 +293,7 @@ export default function CourseList() {
             <h2 className="text-lg font-semibold text-gray-800">Course List</h2>
             <p className="text-sm text-gray-600 mt-1">{courses.length} courses available</p>
           </div>
-          
+
           {courses.length === 0 ? (
             <div className="p-8 text-center">
               <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
@@ -167,9 +316,11 @@ export default function CourseList() {
                 <thead className="bg-gray-50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course Category</th>
+
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fees</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
+                    {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th> */}
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Instructor</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dates</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
@@ -177,52 +328,68 @@ export default function CourseList() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {courses.map(course => {
-                    const startDate = new Date(course.RegisterStartDate);
-                    const endDate = new Date(course.RegisterEndDate);
-                    const today = new Date();
-                    const isActive = today >= startDate && today <= endDate;
-                    
                     return (
                       <tr key={course._id} className="hover:bg-gray-50 transition-colors">
                         <td className="px-6 py-4">
                           <div>
                             <div className="text-sm font-medium text-gray-900">{course.courseTitle}</div>
-                            <div className="text-xs text-gray-500 mt-1">{course.category || 'Uncategorized'}</div>
+
+
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="text-sm text-gray-900 line-clamp-2 max-w-xs">{course.courseDescription}</div>
+                          <div>
+
+
+                            <div className="text-xs text-gray-500 mt-1">{course.category?.CourseCategory || 'Uncategorized'}</div>
+                          </div>
                         </td>
+
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-2 py-1 text-xs rounded-full ${course.fees ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
                             {course.fees ? `$${course.fees}` : 'Free'}
                           </span>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           {course.duration || 'N/A'}
+                        </td> */}
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {course.instructor ? `${course.instructor.salutation || ''} ${course.instructor.firstName} ${course.instructor.lastName}`.trim() : 'N/A'}
                         </td>
                         <td className="px-6 py-4">
                           <div className="text-sm">
-                            <div className="text-gray-900">{startDate.toLocaleDateString()}</div>
-                            <div className="text-gray-500 text-xs">to {endDate.toLocaleDateString()}</div>
+                            <div className="text-gray-900">{new Date(course.RegisterStartDate).toLocaleDateString()}</div>
+                            <div className="text-gray-500 text-xs">to {new Date(course.RegisterEndDate).toLocaleDateString()}</div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            isActive
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-red-100 text-red-800'
-                          }`}>
-                            {isActive ? 'Active' : 'Inactive'}
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${course.status === 'active'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                            }`}>
+                            {course.status === 'active' ? 'Active' : 'Inactive'}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-lg font-medium">
+                          <button
+                            onClick={() => {
+                              setIsViewing(true);
+                              setSelectedCourse(course);
+                              setShowModal(true);
+                            }}
+                            className="text-blue-600 hover:text-blue-900 mr-3"
+                          >
+                            <FaEye />
+                          </button>
                           <button
                             onClick={() => {
                               setIsEditing(true);
                               setSelectedCourse(course);
                               setFormData({
                                 ...course,
+                                category: course.category?._id || course.category,
+                                instructor: course.instructor?._id || course.instructor,
+                                skills: course.skills ? course.skills.map(skill => skill._id) : [],
                                 RegisterStartDate: course.RegisterStartDate ? new Date(course.RegisterStartDate).toISOString().split('T')[0] : '',
                                 RegisterEndDate: course.RegisterEndDate ? new Date(course.RegisterEndDate).toISOString().split('T')[0] : '',
                               });
@@ -256,12 +423,17 @@ export default function CourseList() {
               <div className="px-8 py-6 border-b border-gray-200">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-900">{isEditing ? 'Edit Course' : 'Create New Course'}</h2>
-                    <p className="text-gray-600 mt-1">{isEditing ? 'Update the course details below' : 'Fill in the course details below'}</p>
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      {isViewing ? 'View Course' : isEditing ? 'Edit Course' : 'Create New Course'}
+                    </h2>
+                    <p className="text-gray-600 mt-1">
+                      {isViewing ? 'Course details' : isEditing ? 'Update the course details below' : 'Fill in the course details below'}
+                    </p>
                   </div>
                   <button
                     onClick={() => {
                       setShowModal(false);
+                      setIsViewing(false);
                       setIsEditing(false);
                       setSelectedCourse(null);
                       setFormData({
@@ -271,7 +443,7 @@ export default function CourseList() {
                         RegisterStartDate: '',
                         RegisterEndDate: '',
                         fees: '',
-                        skills: '',
+                        skills: [],
                         duration: '',
                         instructor: '',
                         prerequisites: '',
@@ -279,7 +451,8 @@ export default function CourseList() {
                         level: '',
                         mode: '',
                         capacity: '',
-                        certification: false
+
+                        status: 'active'
                       });
                     }}
                     className="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -291,21 +464,133 @@ export default function CourseList() {
                 </div>
               </div>
 
-              {/* Form */}
-              <form onSubmit={handleSubmit} className="overflow-y-auto max-h-[calc(90vh-120px)]">
-                <div className="p-8">
-                  {error && (
-                    <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-                      <div className="flex items-center text-red-800">
-                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span className="font-medium">{error}</span>
-                      </div>
-                    </div>
-                  )}
+             {/* Content */}
+             <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
+               <div className="p-8">
+                 {isViewing ? (
+                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     {/* Column 1 */}
+                     <div className="space-y-5">
+                       {/* Course Image */}
+                       {selectedCourse?.image && (
+                         <div>
+                           <label className="block text-sm font-medium text-gray-700 mb-2">Course Image</label>
+                           <img src={`${baseURL}/${selectedCourse.image}`} alt="Course Image" className="w-full h-48 object-cover rounded-lg border" />
+                         </div>
+                       )}
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                       
+                       <div>
+                         <label className="block text-sm font-medium text-gray-700 mb-2">Course Title</label>
+                         <p className="text-gray-900 bg-gray-50 px-4 py-3 rounded-lg">{selectedCourse?.courseTitle || 'N/A'}</p>
+                       </div>
+
+                       {/* Course Description */}
+                       <div>
+                         <label className="block text-sm font-medium text-gray-700 mb-2">Course Description</label>
+                         <p className="text-gray-900 bg-gray-50 px-4 py-3 rounded-lg whitespace-pre-wrap">{selectedCourse?.courseDescription || 'N/A'}</p>
+                       </div>
+
+                       {/* Course Content */}
+                       <div>
+                         <label className="block text-sm font-medium text-gray-700 mb-2">Course Content</label>
+                         <p className="text-gray-900 bg-gray-50 px-4 py-3 rounded-lg whitespace-pre-wrap">{selectedCourse?.content || 'N/A'}</p>
+                       </div>
+
+                       {/* Date Range */}
+                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         <div>
+                           <label className="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
+                           <p className="text-gray-900 bg-gray-50 px-4 py-3 rounded-lg">{selectedCourse?.RegisterStartDate ? new Date(selectedCourse.RegisterStartDate).toLocaleDateString() : 'N/A'}</p>
+                         </div>
+                         <div>
+                           <label className="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+                           <p className="text-gray-900 bg-gray-50 px-4 py-3 rounded-lg">{selectedCourse?.RegisterEndDate ? new Date(selectedCourse.RegisterEndDate).toLocaleDateString() : 'N/A'}</p>
+                         </div>
+                       </div>
+
+                       {/* Fees */}
+                       <div>
+                         <label className="block text-sm font-medium text-gray-700 mb-2">Course Fees</label>
+                         <p className="text-gray-900 bg-gray-50 px-4 py-3 rounded-lg">{selectedCourse?.fees ? `$${selectedCourse.fees}` : 'Free'}</p>
+                       </div>
+                     </div>
+
+                     {/* Column 2 */}
+                     <div className="space-y-5">
+                       {/* Duration */}
+                       <div>
+                         <label className="block text-sm font-medium text-gray-700 mb-2">Duration</label>
+                         <p className="text-gray-900 bg-gray-50 px-4 py-3 rounded-lg">{selectedCourse?.duration || 'N/A'}</p>
+                       </div>
+
+                       {/* Instructor */}
+                       <div>
+                         <label className="block text-sm font-medium text-gray-700 mb-2">Instructor Name</label>
+                         <p className="text-gray-900 bg-gray-50 px-4 py-3 rounded-lg">
+                           {selectedCourse?.instructor ? `${selectedCourse.instructor.salutation || ''} ${selectedCourse.instructor.firstName} ${selectedCourse.instructor.lastName}`.trim() : 'N/A'}
+                         </p>
+                       </div>
+
+                       {/* Category & Level */}
+                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         <div>
+                           <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                           <p className="text-gray-900 bg-gray-50 px-4 py-3 rounded-lg">{selectedCourse?.category?.CourseCategory || 'N/A'}</p>
+                         </div>
+                         <div>
+                           <label className="block text-sm font-medium text-gray-700 mb-2">Level</label>
+                           <p className="text-gray-900 bg-gray-50 px-4 py-3 rounded-lg">{selectedCourse?.level || 'N/A'}</p>
+                         </div>
+                       </div>
+
+                       {/* Mode & Capacity */}
+                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                         <div>
+                           <label className="block text-sm font-medium text-gray-700 mb-2">Mode</label>
+                           <p className="text-gray-900 bg-gray-50 px-4 py-3 rounded-lg">{selectedCourse?.mode || 'N/A'}</p>
+                         </div>
+                         <div>
+                           <label className="block text-sm font-medium text-gray-700 mb-2">Capacity</label>
+                           <p className="text-gray-900 bg-gray-50 px-4 py-3 rounded-lg">{selectedCourse?.capacity || 'N/A'}</p>
+                         </div>
+                       </div>
+
+                       {/* Status */}
+                       <div>
+                         <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                         <p className="text-gray-900 bg-gray-50 px-4 py-3 rounded-lg">{selectedCourse?.status || 'N/A'}</p>
+                       </div>
+
+                       {/* Skills */}
+                       <div>
+                         <label className="block text-sm font-medium text-gray-700 mb-2">Skills</label>
+                         <p className="text-gray-900 bg-gray-50 px-4 py-3 rounded-lg">
+                           {selectedCourse?.skills && selectedCourse.skills.length > 0 ? selectedCourse.skills.map(skill => skill.name).join(', ') : 'N/A'}
+                         </p>
+                       </div>
+
+                       {/* Prerequisites */}
+                       <div>
+                         <label className="block text-sm font-medium text-gray-700 mb-2">Prerequisites</label>
+                         <p className="text-gray-900 bg-gray-50 px-4 py-3 rounded-lg">{selectedCourse?.prerequisites || 'N/A'}</p>
+                       </div>
+                     </div>
+                   </div>
+                 ) : (
+                   <form onSubmit={handleSubmit}>
+                     {error && (
+                       <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                         <div className="flex items-center text-red-800">
+                           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                           </svg>
+                           <span className="font-medium">{error}</span>
+                         </div>
+                       </div>
+                     )}
+
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Column 1 */}
                     <div className="space-y-5">
                       {/* Course Title */}
@@ -405,6 +690,20 @@ export default function CourseList() {
                           />
                         </div>
                       </div>
+                      {/* Course Image */}
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Course Image
+                        </label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageChange}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-white
+                           focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+
                     </div>
 
                     {/* Column 2 */}
@@ -429,14 +728,19 @@ export default function CourseList() {
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Instructor Name
                         </label>
-                        <input
-                          type="text"
+                        <select
                           name="instructor"
-                          placeholder="e.g., Dr. John Smith"
                           value={formData.instructor}
                           onChange={handleChange}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                        />
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
+                        >
+                          <option value="">Select Instructor</option>
+                          {speakers.map(speaker => (
+                            <option key={speaker._id} value={speaker._id}>
+                              {`${speaker.salutation || ''} ${speaker.firstName} ${speaker.lastName}`.trim()}
+                            </option>
+                          ))}
+                        </select>
                       </div>
 
                       {/* Category & Level */}
@@ -445,14 +749,19 @@ export default function CourseList() {
                           <label className="block text-sm font-medium text-gray-700 mb-2">
                             Category
                           </label>
-                          <input
-                            type="text"
+                          <select
                             name="category"
-                            placeholder="e.g., Programming, Business"
                             value={formData.category}
                             onChange={handleChange}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                          />
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
+                          >
+                            <option value="">Select Category</option>
+                            {categories.map(cat => (
+                              <option key={cat._id} value={cat._id}>
+                                {cat.CourseCategory}
+                              </option>
+                            ))}
+                          </select>
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -504,6 +813,20 @@ export default function CourseList() {
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                           />
                         </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Status
+                          </label>
+                          <select
+                            name="status"
+                            value={formData.status}
+                            onChange={handleChange}
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-white"
+                          >
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                          </select>
+                        </div>
                       </div>
 
                       {/* Skills */}
@@ -511,14 +834,52 @@ export default function CourseList() {
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Skills
                         </label>
-                        <input
-                          type="text"
-                          name="skills"
-                          placeholder="e.g., JavaScript, React, Node.js"
-                          value={formData.skills}
-                          onChange={handleChange}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                        />
+                        {(() => {
+                          const skillOptions = skillsOptions.map(skill => ({ value: skill._id, label: skill.name }));
+                          return (
+                            <Select
+                              isMulti
+                              options={skillOptions}
+                              value={skillOptions.filter(option => formData.skills.includes(option.value))}
+                              onChange={(selected) => setFormData({ ...formData, skills: selected ? selected.map(s => s.value) : [] })}
+                              className="w-full"
+                              placeholder="Select skills"
+                              styles={{
+                                control: (provided) => ({
+                                  ...provided,
+                                  border: '1px solid #d1d5db',
+                                  borderRadius: '0.5rem',
+                                  padding: '0.75rem 1rem',
+                                  fontSize: '0.875rem',
+                                  backgroundColor: 'white',
+                                  '&:hover': {
+                                    borderColor: '#3b82f6',
+                                  },
+                                  '&:focus-within': {
+                                    borderColor: '#3b82f6',
+                                    boxShadow: '0 0 0 1px #3b82f6',
+                                  },
+                                }),
+                                multiValue: (provided) => ({
+                                  ...provided,
+                                  backgroundColor: '#eff6ff',
+                                }),
+                                multiValueLabel: (provided) => ({
+                                  ...provided,
+                                  color: '#1e40af',
+                                }),
+                                multiValueRemove: (provided) => ({
+                                  ...provided,
+                                  color: '#1e40af',
+                                  '&:hover': {
+                                    backgroundColor: '#dbeafe',
+                                    color: '#1d4ed8',
+                                  },
+                                }),
+                              }}
+                            />
+                          );
+                        })()}
                       </div>
 
                       {/* Prerequisites */}
@@ -534,82 +895,73 @@ export default function CourseList() {
                           onChange={handleChange}
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                         />
-                      </div>
+                       </div>
 
-                      {/* Certification */}
-                      <div className="pt-2">
-                        <label className="flex items-center space-x-3 cursor-pointer p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                          <input
-                            type="checkbox"
-                            name="certification"
-                            checked={formData.certification}
-                            onChange={handleChange}
-                            className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
-                          />
-                          <div>
-                            <span className="text-sm font-medium text-gray-900">Certification Available</span>
-                            <p className="text-xs text-gray-500 mt-1">Students will receive a certificate upon completion</p>
-                          </div>
-                        </label>
-                      </div>
-                    </div>
-                  </div>
+                       {/* Form Actions */}
+                       <div className="md:col-span-2">
+                         <div className="flex justify-end gap-3 pt-8 mt-6 border-t border-gray-200">
+                           <button
+                             type="button"
+                             onClick={() => {
+                               setShowModal(false);
+                               setIsViewing(false);
+                               setIsEditing(false);
+                               setSelectedCourse(null);
+                               setFormData({
+                                 courseTitle: '',
+                                 courseDescription: '',
+                                 content: '',
+                                 RegisterStartDate: '',
+                                 RegisterEndDate: '',
+                                 fees: '',
+                                 skills: [],
+                                 duration: '',
+                                 instructor: '',
+                                 prerequisites: '',
+                                 category: '',
+                                 level: '',
+                                 mode: '',
+                                 capacity: '',
 
-                  {/* Form Actions */}
-                  <div className="flex justify-end gap-3 pt-8 mt-6 border-t border-gray-200">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setShowModal(false);
-                        setIsEditing(false);
-                        setSelectedCourse(null);
-                        setFormData({
-                          courseTitle: '',
-                          courseDescription: '',
-                          content: '',
-                          RegisterStartDate: '',
-                          RegisterEndDate: '',
-                          fees: '',
-                          skills: '',
-                          duration: '',
-                          instructor: '',
-                          prerequisites: '',
-                          category: '',
-                          level: '',
-                          mode: '',
-                          capacity: '',
-                          certification: false
-                        });
-                      }}
-                      className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-lg shadow-sm hover:shadow transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-                    >
-                      {loading ? (
-                        <>
-                          <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                          </svg>
-                          {isEditing ? 'Updating...' : 'Creating...'}
-                        </>
-                      ) : (
-                        <>
-                          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                          </svg>
-                          {isEditing ? 'Update Course' : 'Create Course'}
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </form>
+                                 status: 'active'
+                               });
+                             }}
+                             className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                           >
+                             {isViewing ? 'Close' : 'Cancel'}
+                           </button>
+                           {!isViewing && (
+                             <button
+                               type="submit"
+                               disabled={loading}
+                               className="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-lg shadow-sm hover:shadow transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                             >
+                               {loading ? (
+                                 <>
+                                   <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                   </svg>
+                                   {isEditing ? 'Updating...' : 'Creating...'}
+                                 </>
+                               ) : (
+                                 <>
+                                   <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                   </svg>
+                                   {isEditing ? 'Update Course' : 'Create Course'}
+                                 </>
+                               )}
+                             </button>
+                           )}
+                         </div>
+                       </div>
+                     </div>
+                   </div>
+                   </form>
+                 )}
+               </div>
+             </div>
             </div>
           </div>
         )}

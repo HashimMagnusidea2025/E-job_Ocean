@@ -29,20 +29,26 @@ const CourseSchema = new mongoose.Schema({
         type: Number,
         min: 0,
     },
-    skills: {
+    image: {
         type: String,
     },
+    skills: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'SkillsCategory',
+    }],
     duration: {
         type: String,
     },
     instructor: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Speaker',
     },
     prerequisites: {
         type: String,
     },
     category: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Course_Category',
     },
     level: {
         type: String,
@@ -60,6 +66,7 @@ const CourseSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    
     status: {
         type: String,
         enum: ['active', 'inactive'],

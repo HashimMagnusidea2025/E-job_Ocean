@@ -9,13 +9,14 @@ export default function WebinarspageList({ webinar }) {
   const [webinars, setWebinars] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
   const [speakers, setSpeakers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleRegisterClick = (webinar) => {
     console.log("User clicked register for webinar:", webinar);
   };
 
 
-  //  Fetch Active Speakers
+  //  Fetch Active Speakers 
   useEffect(() => {
     const fetchSpeakers = async () => {
       try {
@@ -49,48 +50,48 @@ export default function WebinarspageList({ webinar }) {
     fetchWebinars();
   }, []);
 
-// const getWebinarImage = (webinar) => {
-//   // Multiple speakers → WebinarImage
-//   if (webinar.Speakers && webinar.Speakers.length > 1 && webinar.WebinarImage) {
-//     return `${baseURL}${webinar.WebinarImage}`;
-//   }
+  // const getWebinarImage = (webinar) => {
+  //   // Multiple speakers → WebinarImage
+  //   if (webinar.Speakers && webinar.Speakers.length > 1 && webinar.WebinarImage) {
+  //     return `${baseURL}${webinar.WebinarImage}`;
+  //   }
 
-//   // Single speaker → Speaker profilePic
-//   if (
-//     webinar.Speakers &&
-//     webinar.Speakers.length === 1 &&
-//     webinar.Speakers[0].profilePic
-//   ) {
-//     return `${baseURL}/${webinar.Speakers[0].profilePic}`;
-//   }
+  //   // Single speaker → Speaker profilePic
+  //   if (
+  //     webinar.Speakers &&
+  //     webinar.Speakers.length === 1 &&
+  //     webinar.Speakers[0].profilePic
+  //   ) {
+  //     return `${baseURL}/${webinar.Speakers[0].profilePic}`;
+  //   }
 
-//   // Fallback image
-//   return "/default-webinar.png";
-// };
+  //   // Fallback image
+  //   return "/default-webinar.png";
+  // };
 
-const getWebinarImage = (webinar) => {
-  // ✅ CASE 1: Multiple speakers → WebinarImage
-  if (webinar.Speakers && webinar.Speakers.length > 1 && webinar.WebinarImage) {
-    return `${baseURL}${webinar.WebinarImage}`;
-  }
+  const getWebinarImage = (webinar) => {
+    // ✅ CASE 1: Multiple speakers → WebinarImage
+    if (webinar.Speakers && webinar.Speakers.length > 1 && webinar.WebinarImage) {
+      return `${baseURL}${webinar.WebinarImage}`;
+    }
 
-  // ✅ CASE 2: Single speaker (NEW structure)
-  if (
-    webinar.Speakers &&
-    webinar.Speakers.length === 1 &&
-    webinar.Speakers[0]?.profilePic
-  ) {
-    return `${baseURL}/${webinar.Speakers[0].profilePic}`;
-  }
+    // ✅ CASE 2: Single speaker (NEW structure)
+    if (
+      webinar.Speakers &&
+      webinar.Speakers.length === 1 &&
+      webinar.Speakers[0]?.profilePic
+    ) {
+      return `${baseURL}/${webinar.Speakers[0].profilePic}`;
+    }
 
-  // ✅ CASE 3: Single speaker (OLD structure)
-  if (webinar.Speaker?.profilePic) {
-    return `${baseURL}/${webinar.Speaker.profilePic}`;
-  }
+    // ✅ CASE 3: Single speaker (OLD structure)
+    if (webinar.Speaker?.profilePic) {
+      return `${baseURL}/${webinar.Speaker.profilePic}`;
+    }
 
-  // ✅ FALLBACK
-  return "/default-webinar.png";
-};
+    // ✅ FALLBACK
+    return "/default-webinar.png";
+  };
 
 
   const now = new Date();
@@ -111,7 +112,7 @@ const getWebinarImage = (webinar) => {
   // });
 
   // ✅ Filter webinars only if not in Speaker tab
-  const filteredWebinars = webinars.filter((webinar) => {
+  let filteredWebinars = webinars.filter((webinar) => {
     if (activeTab === "upcoming") {
       return new Date(webinar.WebinarStartDateTime) >= now;
     } else if (activeTab === "past") {
@@ -121,6 +122,21 @@ const getWebinarImage = (webinar) => {
     } else {
       return false; // don't show webinars in Speaker tab
     }
+  });
+
+  // Apply search filter for webinars
+  filteredWebinars = filteredWebinars.filter((webinar) => {
+    if (!searchTerm) return true;
+    const title = webinar.WebinarTitle?.toLowerCase() || '';
+    const speakers = webinar.Speakers?.map(s => s.name?.toLowerCase()).join(' ') || '';
+    return title.includes(searchTerm.toLowerCase()) || speakers.includes(searchTerm.toLowerCase());
+  });
+
+  // Filter speakers based on search
+  const filteredSpeakers = speakers.filter((speaker) => {
+    if (!searchTerm) return true;
+    const name = `${speaker.firstName || ''} ${speaker.lastName || ''}`.toLowerCase().trim();
+    return name.includes(searchTerm.toLowerCase());
   });
 
   // Sort only for "all" tab
@@ -144,7 +160,20 @@ const getWebinarImage = (webinar) => {
     <div className="w-full font-[Poppins] bg-[#f7f9f8]">
       <Navbar />
       <div className="container mx-auto">
+
         <div className="px-4 sm:px-6 md:px-10 py-10">
+
+          <div className="flex justify-end">
+            <input
+              type="text"
+              placeholder={activeTab === "Speaker" ? "Search speakers..." : "Search webinars..."}
+              className="w-64 px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+
           <div className="flex justify-center items-center mb-8">
             <h2 className="text-3xl font-bold text-gray-900">
               {activeTab === "Speaker" ? "Speakers" : "Webinars"}
@@ -210,10 +239,10 @@ const getWebinarImage = (webinar) => {
             </div> */}
             <div className="lg:w-4/5 w-full">
               {activeTab === "Speaker" ? (
-                // ✅ SPEAKER VIEW
+                //  SPEAKER VIEW
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 justify-items-center ">
-                  {speakers.length > 0 ? (
-                    speakers.map((speaker, index) => (
+                  {filteredSpeakers.length > 0 ? (
+                    filteredSpeakers.map((speaker, index) => (
                       <HallOfFameCards key={index} speaker={speaker} />
                     ))
                   ) : (
@@ -223,7 +252,7 @@ const getWebinarImage = (webinar) => {
                   )}
                 </div>
               ) : (
-                // ✅ WEBINAR VIEW
+                //  WEBINAR VIEW
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   {filteredWebinars.length > 0 ? (
                     filteredWebinars.map((webinar) => (

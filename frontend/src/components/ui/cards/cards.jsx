@@ -1183,7 +1183,7 @@ export const HallOfFameCards = ({ speaker }) => {
                 </button> */}
 
                 <button className="px-4 py-1 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition">
-                    Book Now
+                    Book One to One
                 </button>
             </span>
 
