@@ -1,5 +1,6 @@
 import SpeakerModel from "./Speaker.model.js";
 import {slugify} from './../../utils/slugify.js';
+import OneToOneModel from "../OneToOne/OneToOne.model.js";
 
 export const CreateSpeaker = async (req, res) => {
     try {
@@ -124,8 +125,21 @@ export const getActiveSpeakers = async (req, res) => {
     try {
         const speakers = await SpeakerModel.find({ status: "active" });
 
-        
-        res.json(speakers);
+        // Check for each speaker if they have one-to-one sessions
+        const speakersWithOneToOne = await Promise.all(
+            speakers.map(async (speaker) => {
+                const oneToOneCount = await OneToOneModel.countDocuments({
+                    Speaker: speaker._id,
+                    status: "active"
+                });
+                return {
+                    ...speaker.toObject(),
+                    hasOneToOneSession: oneToOneCount > 0
+                };
+            })
+        );
+
+        res.json(speakersWithOneToOne);
     } catch (err) {
         console.error("Error in getActiveSpeakers:", err);
         res.status(500).json({ message: "Error fetching active speakers", error: err.message });

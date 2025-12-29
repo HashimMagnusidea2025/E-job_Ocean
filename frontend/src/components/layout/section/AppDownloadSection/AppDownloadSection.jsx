@@ -7,25 +7,63 @@ import { CiYoutube } from "react-icons/ci";
 import { FaInstagramSquare } from "react-icons/fa";
 import { FaLinkedinIn } from "react-icons/fa6";
 import { CiTwitter } from "react-icons/ci";
+import { FaFacebookF } from "react-icons/fa6";
+const iconMap = {
+  whatsapp: {
+    icon: BsWhatsapp,
+    bg: 'hover:bg-green-600',
+    color: 'text-green-500'
+  },
+  telegram: {
+    icon: FaTelegram,
+    bg: 'hover:bg-blue-500',
+    color: 'text-blue-400'
+  },
+  youtube: {
+    icon: CiYoutube,
+    bg: 'hover:bg-red-500',
+    color: 'text-red-500'
+  },
+  instagram: {
+    icon: FaInstagramSquare,
+    bg: 'hover:bg-pink-500',
+    color: 'text-pink-500'
+  },
+  linkedin: {
+    icon: FaLinkedinIn,
+    bg: 'hover:bg-blue-800',
+    color: 'text-blue-700'
+  },
+  twitter: {
+    icon: CiTwitter,
+    bg: 'hover:bg-sky-500',
+    color: 'text-sky-400'
+  },
+  facebook: {
+    icon: FaFacebookF,
+    bg: 'hover:bg-blue-700',
+    color: 'text-blue-600'
+  }
+};
 
 export default function AppDownloadSection() {
 
- const [data, setData] = useState()
-    const fetchCompanydata = async () => {
-        try {
-            const response = await axios.get('/general-settings'); // backend endpoint
-            console.log("✅ Full Response:", response);              // logs full Axios response object
-            console.log("✅ Data Received:", response.data);          // logs only your actual data
+  const [data, setData] = useState()
+  const fetchCompanydata = async () => {
+    try {
+      const response = await axios.get('/general-settings'); // backend endpoint
+      console.log("✅ Full Response:", response);              // logs full Axios response object
+      console.log("✅ Data Received:", response.data);          // logs only your actual data
 
-            setData(response.data);
-        } catch (error) {
-            console.error("❌ Failed to fetch company logo:", error);
-        }
-    };
+      setData(response.data);
+    } catch (error) {
+      console.error("❌ Failed to fetch company logo:", error);
+    }
+  };
 
-    useEffect(() => {
-        fetchCompanydata();
-    }, []);
+  useEffect(() => {
+    fetchCompanydata();
+  }, []);
 
   return (
     <div className="w-full bg-[linear-gradient(to_right,_#090A47,_#20AEB2)]">
@@ -95,6 +133,24 @@ export default function AppDownloadSection() {
 
 
 export function PlacementProgramSection() {
+
+  const [icons, setIcons] = useState([]);
+
+  useEffect(() => {
+    fetchIcons();
+  }, []);
+
+  const fetchIcons = async () => {
+    try {
+      const res = await axios.get("/social-media-icons/active");
+      setIcons(res.data);
+      console.log(res.data);
+      
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   return (
     <div className='container mx-auto'>
       <div className=" py-16 px-4 sm:px-6 md:px-10 font-[Poppins] overflow-hidden">
@@ -136,12 +192,12 @@ export function PlacementProgramSection() {
               </button>
             </div>
 
-            {/* Social Media Section */}
-            <div className="border-t border-white/40 pt-6 text-white w-full">
+            {/* <div className="border-t border-white/40 pt-6 text-white w-full">
               <p className="font-semibold text-lg mb-4 text-center lg:text-left">
                 Follow Us On Social Media
               </p>
               <div className="flex flex-wrap gap-4 justify-center lg:justify-start text-2xl">
+
                 <div className="bg-white p-3 rounded-full hover:bg-green-600 transition-all">
                   <BsWhatsapp className="text-green-500 hover:text-white transition-transform hover:scale-110 cursor-pointer" size={30} />
                 </div>
@@ -162,7 +218,7 @@ export function PlacementProgramSection() {
                 </div>
               </div>
 
-              {/* Telegram CTA */}
+             
               <div className="pt-8 text-center lg:text-left">
                 <h3 className="text-[22px] sm:text-[26px] lg:text-[28px] font-medium mb-4">
                   Get Job/Articleship Updates on Telegram
@@ -171,6 +227,56 @@ export function PlacementProgramSection() {
                   Join Us On Telegram
                 </button>
               </div>
+            </div> */}
+
+
+            <div className="border-t border-white/40 pt-6 text-white w-full">
+              <p className="font-semibold text-lg mb-4 text-center lg:text-left">
+                Follow Us On Social Media
+              </p>
+
+              <div className="flex flex-wrap gap-4 justify-center lg:justify-start text-2xl">
+                {icons.map((item) => {
+                  const key = item.name.toLowerCase();
+                  const Icon = iconMap[key]?.icon;
+
+                  if (!Icon) return null;
+
+                  return (
+                    <a
+                      key={item._id}
+                      href={item.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`bg-white p-3 rounded-full transition-all ${iconMap[key].bg}`}
+                    >
+                      <Icon
+                        size={30}
+                        className={`${iconMap[key].color} hover:text-white transition-transform hover:scale-110 cursor-pointer`}
+                      />
+                    </a>
+                  );
+                })}
+              </div>
+
+              {/* Telegram CTA – sirf tab dikhe jab telegram active ho */}
+              {icons.some((i) => i.name.toLowerCase() === "telegram") && (
+                <div className="pt-8 text-center lg:text-left">
+                  <h3 className="text-[22px] sm:text-[26px] lg:text-[28px] font-medium mb-4">
+                    Get Job/Articleship Updates on Telegram
+                  </h3>
+                  <a
+                    href={
+                      icons.find((i) => i.name.toLowerCase() === "telegram")?.link
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block text-[18px] bg-black text-white px-6 py-3 rounded-md shadow hover:bg-gray-800 transition-all"
+                  >
+                    Join Us On Telegram
+                  </a>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -9,10 +9,10 @@ CommentRuter.post('/request-otp',RequestOtp);
 
 CommentRuter.post('/verify-otp', VerifyOtp);
 
-CommentRuter.post('/post',protect,PostComment);
+CommentRuter.post('/post',PostComment);
 
 CommentRuter.get('/:id', GetCommentsByBlog);
 
-CommentRuter.post('/like',protect, LikeComment);    
+CommentRuter.post('/like', LikeComment);
 
 export default CommentRuter;

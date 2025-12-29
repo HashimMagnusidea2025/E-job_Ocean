@@ -10,6 +10,12 @@ import { FaFacebook, FaTwitter, FaInstagram, FaTelegram } from "react-icons/fa";
 import { MdOutlineAccessTime } from "react-icons/md";
 import { Link } from "react-router-dom";
 import { CommentCards, ReactShareButton } from "../../components/ui/cards/cards.jsx";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay } from "swiper/modules";
+import { ViewButton } from "../../components/ui/button/button";
+import "swiper/css";
+import { MdEmojiEmotions } from "react-icons/md";
+
 import {
     EmailShareButton,
     EmailIcon,
@@ -58,7 +64,9 @@ export default function BlogDetailsPage2({ blogs }) {
     const [currentPage, setCurrentPage] = useState(1);
     const type = "blogs";
 
-
+    const [showReactions, setShowReactions] = useState(false);
+    const [reaction, setReaction] = useState(null);
+    const [reactions, setReactions] = useState({});
 
 
     // useEffect(() => {
@@ -91,16 +99,9 @@ export default function BlogDetailsPage2({ blogs }) {
     const fetchComments = async () => {
         if (!id) return; // ✅ Prevent calling before id is ready
         try {
-            console.log("BlogDetailsPage: Fetching comments for blog:", {
-                id,
-                type,
-                idType: typeof id
-            });
+            
             const res = await axios.get(`/comment/${id}?type=${type}`);
-            console.log("BlogDetailsPage: Comments response:", {
-                count: res.data.count,
-                comments: res.data.comments
-            });
+            
             setComments(res.data.comments);
             setCommentCount(res.data.count);
         } catch (err) {
@@ -115,7 +116,7 @@ export default function BlogDetailsPage2({ blogs }) {
 
     // ✅ Comment add होने के बाद refresh करने का function
     const handleCommentAdded = () => {
-        console.log("Comment added, refreshing comments...");
+       
         fetchComments(); // ✅ Comments को फिर से fetch करें
     };
     const [isLoggedIn, setIsLoggedIn] = useState(false);;
@@ -131,9 +132,9 @@ export default function BlogDetailsPage2({ blogs }) {
         const fetchLikeCount = async () => {
             if (!id) return;
             try {
-                console.log("Fetching like count for blog:", { id, type });
+                
                 const res = await axios.get(`/blogs/like/likes/${id}/${type}`);
-                console.log("Blog like count response:", res.data);
+               
                 setLikeCount(res.data.totalCount);
             } catch (err) {
                 console.error(err.response?.data || err.message);
@@ -143,6 +144,22 @@ export default function BlogDetailsPage2({ blogs }) {
     }, [id, type]);
 
 
+    // ✅ Fetch Reactions
+    useEffect(() => {
+        const fetchReactions = async () => {
+            if (!id) return;
+            try {
+                const res = await axios.get(`/reaction/${id}`);
+                setReactions(res.data.reactions);
+                
+
+            } catch (err) {
+                console.error("Error fetching reactions:", err);
+            }
+        };
+        fetchReactions();
+    }, [id]);
+
     useEffect(() => {
 
         axios.get("https://blog.ejobocean.com/wp-json/wp/v2/posts?_embed")
@@ -150,6 +167,8 @@ export default function BlogDetailsPage2({ blogs }) {
             .then((res) => {
                 setPosts(res.data);
                 console.log(res.data);
+                
+                
                 console.log(res.data[0].slug);
 
             })
@@ -299,17 +318,18 @@ export default function BlogDetailsPage2({ blogs }) {
 
     // Like functionality yaha
     // ✅ Handle Like
+
     const handleLike = async () => {
         try {
             const token = localStorage.getItem("token");
 
-            console.log("Sending like request for blog:", { id, type });
+            
             const res = await axios.post(
                 "/blogs/like",
                 { id: id, type },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            console.log("Blog like response:", res.data);
+            
             if (res.data.totalCount !== undefined) {
                 setLikeCount(res.data.totalCount);
                 setLiked(true);
@@ -348,26 +368,7 @@ export default function BlogDetailsPage2({ blogs }) {
 
                 {/* Hero Section */}
 
-                {/* <div className="relative h-[60vh] w-full">
-                    <img
-                        src={hero31}
-                        alt="Blog Hero"
-                        className="absolute top-0 left-0 w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/60"></div>
-                    <div className="relative z-10 flex flex-col justify-center items-center h-full text-center text-white px-4">
-                        <span className="bg-green-500 text-sm font-semibold px-3 py-1 rounded-full mb-4">
-                            Article
-                        </span>
-                        <h1 className="text-3xl md:text-5xl font-bold leading-snug max-w-3xl">
-                            The Future is Outsourced: Job Opportunities in India's Accounting
-                            Outsourcing Industry
-                        </h1>
-                        <p className="mt-3 text-sm md:text-base">
-                            By Kirty Khandelwal | April 1, 2025
-                        </p>
-                    </div>
-                </div> */}
+
 
                 {loading ? (
                     <>
@@ -440,7 +441,7 @@ export default function BlogDetailsPage2({ blogs }) {
                                 </div>
                                 <Categories />
 
-                                <SubscribeNow />
+                                {/* <SubscribeNow /> */}
                             </div>
                         </div>
                     </>
@@ -487,16 +488,15 @@ export default function BlogDetailsPage2({ blogs }) {
                                                     })}
                                                 </h3>
                                             </div>
+                                            <div className="mt-2">
+                                                <ViewButton
+                                                    blogId={postDetilas.id}
+                                                    type="blogs"
+                                                />
+                                            </div>
 
 
 
-                                            {/* <div
-                                        className="prose"
-                                        dangerouslySetInnerHTML={{ __html: postDetilas.excerpt.rendered }}
-                                    />  */}
-                                            {/* <h3 className="text-sm sm:text-base md:text-lg font-medium text-gray-600">
-                                    By Nilesh Kadnor | April 1, 2025
-                                </h3> */}
                                         </div>
 
                                     </div>
@@ -522,9 +522,48 @@ export default function BlogDetailsPage2({ blogs }) {
                                                 email
                                                 linkedin
                                                 desktopClass="hidden lg:flex flex gap-2 rounded-md" />
+                                            <div className="relative flex items-center gap-3">
+
+                                                <button
+                                                    onClick={() => setShowReactions(!showReactions)}
+                                                    className="flex items-center justify-center w-11 h-11 rounded-full bg-gradient-to-tr from-orange-500 to-yellow-400 shadow-md hover:scale-105 transition"
+                                                >
+                                                    <MdEmojiEmotions className="text-white" size={26} />
+                                                </button>
 
 
+                                                {showReactions && (
+                                                    <div className="absolute bottom-14 left-0 bg-white shadow-xl border rounded-full px-4 py-2 flex gap-3 z-50 animate-bounce">
+                                                        {["👍", "❤️", "😂", "😮", "😢", "🔥"].map((emoji, index) => (
+                                                            <button
+                                                                key={index}
+                                                                className="text-2xl hover:scale-125 transition"
+                                                                onClick={async () => {
+                                                                    await axios.post('/reaction/add', { blogId: id, emoji });
+                                                                    setShowReactions(false);
+                                                                    const res = await axios.get(`/reaction/${id}`);
+                                                                    setReactions(res.data.reactions);
+                                                                }}
+                                                            >
+                                                                {emoji}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                )}
 
+                                                {/* Reaction Counters */}
+                                                <div className="flex items-center gap-2">
+                                                    {Object.entries(reactions).map(([emoji, count]) => (
+                                                        <span
+                                                            key={emoji}
+                                                            className="flex items-center gap-1 px-2 py-1 text-sm bg-gray-100 rounded-full shadow-sm"
+                                                        >
+                                                            <span className="text-lg">{emoji}</span>
+                                                            <span className="font-semibold">{count}</span>
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
 
                                         </div>
                                         <div className="prose max-w-none mt-6">
@@ -549,19 +588,55 @@ export default function BlogDetailsPage2({ blogs }) {
 
 
                                     </div>
+
+                                    <div className="relative flex items-center gap-3">
+
+                                        <button
+                                            onClick={() => setShowReactions(!showReactions)}
+                                            className="flex items-center justify-center w-11 h-11 rounded-full bg-gradient-to-tr from-orange-500 to-yellow-400 shadow-md hover:scale-105 transition"
+                                        >
+                                            <MdEmojiEmotions className="text-white" size={26} />
+                                        </button>
+
+
+                                        {showReactions && (
+                                            <div className="absolute bottom-14 left-0 bg-white shadow-xl border rounded-full px-4 py-2 flex gap-3 z-50 animate-bounce">
+                                                {["👍", "❤️", "😂", "😮", "😢", "🔥"].map((emoji, index) => (
+                                                    <button
+                                                        key={index}
+                                                        className="text-2xl hover:scale-125 transition"
+                                                        onClick={async () => {
+                                                            await axios.post('/reaction/add', { blogId: id, emoji });
+                                                            setShowReactions(false);
+                                                            const res = await axios.get(`/reaction/${id}`);
+                                                            setReactions(res.data.reactions);
+                                                        }}
+                                                    >
+                                                        {emoji}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {/* Reaction Counters */}
+                                        <div className="flex items-center gap-2">
+                                            {Object.entries(reactions).map(([emoji, count]) => (
+                                                <span
+                                                    key={emoji}
+                                                    className="flex items-center gap-1 px-2 py-1 text-sm bg-gray-100 rounded-full shadow-sm"
+                                                >
+                                                    <span className="text-lg">{emoji}</span>
+                                                    <span className="font-semibold">{count}</span>
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+
                                     <CommentCards
-                                        isLoggedIn={isLoggedIn}   /// if user login ///
                                         blogId={postDetilas.id}
                                         type={type}
                                         title="Leave a Reply"
-                                        des={
-                                            <p className="text-sm text-gray-600 mb-4">
-                                                Your email address will <span className="italic">not</span> be published.
-                                                Required fields are marked <span className="text-red-500">*</span>
-                                            </p>
-                                        }
-                                        checkbox="Save my name, email, and website in this browser for the next time I comment."
-                                        onCommentAdded={handleCommentAdded} // ✅ Refresh function pass करें
+                                        onCommentAdded={handleCommentAdded} //  Refresh function pass करें
                                     />
 
                                     <CommentList
@@ -576,50 +651,72 @@ export default function BlogDetailsPage2({ blogs }) {
                                 </div>
 
                                 {/* Sidebar */}
-                                <div className="space-y-6">
+                                {/* <div className="space-y-6">
                                     <FollowSocials />
-
-
-                                    <div className="bg-white shadow-md rounded-2xl p-5">
-                                        <div>
-                                            <h3 className="mb-4 text-lg font-semibold text-gray-800">
-                                                LATEST POSTS
-                                            </h3>
-
-                                            <div className="flex flex-col gap-5">
-                                                {posts.map((value, idss) => (
-                                                    <Link
-                                                        key={idss}
-                                                        to={`/blogs/${value.slug}`}
-                                                        className="flex items-start gap-3 rounded-lg bg-white p-3 shadow-sm hover:shadow-md transition"
-                                                    >
-                                                        <LatestPost
-                                                            key={value.id}
-                                                            id={value.id}
-                                                            img={
-                                                                value._embedded?.["wp:featuredmedia"]?.[0]?.media_details?.sizes
-                                                                    ?.pixwell_280x210?.source_url
-                                                            }
-                                                            title={value.title.rendered}
-                                                            date={value.date.split("T")[0]}
-                                                        />
-                                                    </Link>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-
 
 
                                     <Categories />
 
 
-                                    <SubscribeNow />
+                                    
+                                </div> */}
+                                <div className="space-y-6 lg:sticky lg:top-24 h-fit">
+                                    <FollowSocials />
+                                    <Categories />
                                 </div>
+
                             </div>
                         )}
                     </>
                 )}
+
+                <div className=" container mx-auto px-6 py-10">
+                    <h3 className="mb-4 text-lg font-semibold text-gray-800">
+                        LATEST POSTS
+                    </h3>
+
+                    <Swiper
+                        modules={[Autoplay]}
+                        spaceBetween={20}
+                        autoplay={{
+                            delay: 2000,
+                            disableOnInteraction: false,
+                        }}
+                        loop={true}
+                        breakpoints={{
+                            0: { slidesPerView: 1 },
+                            640: { slidesPerView: 2 },
+                            1024: { slidesPerView: 3 },
+                            1280: { slidesPerView: 4 },
+                        }}
+                        className="mb-10"
+                    >
+                        {posts.map((value, index) => {
+                            const featuredImage =
+                                value._embedded?.["wp:featuredmedia"]?.[0]?.source_url;
+
+                            const authorName =
+                                value._embedded?.author?.[0]?.name || "E-Job Ocean";
+
+                            return (
+                                <SwiperSlide key={index}>
+                                    <Link
+                                        to={`/blogs/${value.slug}`}
+                                        className="block px-2"
+                                    >
+                                        <LatestPost
+                                            img={featuredImage}
+                                            title={value.title.rendered}
+                                            author={authorName}
+                                            date={value.date.split("T")[0]}
+                                        />
+                                    </Link>
+                                </SwiperSlide>
+                            );
+                        })}
+                    </Swiper>
+                </div>
+
 
 
 

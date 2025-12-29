@@ -1,65 +1,106 @@
-import React from 'react';
-import image1 from '../../../../media/png/bonus-1.png';
+import React, { useEffect, useState } from 'react';
+import { WebinarCardsList } from '../../../ui/cards/cards';
+import axios from '../../../../utils/axios.js';
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination } from "swiper/modules";
+
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 
 
-
-
-const bonuses = [
-    {
-        title: '5 free Technical sessions',
-        worth: '₹3000',
-        img: image1,
-    },
-    {
-        title: 'Live communication skills training',
-        worth: '₹3000',
-        img: image1,
-    },
-    {
-        title: 'Mentorship from industry experts',
-        worth: '₹4000',
-        img: image1,
-    },
-    {
-        title: 'Lifetime Free Placement Assistance',
-        worth: '₹5000',
-        img: image1,
-    },
-];
+const baseURL = import.meta.env.VITE_BACKEND_URL;
 
 export default function BonusSection() {
+    const [webinars, setWebinars] = useState([]);
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(window.innerWidth < 640);
+        };
+
+        window.addEventListener("resize", handleResize);
+        return () => window.removeEventListener("resize", handleResize);
+    }, []);
+
+    useEffect(() => {
+        const fetchWebinars = async () => {
+            try {
+                const { data } = await axios.get("/webinars/active");
+                
+                const validData = data.map((w) => ({
+                    ...w,
+                    WebinarStartDateTime: new Date(w.WebinarStartDateTime),
+                    WebinarEndDateTime: new Date(w.WebinarEndDateTime),
+                }));
+                setWebinars(validData);
+            } catch (err) {
+                console.error("Error fetching webinars:", err);
+            }
+        };
+        fetchWebinars();
+    }, []);
+
+    const getWebinarImage = (webinar) => {
+        
+        if (webinar.Speakers && webinar.Speakers.length > 1 && webinar.WebinarImage) {
+            return `${baseURL}${webinar.WebinarImage}`;
+        }
+
+       
+        if (
+            webinar.Speakers &&
+            webinar.Speakers.length === 1 &&
+            webinar.Speakers[0]?.profilePic
+        ) {
+            return `${baseURL}/${webinar.Speakers[0].profilePic}`;
+        }
+
+       
+        if (webinar.Speaker?.profilePic) {
+            return `${baseURL}/${webinar.Speaker.profilePic}`;
+        }
+
+        
+        return "/default-webinar.png";
+    };
+
+    const now = new Date();
+    const pastWebinars = webinars.filter((webinar) => new Date(webinar.WebinarEndDateTime) < now);
+
+    const handleRegisterClick = (webinar) => {
+        console.log("User clicked register for webinar:", webinar);
+    };
+
     return (
-        <section className="container mx-auto py-28 w-full font-[Poppins] " >
-            <h2 className="text-2xl md:text-3xl font-semibold text-center text-gray-800 mb-10">
-                Unlock Bonuses worth <span className="text-[#339ca0] font-bold">₹15,000</span> with our Program
+        <section className="container mx-auto py-5 w-full font-[Poppins]">
+            <h2 className="text-2xl md:text-4xl font-semibold text-center text-gray-800 mb-10">
+                <span className="text-[#339ca0] font-bold">Webinars</span>
             </h2>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto px-4">
-                {bonuses.map((bonus, index) => (
-                    <div
-                        key={index}
-                        className="group hover:bg-[linear-gradient(to_right,_#090A47,_#20AEB2)] rounded-xl shadow-lg p-6 relative flex flex-col items-center text-center transition-transform transform hover:scale-105 duration-300"
-                    >
-                        {/* FREE Badge */}
-                        <div className="absolute -top-4 -left-4 rotate-[-10deg] bg-[linear-gradient(to_right,_#090A47,_#20AEB2)] to-black text-white font-bold text-sm px-3 py-1 rounded shadow-md z-10">
-                            FREE
-                        </div>
+            <Swiper
+                modules={[Navigation, Pagination]}   
+                spaceBetween={20}
+                navigation  
+                slidesPerView={1}
+                pagination={isMobile ? { clickable: true } : false}
+                breakpoints={{
+                    640: { slidesPerView: 2 },
+                    1024: { slidesPerView: 4 },
+                }}
+                className={isMobile ? "pb-10" : ""}
+            >
 
-                        {/* Image */}
-                        <img src={bonus.img} alt={bonus.title} className="w-24 h-24 object-contain mb-4" />
-
-                        {/* Title */}
-                        <h3 className="text-2xl font-semibold text-black group-hover:text-white">
-                            {bonus.title}
-                        </h3>
-
-                        {/* Worth */}
-                        <p className="text-sm font-bold text-black mt-2 group-hover:text-white">
-                            <span className="font-bold group-hover:text-white">worth</span> {bonus.worth}
-                        </p>
-                    </div>
+                {pastWebinars.map((webinar) => (
+                    <SwiperSlide key={webinar._id} className="p-5 sm:p-0">
+                        <WebinarCardsList
+                            webinar={webinar}
+                            image={getWebinarImage(webinar)}
+                            onRegisterClick={handleRegisterClick}
+                        />
+                    </SwiperSlide>
                 ))}
-            </div>
+            </Swiper>
 
         </section>
     );

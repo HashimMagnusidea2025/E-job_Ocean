@@ -3,7 +3,8 @@ import { FaMapMarkerAlt, FaClock, FaMoneyBill, FaUserAlt, FaBuilding, FaBriefcas
 import axios from "../../../../utils/axios.js";
 import depositphotos from "../../../../media/jpg/depositphotos.jpg";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import { Navigation, Pagination, Autoplay, Grid } from "swiper/modules";
+
 const tabs = ["Job Vacancies", "CA Articleship", "Industrial Training", "Internships"];
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
@@ -13,6 +14,10 @@ import { useParams } from "react-router";
 import Select from "react-select";
 import { useLocation } from "react-router-dom";
 const baseURL = import.meta.env.VITE_BACKEND_URL;
+import "swiper/css";
+import "swiper/css/grid";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 
 export default function OpportunitiesSection() {
     const { id } = useParams();
@@ -464,7 +469,7 @@ export default function OpportunitiesSection() {
 
     const getCompanyLogo = (job) => {
         if (job.companyId?.company?.employerLogo) {
-            return `${baseURL || 'http://localhost:5000'}${job.companyId.company.employerLogo}`;
+            return `${baseURL}${job.companyId.company.employerLogo}`;
         }
         return null;
     };
@@ -566,17 +571,20 @@ export default function OpportunitiesSection() {
 
                         {/* Mode Filter */}
                         <div className="flex flex-col min-w-[180px]">
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Mode</label>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Job Mode
+                            </label>
+
                             <Select
                                 options={[
                                     { value: "", label: "All Modes" },
-                                    { value: "remote", label: "Remote" },
-                                    { value: "online", label: "online" },
-                                    { value: "offline", label: "offline" },
+                                    { value: "Work From Home", label: "Work From Home" },
+                                    { value: "Work From Office", label: "Work From Office" },
+                                    { value: "Hybrid", label: "Hybrid" },
                                 ]}
                                 value={
                                     tempModeFilter
-                                        ? { value: tempModeFilter, label: tempModeFilter.charAt(0).toUpperCase() + tempModeFilter.slice(1) }
+                                        ? { value: tempModeFilter, label: tempModeFilter }
                                         : { value: "", label: "All Modes" }
                                 }
                                 onChange={(selected) => setTempModeFilter(selected?.value || "")}
@@ -584,10 +592,11 @@ export default function OpportunitiesSection() {
                                 classNamePrefix="react-select"
                                 menuPortalTarget={document.body}
                                 styles={{
-                                    menuPortal: (base) => ({ ...base, zIndex: 9999 })
+                                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
                                 }}
                             />
                         </div>
+
 
                         {/* Experience Filter */}
                         <div className="flex flex-col min-w-[180px]">
@@ -598,7 +607,9 @@ export default function OpportunitiesSection() {
                                     { value: "0-1 years", label: "0-1 Years" },
                                     { value: "1-3 years", label: "1-3 Years" },
                                     { value: "3-5 years", label: "3-5 Years" },
-                                    { value: "5+ years", label: "5+ Years" },
+                                    { value: "5-10 years", label: "5-10 Years" },
+                                    { value: "10-15 years", label: "10+10 Years" },
+                                    { value: "15-20 years", label: "15+20 Years" },
                                 ]}
                                 value={
                                     tempExperienceFilter
@@ -606,7 +617,10 @@ export default function OpportunitiesSection() {
                                             value: tempExperienceFilter,
                                             label: tempExperienceFilter === "0-1 years" ? "0-1 Years" :
                                                 tempExperienceFilter === "1-3 years" ? "1-3 Years" :
-                                                    tempExperienceFilter === "3-5 years" ? "3-5 Years" : "5+ Years"
+                                                    tempExperienceFilter === "3-5 years" ? "3-5 Years" :
+                                                        tempExperienceFilter === "5-10 years" ? "5-10 Years" :
+                                                            tempExperienceFilter === "10-15 years" ? "10+10 Years" :
+                                                                tempExperienceFilter === "15-20 years" ? "15+20 Years" : ""
                                         }
                                         : { value: "", label: "All Experience" }
                                 }
@@ -647,19 +661,36 @@ export default function OpportunitiesSection() {
                     </div>
                 ) : (
                     <Swiper
-                        modules={[Navigation, Pagination, Autoplay]}
-                        spaceBetween={20}
-                        slidesPerView={1}
+  modules={[Navigation, Pagination, Autoplay, Grid]}
+  navigation
+  spaceBetween={20}
+  centerInsufficientSlides={true}
+  className="mt-10"
 
-                        centerInsufficientSlides={true} //  BEST for dynamic job counts
-                        navigation
-                        breakpoints={{
-                            640: { slidesPerView: 1 },
-                            768: { slidesPerView: 2 },
-                            1024: { slidesPerView: 4 }
-                        }}
-                        className="mt-10"
-                    >
+  // Mobile default
+  slidesPerView={1}
+  grid={{ rows: 1 }}
+
+  breakpoints={{
+    640: {
+      slidesPerView: 1,
+      grid: { rows: 1 },
+    },
+    768: {
+      slidesPerView: 2,
+      grid: { rows: 1 },
+    },
+    1024: {
+      slidesPerView: 4,          // ✅ 4 columns
+      grid: {
+        rows: 2,                // ✅ 2 rows
+        fill: "row",            // ⭐ MOST IMPORTANT
+      },
+    },
+  }}
+>
+
+
                         {filteredJobs.map((job) => {
                             // Yeh variables map function ke andar define karein
                             const companyLogo = getCompanyLogo(job);

@@ -135,6 +135,7 @@ import ContactUserList from './components/AdminDashboard/ContactUserList/Contact
 import CourseList from './components/AdminDashboard/Course/course.jsx';
 import OurFounders from './components/AdminDashboard/OurFounders/OurFounders.jsx';
 
+import SocialMediaForm from './components/AdminDashboard/SocialMediaForm/SocialMediaForm.jsx';
 // Course File
 
 function App() {
@@ -347,6 +348,7 @@ function App() {
         <Route path="/admin-dashboard/contact-list" element={<><ContactUserList /></>} />
         <Route path="/admin-dashboard/course" element={<><CourseList /></>} />
         <Route path="/admin-dashboard/our-founders" element={<><OurFounders /></>} />
+         <Route path="/admin-dashboard/social-media" element={<><SocialMediaForm /></>} />
 
 
 

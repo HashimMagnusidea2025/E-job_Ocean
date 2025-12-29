@@ -279,15 +279,7 @@ export default function JobCandidates() {
                                                             </p>
                                                         </div>
                                                     </div>
-                                                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                                                        <FaMapMarkerAlt className="text-red-500 flex-shrink-0" />
-                                                        <div>
-                                                            <p className="text-xs text-gray-500">Location</p>
-                                                            <p className="text-sm font-medium text-gray-800">
-                                                                {getLocationString(candidate._id)}
-                                                            </p>
-                                                        </div>
-                                                    </div>
+                                                   
                                                 </div>
                                             </div>
 

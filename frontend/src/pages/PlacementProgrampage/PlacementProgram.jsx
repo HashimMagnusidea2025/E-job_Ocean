@@ -16,6 +16,7 @@ import HowWeWork from '../../components/layout/section/HowWeWork/HowWeWork';
 import WhoCanApply from '../../components/layout/section/WhoCanApply/WhoCanApply';
 import FAQSection from '../../components/layout/section/FAQSection/FAQSection';
 import { PlacementProgramSection } from '../../components/layout/section/AppDownloadSection/AppDownloadSection';
+import CARegistrationSection from "../../components/layout/section/CARegistrationSection/CARegistrationSection.jsx";
 import axios from '../../utils/axios.js'
 export default function Placementpage() {
 
@@ -73,31 +74,29 @@ export default function Placementpage() {
             </section>
 
 
-
-
             <div className='w-full'>
                 <OpportunitiesSection />
             </div>
-            <div className='bg-[#FFFBF7] '>
+            <div className=''>
                 <BonusSection />
             </div>
-            <div className='relative bg-[linear-gradient(to_right,_#090A47,_#20AEB2)]'>
+            {/* <div className='relative bg-[linear-gradient(to_right,_#090A47,_#20AEB2)]'>
                 <Countersection />
-            </div>
-            <div className='w-full'>
+            </div> */}
+            {/* <div className='w-full'>
                 <AlumniSlider />
-            </div>
+            </div> */}
             <HallOfFrameSlider />
             <div className='bg-[linear-gradient(to_right,_#090A47,_#20AEB2)]'>
-                <Location />
+                <CARegistrationSection />
             </div>
-            <RoleSection />
-            <div className='w-full bg-[linear-gradient(to_right,_#090A47,_#20AEB2)]'>
+            {/* <RoleSection /> */}
+            {/* <div className='w-full bg-[linear-gradient(to_right,_#090A47,_#20AEB2)]'>
                 <HowWeWork />
-            </div>
-            <div className='container mx-auto'>
+            </div> */}
+            {/* <div className='container mx-auto'>
                 <WhoCanApply />
-            </div>
+            </div> */}
             <div className='container mx-auto'>
                 <FAQSection />
             </div>

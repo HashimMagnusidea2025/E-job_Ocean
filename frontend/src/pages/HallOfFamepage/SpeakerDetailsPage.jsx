@@ -43,6 +43,8 @@ export default function SpeakerDetailsPage() {
 
     const fullName = `${speaker.firstName} ${speaker.lastName}`;
 
+
+
     return (
         <div className="container mx-auto font-[Poppins] p-6 pt-10">
             {/* User Type Badge */}

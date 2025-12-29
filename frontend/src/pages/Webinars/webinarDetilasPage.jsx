@@ -38,17 +38,21 @@ const WebinarDetailsPage = () => {
     if (!webinar) {
         return <p className="text-center mt-10">Loading...</p>;
     }
+    // const now = new Date();
+    // const start = new Date(webinar.WebinarStartDateTime);
+    // const end = new Date(webinar.WebinarEndDateTime);
+    // console.log(start);
+    // console.log(end);
+
+
+
+    // const isUpcoming = end > now;
+    // console.log(isUpcoming);
     const now = new Date();
     const start = new Date(webinar.WebinarStartDateTime);
     const end = new Date(webinar.WebinarEndDateTime);
-    console.log(start);
-    console.log(end);
 
-
-
-    const isUpcoming = end > now;
-    console.log(isUpcoming);
-    
+    const isUpcoming = start > now; // ✅ SAME as WebinarCardsList
     const duration = Math.round((end.getTime() - start.getTime()) / (1000 * 60));
     const convertToOrderedList = (htmlContent) => {
         // Remove Quill span tags

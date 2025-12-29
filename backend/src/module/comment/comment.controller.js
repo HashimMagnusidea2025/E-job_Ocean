@@ -69,21 +69,34 @@ export const PostComment = async (req, res) => {
 
     try {
 
-        const { comment, id, type } = req.body;
+        const { comment, id, type, name, email } = req.body;
 
-        if (!req.user) return res.status(401).json({ msg: "Login required" });
+        if (!comment || !id || !type) {
+            return res.status(400).json({ msg: "Comment, id, and type are required" });
+        }
 
         const newComment = new CommentModel({
             id: id,
             type,
-            user: req.user._id,
             comment,
             otpVerified: true
         });
 
+        if (req.user) {
+            // Logged-in user
+            newComment.user = req.user._id;
+        } else {
+            // Anonymous user
+            if (!name || !email) {
+                return res.status(400).json({ msg: "Name and email are required for anonymous comments" });
+            }
+            newComment.name = name;
+            newComment.email = email;
+        }
+
         await newComment.save();
 
-        
+
         const updatedCount = await CommentModel.countDocuments({ id: id, type, otpVerified: true });
 
         res.status(201).json({
@@ -103,51 +116,33 @@ export const GetCommentsByBlog = async (req, res) => {
     try {
         const { id } = req.params;
         const { type } = req.query;
-        console.log("=== GET COMMENTS DEBUG ===");
-        console.log("Request params id:", id);
-        console.log("Request query type:", type);
-        console.log("id type:", typeof id);
 
-           
         let queryId;
-        
 
         if (!isNaN(id) && id.trim() !== '') {
-            queryId = Number(id); 
+            queryId = Number(id);
         } else {
-            queryId = id; 
+            queryId = id;
         }
 
-        console.log("Final queryId:", queryId, "Type:", typeof queryId);
-
         const allComments = await CommentModel.find({ type: type }).limit(10);
-        
-         console.log(`First 10 ${type} comments in DB:`, allComments.map(c => ({ 
-            id: c.id, 
-            idType: typeof c.id,
-            type: c.type 
-        })));
-        
+
         const comments = await CommentModel.find({
-          id: queryId,
+            id: queryId,
             type,
             otpVerified: true
         })
-            .populate("user", "name email") 
+            .populate("user", "name email")
             .sort({ createdAt: -1 });
 
-        const commentCount = await CommentModel.countDocuments({  id: queryId,  type, otpVerified: true });
-       console.log("Found comments for query:", comments.length);
-        console.log("Comments details:", comments.map(c => ({ id: c.id, type: c.type, comment: c.comment })));
-       
-        const userId = req.user?._id?.toString();
+        const commentCount = await CommentModel.countDocuments({ id: queryId, type, otpVerified: true });
 
         res.status(200).json({
             count: commentCount,
             comments: comments.map(c => ({
                 ...c.toObject(),
                 likesCount: c.likes.length,
-                likedByUser: userId ? c.likes.includes(userId) : false
+                likedByUser: false
             }))
         });
 
@@ -159,70 +154,49 @@ export const GetCommentsByBlog = async (req, res) => {
 }
 
 
-    // export const LikeComment = async (req, res) => {
-
-
-    //     try {
-    //         if (!req.user) return res.status(401).json({ msg: "Login required" });
-
-    //         const { commentId } = req.body;
-    //         const comment = await CommentModel.findById(commentId);
-    //         if (!comment) return res.status(404).json({ msg: "Comment not found" });
-
-    //         const userId = req.user._id;
-
-    //         // ✅ Sirf ek baar like allow
-    //         if (!comment.likes.includes(userId)) {
-    //             comment.likes.push(userId);
-    //             await comment.save();
-    //         }
-    //         res.status(200).json({
-    //             msg: "Like status updated",
-    //             likesCount: comment.likes.length,
-    //             likedByUser: comment.likes.includes(userId)
-    //         });
-
-    //     } catch (err) {
-    //         res.status(500).json({ msg: err.message });
-    //     }
-    // }
-
 export const LikeComment = async (req, res) => {
-  try {
-    const { commentId } = req.body;
-    const comment = await CommentModel.findById(commentId);
-    if (!comment) return res.status(404).json({ msg: "Comment not found" });
+    try {
+        const { commentId } = req.body;
 
-   
-    let userIdentifier;
-    if (req.user) {
-      userIdentifier = req.user._id.toString(); 
-    } else {
+        const comment = await CommentModel.findById(commentId);
+        if (!comment) {
+            return res.status(404).json({ msg: "Comment not found" });
+        }
 
-      userIdentifier = req.ip || "guest_" + Math.random().toString(36).substr(2, 9);
+        let identifier;
+
+        // ✅ Case 1: Logged-in user
+        if (req.user) {
+            identifier = req.user._id.toString();
+        }
+        // ✅ Case 2: Guest user (IP based)
+        else {
+            identifier = req.ip;
+        }
+      
+
+        // ❌ Already liked → block
+        if (comment.likes.includes(identifier)) {
+            return res.status(400).json({
+                msg: "Already liked",
+                likesCount: comment.likes.length,
+                likedByUser: true
+            });
+        }
+
+        // ✅ First time like
+        comment.likes.push(identifier);
+        await comment.save();
+
+        return res.status(200).json({
+            msg: "Liked successfully",
+            likesCount: comment.likes.length,
+            likedByUser: true
+        });
+
+    } catch (err) {
+        res.status(500).json({ msg: err.message });
     }
-
-  
-    if (!comment.likes.includes(userIdentifier)) {
-      comment.likes.push(userIdentifier);
-      await comment.save();
-    } else {
-     
-      comment.likes = comment.likes.filter((id) => id !== userIdentifier);
-      await comment.save();
-    }
-
-    res.status(200).json({
-      msg: "Like status updated",
-      likesCount: comment.likes.length,
-      likedByUser: comment.likes.includes(userIdentifier),
-    });
-
-  } catch (err) {
-    res.status(500).json({ msg: err.message });
-  }
 };
-
-
 
 

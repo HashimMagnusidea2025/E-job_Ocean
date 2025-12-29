@@ -38,12 +38,12 @@ const FAQSection = () => {
 
   return (
     <div className="bg-white py-12 px-4 md:px-16 font-[Poppins]">
-      <h2 className="text-3xl font-semibold text-center mb-10">
+      {/* <h2 className="text-3xl font-semibold text-center mb-10">
         Frequently Asked Questions (FAQs)
       </h2>
 
       <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-start">
-        {/* Left: Image with AOS */}
+       
         <div data-aos="fade-right" data-aos-delay="200">
           <img
             src={FAQ}
@@ -52,13 +52,13 @@ const FAQSection = () => {
           />
         </div>
 
-        {/* Right: FAQ Accordion with AOS */}
+        
         <div data-aos="fade-left" data-aos-delay="400" className="space-y-4 w-full">
           {faqs.map((faq, index) => (
             <div
               key={index}
               data-aos="fade-up"
-              data-aos-delay={600 + index * 100} // staggered delay
+              data-aos-delay={600 + index * 100} 
               className="border rounded-md shadow-sm transition"
             >
               <button
@@ -76,9 +76,9 @@ const FAQSection = () => {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
 
-      {/* Call to Action with fade-up */}
+     
       <div className="flex justify-center items-center text-center pt-20" data-aos="fade-up" data-aos-delay="900">
         <h2 className="text-[#339ca0] text-[2.8rem]">
           Join Our WhatsApp Community for Jobs/Articleship Updates & Important Resources

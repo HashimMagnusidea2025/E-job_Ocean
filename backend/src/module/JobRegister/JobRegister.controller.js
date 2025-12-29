@@ -10,11 +10,11 @@ const logoUrl = `https://talent.ejobocean.com/upload/settings/1747379111_1739879
 export const CreateJobRegisteration = async (req, res) => {
 
   try {
-    const { jobId, firstName, lastName, email, mobile, country, state, city } = req.body;
+    const { jobId, firstName, lastName, email, mobile } = req.body;
     const resume = req.file ? req.file.path : null;
 
     console.log("📥 Received job application data:", {
-      jobId, firstName, lastName, email, mobile, country, state, city, resume
+      jobId, firstName, lastName, email, mobile,  resume
     });
 
     if (!resume) return res.status(400).json({ success: false, message: "Resume is required" });
@@ -50,9 +50,7 @@ export const CreateJobRegisteration = async (req, res) => {
       lastName,
       email,
       mobile,
-      country,
-      state,
-      city,
+      
       resume
     });
 
@@ -224,10 +222,7 @@ export const CreateJobRegisteration = async (req, res) => {
                                                 <td style="padding:8px; border:1px solid #ddd; background:#f9f9f9;"><strong>Mobile:</strong></td>
                                                 <td style="padding:8px; border:1px solid #ddd;">${mobile}</td>
                                             </tr>
-                                            <tr>
-                                                <td style="padding:8px; border:1px solid #ddd; background:#f9f9f9;"><strong>Location:</strong></td>
-                                                <td style="padding:8px; border:1px solid #ddd;">${city}, ${state}, ${country}</td>
-                                            </tr>
+                                           
                                             <tr>
                                                 <td style="padding:8px; border:1px solid #ddd; background:#f9f9f9;"><strong>Applied On:</strong></td>
                                                 <td style="padding:8px; border:1px solid #ddd;">${new Date().toLocaleString()}</td>
@@ -392,12 +387,12 @@ export const GetJobRegistrationById = async (req, res) => {
 //  Update registration
 export const UpdateJobRegistration = async (req, res) => {
   try {
-    const { firstName, lastName, email, mobile, country, state, city } = req.body;
+    const { firstName, lastName, email, mobile, } = req.body;
     const resume = req.file ? req.file.path : undefined;
 
     const updated = await JobRegisterModel.findByIdAndUpdate(
       req.params.id,
-      { firstName, lastName, email, mobile, country, state, city, ...(resume && { resume }) },
+      { firstName, lastName, email, mobile, ...(resume && { resume }) },
       { new: true }
     );
 

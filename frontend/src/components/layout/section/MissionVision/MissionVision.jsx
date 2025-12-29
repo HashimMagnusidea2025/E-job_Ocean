@@ -33,8 +33,8 @@ export default function MissionVision() {
       <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-10 mb-20">
         <div>
           <div className="flex items-center mb-4">
-            <span className="text-[#339ca0] text-2xl mr-3"><FaMapPin /></span>
-            <h2 className="text-3xl font-bold text-[#339ca0]">Our Mission</h2>
+            <span className="text-[#339ca0] text-2xl mr-3"><FaEye /></span>
+            <h2 className="text-3xl font-bold text-[#339ca0]">   Our Vision </h2>
           </div>
           {/* <p className="text-gray-700 text-base md:text-lg leading-relaxed">
             {cmsContent?.line_1}
@@ -42,7 +42,7 @@ export default function MissionVision() {
           <div
             className="text-gray-700 text-base md:text-lg leading-relaxed"
             dangerouslySetInnerHTML={{
-              __html: cmsContent?.line_1,
+              __html: cmsContent?.line_2,
             }}
           ></div>
 
@@ -67,8 +67,8 @@ export default function MissionVision() {
         </div>
         <div>
           <div className="flex items-center mb-4">
-            <span className="text-[#339ca0] text-2xl mr-3"><FaEye /></span>
-            <h2 className="text-3xl font-bold text-[#339ca0]">Our Vision</h2>
+            <span className="text-[#339ca0] text-2xl mr-3"><FaMapPin /></span>
+            <h2 className="text-3xl font-bold text-[#339ca0]">Our Mission</h2>
           </div>
           {/* <p className="text-gray-700 text-base md:text-lg leading-relaxed">
             Finance form the Life and Blood of all business. Nowadays you need a sharper network to get edge over cutthroat competition. We therefore provide you with an end to end solution related to recruitment problem.
@@ -84,7 +84,7 @@ export default function MissionVision() {
           <div
             className="text-gray-700 text-base md:text-lg leading-relaxed"
             dangerouslySetInnerHTML={{
-              __html: cmsContent?.line_2,
+              __html: cmsContent?.line_1,
             }}
           ></div>
         </div>

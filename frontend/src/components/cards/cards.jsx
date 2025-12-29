@@ -150,7 +150,7 @@ export const MarqueeTagCards = () => {
 //         sm:h-[320px]
 //         rounded-3xl
 //         overflow-hidden
-        
+
 //         bg-black
 //         group
 //       "
@@ -234,7 +234,7 @@ export const StudentCardMarquee = () => {
         return (
             <div className="w-full py-16 flex justify-center items-center bg-[#f9fafb]">
                 <div className="flex gap-4">
-                    {[1, 2, 3,4].map((i) => (
+                    {[1, 2, 3, 4].map((i) => (
                         <div
                             key={i}
                             className="
@@ -282,31 +282,31 @@ export const StudentCardMarquee = () => {
 
                     return (
                         <SplideSlide key={index} className="!w-[280px] sm:!w-[340px] py-6">
-                          <Link to={`/blogs/${blog.slug}`}>
-                            <div className="px-3 h-full">
-                                <div className="relative h-[280px] sm:h-[320px] rounded-3xl overflow-hidden bg-black group">
-                                    <img
-                                        src={featuredImage}
-                                        alt={blog.title.rendered}
-                                        className="absolute inset-0 w-full h-full object-cover scale-105"
-                                    />
-
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-
-                                    <div className="relative z-10 h-full flex flex-col justify-end p-5">
-                                        <h3
-                                            className="text-white text-base sm:text-lg font-bold leading-snug line-clamp-2"
-                                            dangerouslySetInnerHTML={{
-                                                __html: blog.title.rendered,
-                                            }}
+                            <Link to={`/blogs/${blog.slug}`}>
+                                <div className="px-3 h-full">
+                                    <div className="relative h-[280px] sm:h-[320px] rounded-3xl overflow-hidden bg-black group">
+                                        <img
+                                            src={featuredImage}
+                                            alt={blog.title.rendered}
+                                            className="absolute inset-0 w-full h-full object-cover scale-105"
                                         />
 
-                                        <div className="mt-3 text-xs sm:text-sm text-gray-300">
-                                            {authorName}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+
+                                        <div className="relative z-10 h-full flex flex-col justify-end p-5">
+                                            <h3
+                                                className="text-white text-base sm:text-lg font-bold leading-snug line-clamp-2"
+                                                dangerouslySetInnerHTML={{
+                                                    __html: blog.title.rendered,
+                                                }}
+                                            />
+
+                                            <div className="mt-3 text-xs sm:text-sm text-gray-300">
+                                                {authorName}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
                             </Link>
                         </SplideSlide>
                     );
@@ -556,35 +556,83 @@ export const OurCourses = () => {
 };
 
 
-export const OurFreeCoursesCrds = ({ image, title, trainer }) => {
-    return (
-        <div className="mx-auto h-[330px] bg-white w-[300px] sm:w-[310px] rounded-lg shadow hover:shadow-xl transition-all overflow-hidden border border-black">
-            <img
-                src={image}
-                alt={title}
-                className="w-full h-50 object-cover"
-            />
+// export const OurFreeCoursesCrds = ({ image, title, trainer }) => {
+//     return (
+//         <div className="mx-auto h-[330px] bg-white w-[300px] sm:w-[310px] rounded-lg shadow hover:shadow-xl transition-all overflow-hidden border border-black">
+//             <img
+//                 src={image}
+//                 alt={title}
+//                 className="w-full h-50 object-cover"
+//             />
 
+//             <div className="p-4">
+//                 <h3 className="font-bold text-md mb-2">{title}</h3>
+//                 <hr className="border-t border-gray-300 my-3" />
+//                 <p className="text-xs text-gray-600 mb-1">
+//                     BY {trainer.toUpperCase()}
+//                 </p>
+
+//                 <div className="flex justify-between items-center">
+//                     <span className="text-lg font-semibold">Free</span>
+//                     <button className="bg-gradient-to-r from-[#339ca0] to-black text-white px-3 py-1 rounded text-sm transition-all hover:bg-gray-800">
+//                         Learn More
+//                     </button>
+//                 </div>
+//             </div>
+//         </div>
+//     );
+// };
+
+
+
+export const OurFreeCoursesCrds = ({ image, title, companyname, date }) => {
+    const formatDate = (isoDate) => {
+        if (!isoDate) return "N/A";
+
+        const date = new Date(isoDate);
+
+        return date.toLocaleDateString("en-IN", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+        });
+    };
+
+    return (
+        <div className="mx-auto h-[330px] bg-white w-[300px] sm:w-[310px] rounded-lg shadow hover:shadow-xl transition-all overflow-hidden border">
+
+            <div className='h-[120px]'>
+
+                <img
+                    src={image}
+                    alt={title}
+                    className="w-full h-auto object-cover"
+                />
+            </div>
             <div className="p-4">
-                <h3 className="font-bold text-md mb-2">{title}</h3>
+                <h3 className="font-bold text-md mb-2 line-clamp-2">
+                    {title}
+                </h3>
+
                 <hr className="border-t border-gray-300 my-3" />
-                <p className="text-xs text-gray-600 mb-1">
-                    BY {trainer.toUpperCase()}
+
+                <p className="text-xs text-gray-600 mb-2">
+                    BY {companyname}
                 </p>
 
                 <div className="flex justify-between items-center">
-                    <span className="text-lg font-semibold">Free</span>
-                    <button className="bg-gradient-to-r from-[#339ca0] to-black text-white px-3 py-1 rounded text-sm transition-all hover:bg-gray-800">
-                        Learn More
+                    <span className="text-sm font-semibold text-green-600">
+                        {formatDate(date)}
+                    </span>
+
+                    <button className="bg-gradient-to-r from-[#339ca0] to-black text-white px-3 py-1 rounded text-sm">
+                        View Job
                     </button>
                 </div>
             </div>
         </div>
     );
 };
-
-
-
 
 
 

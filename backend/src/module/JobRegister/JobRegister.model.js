@@ -20,10 +20,7 @@ const JobRegisterSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    country: { ref: 'Country', type: Number, required: true },
-    state: { ref: 'State', type: Number, required: true },
-    city: { ref: 'City', type: Number, required: true },
-
+    
     resume: {
         type: String,
         required: true

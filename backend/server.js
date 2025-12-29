@@ -40,7 +40,7 @@ import JObPostRouter from './src/module/jobPost/jobPost.Routes.js';
 import JobRegisterRoute from './src/module/JobRegister/JobRegister.Routes.js';
 import LikeRoute from './src/module/likes/likes.Routes.js';
 import CommentRuter from './src/module/comment/comment.Routes.js';
-
+import ReactionRouter from './src/module/reaction/reaction.Routes.js';
 // webinars file //
 
 import SpeakerRouter from './src/module/Speaker/Speaker.Routes.js';
@@ -60,7 +60,7 @@ import JobAlertsRoute from './src/module/JobAlerts/JobAlerts.Routes.js';
 import ContactRoute from './src/module/contact/contact.Routes.js';
 import CourseRouter from './src/module/Course/Course.Route.js';
 import OurFoundersRouter from './src/module/OurFounders/OurFounders.Routes.js';
-
+import SocialMediaIconrouter from './src/module/SocialMediaIcon/SocialMediaIcon.Route.js';
 import cors from 'cors';
 import dotenv from 'dotenv'	
 dotenv.config();
@@ -85,14 +85,14 @@ server.use("/api-docs", (req, res, next) => {
 
 server.use(cors({
   origin: 'http://localhost:5173',
-  //  origin: 'http://ejobocean.in/',
-  //  origin: 'https://site.ejobocean.in',
+  origin: [ "http://localhost:5173","https://site.ejobocean.in", "http://ejobocean.in"],
   methods: ['GET', 'POST', 'PUT', "PATCH", 'DELETE'],
   credentials: true
 }));
 
 server.use(express.static(path.join(__dirname, "dist")));
 
+server.set("trust proxy", true);
 
 server.get('/api/test', (req, res) => {
   console.log('hello');
@@ -139,6 +139,7 @@ server.use('/api/build-Resume',buildResumeRoute);
 
 server.use('/api/blogs/like', LikeRoute);
 server.use('/api/comment', CommentRuter);
+server.use('/api/reaction', ReactionRouter);
 
 server.use('/api/favorite',FavoriteRoute);
 
@@ -167,6 +168,7 @@ server.use('/api/contact',ContactRoute);
 server.use('/api/courses', CourseRouter);
 server.use('/api/our-founders', OurFoundersRouter);
 
+server.use('/api/social-media-icons', SocialMediaIconrouter);
 // filterOptionRoutes //
 server.use("/api", filterOptionRouter);
 

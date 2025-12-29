@@ -12,7 +12,6 @@ export default function PostAJob() {
     const [formData, setFormData] = useState({
         jobTitle: "",
         description: "",
-        benefits: "",
         salaryFrom: "",
         salaryTo: "",
         salaryCurrency: "",
@@ -33,6 +32,7 @@ export default function PostAJob() {
         country: "",
         state: "",
         city: "",
+        address: "",
         postedByType: "Employer"
     });
 
@@ -52,6 +52,8 @@ export default function PostAJob() {
     const [errors, setErrors] = useState({});
     const [companyId, setCompanyId] = useState("");
     const [loading, setLoading] = useState(false);
+    const [showOtherInput, setShowOtherInput] = useState(false);
+    const [customSkill, setCustomSkill] = useState("");
 
     const [isEditing, setIdEditing] = useState(false);
     // Set editing mode based on ID
@@ -172,6 +174,8 @@ export default function PostAJob() {
                     value: skill._id,
                     label: skill.name,
                 }));
+                // Add "Other" option
+                formatted.push({ value: "other", label: "Other" });
                 setSkills(formatted);
             } catch (error) {
                 console.error("Failed to fetch skills:", error);
@@ -201,7 +205,9 @@ export default function PostAJob() {
             { _id: "1", name: "0-1 years" },
             { _id: "2", name: "1-3 years" },
             { _id: "3", name: "3-5 years" },
-            { _id: "4", name: "5+ years" }
+            { _id: "4", name: "5-10 years" },
+            { _id: "5", name: "10-15 years" },
+            { _id: "6", name: "15-20 years" }
         ]);
     }, []);
 
@@ -219,7 +225,7 @@ export default function PostAJob() {
                     setFormData({
                         jobTitle: job.jobTitle || "",
                         description: job.description || "",
-                        benefits: job.benefits || "",
+
                         salaryFrom: job.salaryFrom || "",
                         salaryTo: job.salaryTo || "",
                         salaryCurrency: job.salaryCurrency?._id || job.salaryCurrency || "",
@@ -239,7 +245,8 @@ export default function PostAJob() {
                         isActive: job.isActive ?? true,
                         country: job.country || "",
                         state: job.state || "",
-                        city: job.city || ""
+                        city: job.city || "",
+                        address: job.address || ""
                     });
 
                     // populate selected skills
@@ -288,7 +295,27 @@ export default function PostAJob() {
     };
 
     const handleSkillsChange = (selected) => {
-        setSelectedSkills(selected || []);
+        const selectedArray = selected || [];
+        const hasOther = selectedArray.some(skill => skill.value === "other");
+        setShowOtherInput(hasOther);
+        setSelectedSkills(selectedArray);
+    };
+
+    const handleAddCustomSkill = async () => {
+        if (!customSkill.trim()) return;
+        try {
+            const res = await axios.post("/skills-categories", { name: customSkill.trim() });
+            const newSkill = { value: res.data._id, label: res.data.name };
+            // Add to skills list
+            setSkills(prev => [...prev.filter(s => s.value !== "other"), newSkill, { value: "other", label: "Other" }]);
+            // Add to selected skills, replace "other"
+            setSelectedSkills(prev => [...prev.filter(s => s.value !== "other"), newSkill]);
+            setCustomSkill("");
+            setShowOtherInput(false);
+        } catch (error) {
+            console.error("Failed to add custom skill:", error);
+            Swal.fire("Error", "Failed to add custom skill", "error");
+        }
     };
 
     const validateForm = () => {
@@ -299,11 +326,6 @@ export default function PostAJob() {
         if (!formData.country) newErrors.country = "Country is required";
         if (!formData.state) newErrors.state = "State is required";
         if (!formData.city) newErrors.city = "City is required";
-        if (!formData.careerLevel) newErrors.careerLevel = "Career level is required";
-        if (!formData.jobType) newErrors.jobType = "Job type is required";
-        if (!formData.functionalArea) newErrors.functionalArea = "Functional Area is required";
-        if (!formData.positions) newErrors.positions = "Number of positions is required";
-        if (!formData.jobShift) newErrors.jobShift = "Job Shift is required";
         if (!formData.mode) newErrors.mode = "Job Mode is required";
         // ✅ Check if company exists
         if (!companyId) newErrors.company = "Company profile not found. Please create company profile first.";
@@ -315,7 +337,6 @@ export default function PostAJob() {
         setFormData({
             jobTitle: "",
             description: "",
-            benefits: "",
             salaryFrom: "",
             salaryTo: "",
             salaryCurrency: "",
@@ -335,52 +356,16 @@ export default function PostAJob() {
             isActive: true,
             country: "",
             state: "",
-            city: ""
+            city: "",
+            address: ""
         });
         setSelectedSkills([]);
         setErrors({});
+        setShowOtherInput(false);
+        setCustomSkill("");
     };
 
 
-
-    // useEffect(() => {
-    //     if (id) {
-    //         // fetch job data for editing
-    //         axios.get(`/job-post/${id}`).then(res => {
-    //             const job = res.data;
-    //             setFormData({
-    //                 jobTitle: job.jobTitle || "",
-    //                 description: job.description || "",
-    //                 benefits: job.benefits || "",
-    //                 salaryFrom: job.salaryFrom || "",
-    //                 salaryTo: job.salaryTo || "",
-    //                 salaryCurrency: job.salaryCurrency?._id || "",
-    //                 salaryPeriod: job.salaryPeriod || "",
-    //                 hideSalary: job.hideSalary || false,
-    //                 careerLevel: job.careerLevel?._id || "",
-    //                 functionalArea: job.functionalArea?._id || "",
-    //                 jobType: job.jobType?._id || "",
-    //                 jobShift: job.jobShift?._id || "",
-    //                 positions: job.positions || "",
-    //                 expiryDate: job.expiryDate?.split("T")[0] || "",
-    //                 degreeLevel: job.degreeLevel || "",
-    //                 experience: job.experience || "",
-    //                 externalJob: job.externalJob || "",
-    //                 isFreelance: job.isFreelance || false,
-    //                 isActive: job.isActive ?? true,
-    //                 country: job.country || "",
-    //                 state: job.state || "",
-    //                 city: job.city || ""
-    //             });
-
-    //             // populate selected skills
-    //             setSelectedSkills((job.skills || []).map(skill => ({
-    //                 value: skill._id,
-    //                 label: skill.name
-    //             })));
-    //         }).catch(err => console.error(err));
-    //     }
-    // }, [id]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -389,7 +374,29 @@ export default function PostAJob() {
 
         try {
             const submitData = {
-                ...formData,
+                jobTitle: formData.jobTitle,
+                description: formData.description,
+                salaryFrom: formData.salaryFrom || undefined,
+                salaryTo: formData.salaryTo || undefined,
+                salaryCurrency: formData.salaryCurrency || undefined,
+                salaryPeriod: formData.salaryPeriod || undefined,
+                mode: formData.mode,
+                hideSalary: formData.hideSalary,
+                careerLevel: formData.careerLevel || undefined,
+                functionalArea: formData.functionalArea || undefined,
+                jobType: formData.jobType || undefined,
+                jobShift: formData.jobShift || undefined,
+                positions: formData.positions ? Number(formData.positions) : undefined,
+                expiryDate: formData.expiryDate || undefined,
+                degreeLevel: formData.degreeLevel || undefined,
+                experience: formData.experience || undefined,
+                externalJob: formData.externalJob || undefined,
+                isFreelance: formData.isFreelance,
+                isActive: formData.isActive,
+                country: formData.country,
+                state: formData.state,
+                city: formData.city,
+                address: formData.address || undefined,
                 skills: selectedSkills.map(skill => skill.value),
                 postedByType: "Employer",
                 companyId: companyId
@@ -492,19 +499,6 @@ export default function PostAJob() {
                             {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
                         </div>
 
-                        {/* Benefits */}
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Benefits</label>
-                            <div className="h-32 border border-gray-300 rounded overflow-hidden">
-                                <textarea
-                                    name="benefits"
-                                    value={formData.benefits}
-                                    onChange={handleInputChange}
-                                    className="w-full h-full p-2 text-sm resize-none"
-                                    placeholder="Enter benefits..."
-                                />
-                            </div>
-                        </div>
 
                         {/* Required Skills */}
                         <div>
@@ -517,6 +511,25 @@ export default function PostAJob() {
                                 placeholder="Select Required Skills"
                                 className="text-sm"
                             />
+                            {showOtherInput && (
+                                <div className="mt-2 flex gap-2">
+                                    <input
+                                        type="text"
+                                        value={customSkill}
+                                        onChange={(e) => setCustomSkill(e.target.value)}
+                                        placeholder="Enter custom skill"
+                                        className="flex-1 border border-gray-300 px-3 py-2 rounded text-sm"
+                                        onKeyPress={(e) => e.key === 'Enter' && handleAddCustomSkill()}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={handleAddCustomSkill}
+                                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm"
+                                    >
+                                        Add
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                         {/* Location */}
@@ -578,6 +591,17 @@ export default function PostAJob() {
                                     </select>
                                     {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
                                 </div>
+                            </div>
+                            <div className="mt-4">
+                                <label className="block text-sm font-medium mb-1">Address</label>
+                                <textarea
+                                    name="address"
+                                    value={formData.address}
+                                    onChange={handleInputChange}
+                                    className="w-full border border-gray-300 px-3 py-2 rounded text-sm resize-none"
+                                    rows="3"
+                                    placeholder="Enter address details"
+                                />
                             </div>
                         </div>
 
@@ -652,13 +676,12 @@ export default function PostAJob() {
                             <label className="block text-2xl font-medium mb-5">Job Specifications</label>
                             <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">Career Level *</label>
+                                    <label className="block text-sm font-medium mb-1">Career Level</label>
                                     <select
                                         name="careerLevel"
                                         value={formData.careerLevel}
                                         onChange={handleInputChange}
-                                        className={`w-full border px-3 py-2 rounded text-sm ${errors.careerLevel ? "border-red-500" : "border-gray-300"
-                                            }`}
+                                        className="w-full border border-gray-300 px-3 py-2 rounded text-sm"
                                     >
                                         <option value="">Select Career Level</option>
                                         {careerLevels.map((level) => (
@@ -667,17 +690,15 @@ export default function PostAJob() {
                                             </option>
                                         ))}
                                     </select>
-                                    {errors.careerLevel && <p className="text-red-500 text-xs mt-1">{errors.careerLevel}</p>}
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">Functional Area *</label>
+                                    <label className="block text-sm font-medium mb-1">Functional Area</label>
                                     <select
                                         name="functionalArea"
                                         value={formData.functionalArea}
                                         onChange={handleInputChange}
-                                        className={`w-full border px-3 py-2 rounded text-sm ${errors.functionalArea ? "border-red-500" : "border-gray-300"
-                                            }`}
+                                        className="w-full border border-gray-300 px-3 py-2 rounded text-sm"
                                     >
                                         <option value="">Select Functional Area</option>
                                         {functionalAreas.map((area) => (
@@ -686,17 +707,15 @@ export default function PostAJob() {
                                             </option>
                                         ))}
                                     </select>
-                                    {errors.functionalArea && <p className="text-red-500 text-xs mt-1">{errors.functionalArea}</p>}
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">Job Type *</label>
+                                    <label className="block text-sm font-medium mb-1">Job Type</label>
                                     <select
                                         name="jobType"
                                         value={formData.jobType}
                                         onChange={handleInputChange}
-                                        className={`w-full border px-3 py-2 rounded text-sm ${errors.jobType ? "border-red-500" : "border-gray-300"
-                                            }`}
+                                        className="w-full border border-gray-300 px-3 py-2 rounded text-sm"
                                     >
                                         <option value="">Select Job Type</option>
                                         {jobTypes.map((job) => (
@@ -705,17 +724,15 @@ export default function PostAJob() {
                                             </option>
                                         ))}
                                     </select>
-                                    {errors.jobType && <p className="text-red-500 text-xs mt-1">{errors.jobType}</p>}
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">Job Shift *</label>
+                                    <label className="block text-sm font-medium mb-1">Job Shift</label>
                                     <select
                                         name="jobShift"
                                         value={formData.jobShift}
                                         onChange={handleInputChange}
-                                        className={`w-full border px-3 py-2 rounded text-sm ${errors.jobShift ? "border-red-500" : "border-gray-300"
-                                            }`}
+                                        className="w-full border border-gray-300 px-3 py-2 rounded text-sm"
                                     >
                                         <option value="">Select Job Shift</option>
                                         {jobShifts.map((shift) => (
@@ -724,21 +741,18 @@ export default function PostAJob() {
                                             </option>
                                         ))}
                                     </select>
-                                    {errors.jobShift && <p className="text-red-500 text-xs mt-1">{errors.jobShift}</p>}
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">Number of Positions *</label>
+                                    <label className="block text-sm font-medium mb-1">Number of Positions</label>
                                     <input
                                         type="number"
                                         name="positions"
                                         value={formData.positions}
                                         onChange={handleInputChange}
-                                        className={`w-full border px-3 py-2 rounded text-sm ${errors.positions ? "border-red-500" : "border-gray-300"
-                                            }`}
+                                        className="w-full border border-gray-300 px-3 py-2 rounded text-sm"
                                         placeholder="Number of Positions"
                                     />
-                                    {errors.positions && <p className="text-red-500 text-xs mt-1">{errors.positions}</p>}
                                 </div>
 
                                 <div>
@@ -805,17 +819,20 @@ export default function PostAJob() {
                                         name="mode"
                                         value={formData.mode}
                                         onChange={handleInputChange}
-                                        className={`w-full border px-3 py-2 rounded text-sm ${errors.mode ? "border-red-500" : "border-gray-300"}`}
+                                        className={`w-full border px-3 py-2 rounded text-sm ${errors.mode ? "border-red-500" : "border-gray-300"
+                                            }`}
                                     >
                                         <option value="">Select Job Mode</option>
-                                        <option value="remote">Remote</option>
-                                        <option value="onsite">On Site</option>
-                                        <option value="hybrid">Hybrid</option>
-
-
+                                        <option value="Work From Home">Work From Home</option>
+                                        <option value="Work From Office">Work From Office</option>
+                                        <option value="Hybrid">Hybrid</option>
                                     </select>
-                                    {errors.mode && <p className="text-red-500 text-xs mt-1">{errors.mode}</p>}
+
+                                    {errors.mode && (
+                                        <p className="text-red-500 text-xs mt-1">{errors.mode}</p>
+                                    )}
                                 </div>
+
 
                                 <div className="flex items-center gap-2">
                                     <label className="flex items-center gap-2 text-sm">

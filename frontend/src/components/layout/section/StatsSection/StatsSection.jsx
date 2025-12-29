@@ -60,15 +60,15 @@ export default function StatsSection() {
   return (
     <div className="w-full bg-white">
       {/* Top Heading */}
-      <div className="container mx-auto py-20">
+      {/* <div className="container mx-auto py-20">
         <h2 className="text-center text-3xl sm:text-4xl font-semibold text-[#339ca0] mb-10">
           Become Industry-Ready With Applied Learning.
         </h2>
-      </div>
+      </div> */}
 
       {/* Background Section */}
       <div className="font-[Poppins] overflow-hidden relative bg-[linear-gradient(to_right,_#090A47,_#20AEB2)]">
-        <section className="container mx-auto py-20">
+        <section className="container mx-auto py-28">
           {/* Background Circles */}
           <ul className="circles">
             {Array.from({ length: 100 }).map((_, i) => (
@@ -83,15 +83,15 @@ export default function StatsSection() {
               <h3 className="text-[34px] sm:text-[50px] font-semibold  mb-2">
                 About {data?.name}
               </h3>
-              <p className="text-sm sm:text-base text-white">
+              {/* <p className="text-sm sm:text-base text-white">
                 We believe in the power of learning & are committed to offering
                 training courses that are thorough, practical and aligned to
                 industry dynamics.
-              </p>
+              </p> */}
             </div>
 
             {/* Stats */}
-            <div className="flex flex-wrap justify-center gap-6 max-w-5xl mx-auto">
+            {/* <div className="flex flex-wrap justify-center gap-6 max-w-5xl mx-auto">
               {stats.map((item, index) => (
                 <div
                   key={index}
@@ -114,7 +114,7 @@ export default function StatsSection() {
                   <p className="text-sm font-medium">{item.label}</p>
                 </div>
               ))}
-            </div>
+            </div> */}
           </div>
         </section>
       </div>

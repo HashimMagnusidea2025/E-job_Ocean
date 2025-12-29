@@ -4,7 +4,7 @@ import axios from '../../../utils/axios.js'
 import { CommentButton } from "../button/button";
 import { ViewButton } from "../button/button";
 import { useState, useEffect } from "react";
-
+import { MdEmojiEmotions } from "react-icons/md";
 import { Link } from "react-router-dom";
 import { IoMdTime } from "react-icons/io";
 import { AiFillLike, AiOutlineLike } from "react-icons/ai";
@@ -12,9 +12,8 @@ import { LikeButton } from "../button/button";
 import axioss from 'axios';
 import { FaRegCalendarAlt } from "react-icons/fa";
 import RegisterModal from "../../../pages/Webinars/RegisterModal.jsx";
-
-
-
+import { FaWhatsapp } from "react-icons/fa";
+import { FaLinkedinIn } from "react-icons/fa6";
 import { FaFacebook, FaTwitter, FaLinkedin, FaPinterest, FaGlobe, FaTelegram, FaInstagram } from "react-icons/fa";
 
 const baseURL = import.meta.env.VITE_BACKEND_URL; // Vite
@@ -63,20 +62,17 @@ export const BlogsPostCards = ({ id, img, title, description, button, type, Comm
     useEffect(() => {
         const fetchComments = async () => {
             try {
-                console.log("BlogsPostCards: Fetching comments for", { id, type });
+
 
                 // Add full URL for debugging
                 const url = `/comment/${id}?type=${type}`;
-                console.log("Full API URL:", url);
-                const res = await axios.get(url);
-                console.log("BlogsPostCards: Full response:", res);
-                console.log("BlogsPostCards: Response data:", res.data);
-                console.log("BlogsPostCards: Count value:", res.data.count);
-                console.log("BlogsPostCards: Comments response", res.data);
-                setCommentCount(res.data.count);
-                console.log(commentCount.data);
 
-                console.log(res.data);
+                const res = await axios.get(url);
+
+                setCommentCount(res.data.count);
+
+
+
 
             } catch (err) {
                 console.error("Error fetching comments:", err);
@@ -210,212 +206,443 @@ export const BlogsCategoryCards = ({ blogs = [] }) => {
 
 
 
-export const CommentCards = ({ title, des, checkbox, button, isLoggedIn, blogId, type, onCommentAdded }) => {
-    console.log("CommentCards: Received props", { blogId, type, isLoggedIn });
-    const [form, setForm] = useState({ name: "", email: "", comment: "", otp: "", type });
-    const [commentId, setCommentId] = useState(null);
-    const [step, setStep] = useState('form')
-    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+// export const CommentCards = ({ title, des, checkbox, button, isLoggedIn, blogId, type, onCommentAdded }) => {
+//     console.log("CommentCards: Received props", { blogId, type, isLoggedIn });
+//     const [form, setForm] = useState({ name: "", email: "", comment: "", otp: "", type });
+//     const [commentId, setCommentId] = useState(null);
+//     const [step, setStep] = useState('form')
+//     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
-    const handleChange = (e) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
+//     const handleChange = (e) => {
+//         setForm({ ...form, [e.target.name]: e.target.value });
 
+//     };
+
+//     const handleEmojiClick = (emojiData) => {
+//         setForm((prev) => ({ ...prev, comment: prev.comment + emojiData.emoji }));
+//     };
+
+
+//     const handleSubmit = async (e) => {
+//         e.preventDefault();
+//         try {
+//             if (isLoggedIn) {
+//                 await axios.post('/comment/post',
+//                     { comment: form.comment, id: blogId, type },
+//                     { withCredentials: true }
+//                 );
+//                 // ✅ Form reset और parent को notify करें
+//                 setForm({ name: "", email: "", comment: "", otp: "", type });
+//                 if (onCommentAdded) {
+//                     onCommentAdded(); //  Parent component को notify करें
+//                 }
+
+//             } else {
+//                 const res = await axios.post("/comment/request-otp", {
+//                     name: form.name,
+//                     email: form.email,
+//                     comment: form.comment,
+//                     id: blogId,
+//                     type
+//                 });
+//                 setCommentId(res.data.commentId);
+//                 setStep("otp");
+//             }
+//         } catch (err) {
+//             alert("❌ " + err.response?.data?.msg || "Something went wrong");
+//         }
+//     }
+
+//     const handleVerify = async (e) => {
+//         e.preventDefault();
+//         try {
+//             await axios.post("/comment/verify-otp", { commentId, otp: form.otp });
+
+//             // ✅ OTP verify होने के बाद refresh करें
+//             setStep("form");
+//             setForm({ name: "", email: "", comment: "", otp: "" });
+//             if (onCommentAdded) {
+//                 onCommentAdded(); // ✅ Parent component को notify करें
+//             }
+//             // alert("✅ Comment verified and posted!");
+//         } catch (err) {
+//             alert("❌ " + (err.response?.data?.msg || "Invalid OTP"));
+//         }
+//     };
+//     return (
+//         <>
+//             <div className="bg-white shadow-md rounded-2xl p-6">
+//                 <h3 className="text-lg font-semibold flex items-center gap-2 mb-2">
+//                     {title || "Leave a Reply"}
+//                 </h3>
+//                 {des}
+
+//                 {step === "form" && (
+//                     <form onSubmit={handleSubmit} className="space-y-4">
+//                         {/* Comment textarea */}
+//                         <div className="relative">
+//                             <textarea
+//                                 name="comment"
+//                                 placeholder="Leave Your Comment 😊"
+//                                 rows="5"
+//                                 className="w-full rounded-lg border border-gray-400 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+//                                 value={form.comment}
+//                                 onChange={handleChange}
+//                                 required
+//                             />
+//                             <button
+//                                 type="button"
+//                                 onClick={() => setShowEmojiPicker((prev) => !prev)}
+//                                 className="absolute bottom-3 right-3 text-2xl"
+//                             >
+//                                 😊
+//                             </button>
+
+//                             {showEmojiPicker && (
+//                                 <div className="absolute bottom-12 right-0 z-50">
+//                                     <EmojiPicker onEmojiClick={handleEmojiClick} />
+//                                 </div>
+//                             )}
+//                         </div>
+
+
+//                         {/*                         
+//                         {!isLoggedIn && (
+//                             <>
+//                                 <input
+//                                     type="text"
+//                                     name="name"
+//                                     placeholder="Name"
+//                                     className="w-full rounded-full border border-gray-400 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+//                                     value={form.name}
+//                                     onChange={handleChange}
+//                                     required
+//                                 />
+//                                 <input
+//                                     type="email"
+//                                     name="email"
+//                                     placeholder="Email"
+//                                     className="w-full rounded-full border border-gray-400 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+//                                     value={form.email}
+//                                     onChange={handleChange}
+//                                     required
+//                                 />
+//                                 <div className="flex items-center gap-2">
+//                                     <input type="checkbox" id="saveInfo" className="w-4 h-4" />
+//                                     <label htmlFor="saveInfo" className="text-sm text-gray-700">
+//                                         {checkbox}
+//                                     </label>
+//                                 </div>
+//                             </>
+//                         )} */}
+
+//                         <button
+//                             type="submit"
+//                             className="bg-black text-white px-6 py-2 rounded-full hover:bg-gray-800 transition"
+//                         >
+//                             Post Comment
+//                         </button>
+//                     </form>
+//                 )}
+
+//                 {/* OTP Step */}
+//                 {step === "otp" && (
+//                     <form onSubmit={handleVerify} className="space-y-4">
+//                         <input
+//                             type="text"
+//                             name="otp"
+//                             placeholder="Enter OTP"
+//                             className="w-full rounded-lg border border-gray-400 p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
+//                             value={form.otp}
+//                             onChange={handleChange}
+//                             required
+//                         />
+//                         <button
+//                             type="submit"
+//                             className="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition"
+//                         >
+//                             Verify OTP
+//                         </button>
+//                     </form>
+//                 )}
+//             </div>
+
+//         </>
+//     )
+
+// }
+
+
+
+// export const CommentList = ({ comments, commentCount, setComments, onCommentUpdate }) => {
+
+//     const [visibleCount, setVisibleCount] = useState(2); // 👈 Show 4 initially
+//     // const handleCommentLike = async (commentId) => {
+//     //     try {
+//     //         const token = localStorage.getItem("token");
+//     //         const res = await axios.post(
+//     //             "/comment/like",
+//     //             { commentId },
+//     //             { headers: { Authorization: `Bearer ${token}` } }
+//     //         );
+
+//     //         // Update frontend state
+//     //         setComments(prev =>
+//     //             prev.map(c =>
+//     //                 c._id === commentId
+//     //                     ? { ...c, likesCount: res.data.likesCount, likedByUser: true }
+//     //                     : c
+//     //             )
+//     //         );
+
+//     //         // ✅ Notify parent component about the update
+//     //         if (onCommentUpdate) {
+//     //             onCommentUpdate();
+//     //         }
+//     //     } catch (err) {
+//     //         console.error(err.response?.data || err.message);
+//     //     }
+//     // };
+//     const handleCommentLike = async (commentId) => {
+//         const token = localStorage.getItem("token");
+
+//         // ✅ Logged-in user
+//         if (token) {
+//             try {
+//                 const res = await axios.post(
+//                     "/comment/like",
+//                     { commentId },
+//                     { headers: { Authorization: `Bearer ${token}` } }
+//                 );
+
+//                 setComments(prev =>
+//                     prev.map(c =>
+//                         c._id === commentId
+//                             ? { ...c, likesCount: res.data.likesCount, likedByUser: true }
+//                             : c
+//                     )
+//                 );
+
+//                 if (onCommentUpdate) onCommentUpdate();
+//             } catch (err) {
+//                 console.error(err.response?.data || err.message);
+//             }
+//             return;
+//         }
+
+//         // ✅ Guest user — localStorage + frontend
+//         const guestLikes = JSON.parse(localStorage.getItem("guestLikes") || "[]");
+//         if (!guestLikes.includes(commentId)) {
+//             localStorage.setItem("guestLikes", JSON.stringify([...guestLikes, commentId]));
+
+//             setComments(prev =>
+//                 prev.map(c =>
+//                     c._id === commentId
+//                         ? { ...c, likesCount: c.likesCount + 1, likedByUser: true }
+//                         : c
+//                 )
+//             );
+//         }
+//     };
+
+//     // 👇 Slice comments based on visibleCount
+//     const visibleComments = comments.slice(0, visibleCount);
+
+//     const handleLoadMore = () => {
+//         setVisibleCount(prev => prev + 3); // 👈 Increase by 4 on each click
+//     };
+//     return (
+//         <div className="bg-white p-6 mt-6 rounded-2xl shadow-sm border">
+//             <h3 className="text-xl font-semibold mb-6 text-gray-800">
+//                 {commentCount} {commentCount === 1 ? "Comment" : "Comments"}
+//             </h3>
+
+//             {comments.length === 0 ? (
+//                 <p className="text-gray-500">
+//                     No comments yet. Be the first to comment!
+//                 </p>
+//             ) : (
+//                 <>
+//                     <ul className="space-y-2">
+//                         {visibleComments.map((c) => (
+//                             <li
+//                                 key={c._id}
+//                                 className="flex items-start gap-4 p-4 rounded-xl border hover:shadow-md transition"
+//                             >
+//                                 {/* Avatar */}
+//                                 <div className="h-10 w-10 rounded-full bg-gray-200 flex items-center justify-center font-semibold text-gray-600">
+//                                     {(c.user?.firstName?.[0] ||
+//                                         c.user?.name?.[0] ||
+//                                         c.name?.[0] ||
+//                                         "G").toUpperCase()}
+//                                 </div>
+
+//                                 {/* Content */}
+//                                 <div className="flex-1">
+//                                     <div className="flex items-center justify-between mb-1">
+//                                         <p className="font-medium text-gray-800">
+//                                             {c.user
+//                                                 ? `${c.user.firstName || ""} ${c.user.lastName || ""}`.trim() ||
+//                                                 c.user.name ||
+//                                                 "Guest User"
+//                                                 : c.name || "Guest User"}
+//                                         </p>
+//                                         <span className="text-xs text-gray-400">
+//                                             {new Date(c.createdAt).toLocaleDateString()}
+//                                         </span>
+//                                     </div>
+
+//                                     <div className="flex justify-between">
+//                                         <p className="text-gray-600 text-sm leading-relaxed">
+//                                             {c.comment}
+//                                         </p>
+
+//                                         <button
+//                                             onClick={() => handleCommentLike(c._id)}
+//                                             disabled={c.likedByUser}
+//                                             className={`flex items-center gap-2 text-sm ${c.likedByUser
+//                                                 ? "text-blue-600"
+//                                                 : "text-gray-600 hover:text-blue-600"
+//                                                 }`}
+//                                         >
+//                                             {c.likedByUser ? <AiFillLike size={16} /> : <AiOutlineLike size={16} />}
+//                                             <span>{c.likesCount}</span>
+//                                         </button>
+//                                     </div>
+//                                 </div>
+//                             </li>
+//                         ))}
+//                     </ul>
+
+//                     {/* 👇 Load More Button */}
+//                     {visibleCount < comments.length && (
+//                         <div className="text-end mt-4">
+//                             <button
+//                                 onClick={handleLoadMore}
+//                                 className="px-3 py-1  text-black rounded-lg  transition"
+//                             >
+//                                 Show More
+//                             </button>
+//                         </div>
+//                     )}
+//                 </>
+//             )}
+//         </div>
+//     );
+// }
+
+
+export const CommentCards = ({ title, blogId, type, onCommentAdded }) => {
+
+    const [comment, setComment] = useState("");
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [isAnonymous, setIsAnonymous] = useState(false);
+    const [showEmoji, setShowEmoji] = useState(false);
+    const onEmojiClick = (emojiData) => {
+        setComment(prev => prev + emojiData.emoji);
     };
-
-    const handleEmojiClick = (emojiData) => {
-        setForm((prev) => ({ ...prev, comment: prev.comment + emojiData.emoji }));
-    };
-
-    // const handleSubmit = async (e) => {
-
-    //     e.preventDefault();
-    //     try {
-
-    //         if (isLoggedIn) {
-    //             await axios.post('/comment/post',
-    //                 { comment: form.comment, id: blogId, type },
-    //                 { withCredentials: true }
-
-    //             );
-    //             //  form reset //
-    //             setForm({ name: "", email: "", comment: "", otp: "", type });
-    //             alert("✅ Comment posted successfully");
-    //         } else {
-    //             const res = await axios.post("/comment/request-otp", {
-    //                 name: form.name,
-    //                 email: form.email,
-    //                 comment: form.comment,
-    //                 id: blogId,
-    //                 type
-    //             });
-    //             setCommentId(res.data.commentId,);
-    //             setStep("otp");
-    //         }
-    //     } catch (err) {
-    //         alert("❌ " + err.response?.data?.msg || "Something went wrong");
-    //     }
-
-    // }
-
-
-    // const handleVerify = async (e) => {
-    //     e.preventDefault();
-    //     try {
-    //         await axios.post("/comment/verify-otp", { commentId, otp: form.otp });
-    //         alert("✅ Comment verified and posted!");
-    //         setStep("form");
-    //         setForm({ name: "", email: "", comment: "", otp: "" });
-    //     } catch (err) {
-    //         alert("❌ " + (err.response?.data?.msg || "Invalid OTP"));
-    //     }
-    // };
-
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        try {
-            if (isLoggedIn) {
-                await axios.post('/comment/post',
-                    { comment: form.comment, id: blogId, type },
-                    { withCredentials: true }
-                );
-                // ✅ Form reset और parent को notify करें
-                setForm({ name: "", email: "", comment: "", otp: "", type });
-                if (onCommentAdded) {
-                    onCommentAdded(); // ✅ Parent component को notify करें
-                }
-
-            } else {
-                const res = await axios.post("/comment/request-otp", {
-                    name: form.name,
-                    email: form.email,
-                    comment: form.comment,
-                    id: blogId,
-                    type
-                });
-                setCommentId(res.data.commentId);
-                setStep("otp");
-            }
-        } catch (err) {
-            alert("❌ " + err.response?.data?.msg || "Something went wrong");
+        if (!comment.trim()) {
+            alert("Please enter a comment.");
+            return;
         }
-    }
-
-    const handleVerify = async (e) => {
-        e.preventDefault();
+        const submitName = isAnonymous ? "anonymous" : name;
+        const submitEmail = isAnonymous ? "anonymous" : email;
         try {
-            await axios.post("/comment/verify-otp", { commentId, otp: form.otp });
-
-            // ✅ OTP verify होने के बाद refresh करें
-            setStep("form");
-            setForm({ name: "", email: "", comment: "", otp: "" });
+            await axios.post('/comment/post',
+                { name: submitName, email: submitEmail, comment: comment.trim(), id: blogId, type }
+            );
+            // ✅ Form reset और parent को notify करें
+            setComment("");
+            setName("");
+            setEmail("");
+            setIsAnonymous(false);
             if (onCommentAdded) {
                 onCommentAdded(); // ✅ Parent component को notify करें
             }
-            // alert("✅ Comment verified and posted!");
+            alert("✅ Comment posted successfully");
         } catch (err) {
-            alert("❌ " + (err.response?.data?.msg || "Invalid OTP"));
+            alert("❌ " + err.response?.data?.msg || "Something went wrong");
         }
     };
     return (
-        <>
-            <div className="bg-white shadow-md rounded-2xl p-6">
-                <h3 className="text-lg font-semibold flex items-center gap-2 mb-2">
-                    {title || "Leave a Reply"}
-                </h3>
-                {des}
-
-                {step === "form" && (
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        {/* Comment textarea */}
-                        <div className="relative">
-                            <textarea
-                                name="comment"
-                                placeholder="Leave Your Comment 😊"
-                                rows="5"
-                                className="w-full rounded-lg border border-gray-400 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                value={form.comment}
-                                onChange={handleChange}
-                                required
-                            />
-                            <button
-                                type="button"
-                                onClick={() => setShowEmojiPicker((prev) => !prev)}
-                                className="absolute bottom-3 right-3 text-2xl"
-                            >
-                                😊
-                            </button>
-
-                            {showEmojiPicker && (
-                                <div className="absolute bottom-12 right-0 z-50">
-                                    <EmojiPicker onEmojiClick={handleEmojiClick} />
-                                </div>
-                            )}
-                        </div>
-
-
-                        {/* Guest user inputs */}
-                        {!isLoggedIn && (
-                            <>
-                                <input
-                                    type="text"
-                                    name="name"
-                                    placeholder="Name"
-                                    className="w-full rounded-full border border-gray-400 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    value={form.name}
-                                    onChange={handleChange}
-                                    required
-                                />
-                                <input
-                                    type="email"
-                                    name="email"
-                                    placeholder="Email"
-                                    className="w-full rounded-full border border-gray-400 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    value={form.email}
-                                    onChange={handleChange}
-                                    required
-                                />
-                                <div className="flex items-center gap-2">
-                                    <input type="checkbox" id="saveInfo" className="w-4 h-4" />
-                                    <label htmlFor="saveInfo" className="text-sm text-gray-700">
-                                        {checkbox}
-                                    </label>
-                                </div>
-                            </>
-                        )}
-
-                        <button
-                            type="submit"
-                            className="bg-black text-white px-6 py-2 rounded-full hover:bg-gray-800 transition"
-                        >
-                            {isLoggedIn ? "Post Comment" : "Send OTP"}
-                        </button>
-                    </form>
-                )}
-
-                {/* OTP Step */}
-                {step === "otp" && (
-                    <form onSubmit={handleVerify} className="space-y-4">
+        <div className="bg-white shadow-md rounded-2xl p-6">
+            <h3 className="text-lg font-semibold flex items-center gap-2 mb-4">
+                {title || "Leave a Reply"}
+            </h3>
+            <form onSubmit={handleSubmit} className="space-y-4">
+                {!isAnonymous && (
+                    <>
                         <input
                             type="text"
-                            name="otp"
-                            placeholder="Enter OTP"
-                            className="w-full rounded-lg border border-gray-400 p-3 focus:outline-none focus:ring-2 focus:ring-green-500"
-                            value={form.otp}
-                            onChange={handleChange}
+                            placeholder="Your Name"
+                            className="w-full rounded-lg border border-gray-400 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
                             required
                         />
-                        <button
-                            type="submit"
-                            className="bg-green-600 text-white px-6 py-2 rounded-full hover:bg-green-700 transition"
-                        >
-                            Verify OTP
-                        </button>
-                    </form>
-                )}
-            </div>
 
-        </>
+                        <input
+                            type="email"
+                            placeholder="Your Email"
+                            className="w-full rounded-lg border border-gray-400 p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                        />
+                    </>
+                )}
+
+                <div className="relative">
+                    <textarea
+                        placeholder="Leave Your Comment"
+                        rows="5"
+                        className="w-full rounded-lg border border-gray-400 p-3 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        required
+                    />
+
+                    {/* Emoji Button */}
+                    <button
+                        type="button"
+                        onClick={() => setShowEmoji(prev => !prev)}
+                        className="absolute bottom-3 right-3 text-gray-500 hover:text-black"
+                    >
+                        <MdEmojiEmotions className="text-[#339ca0]" size={20} />
+                    </button>
+
+                    {/* Emoji Picker */}
+                    {showEmoji && (
+                        <div className="absolute z-50 bottom-12 right-0">
+                            <EmojiPicker
+                                onEmojiClick={onEmojiClick}
+                                height={350}
+                                width={300}
+                            />
+                        </div>
+                    )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                    <input
+                        type="checkbox"
+                        checked={isAnonymous}
+                        onChange={(e) => setIsAnonymous(e.target.checked)}
+                    />
+                    <label className="text-sm">Post anonymously</label>
+                </div>
+                <button
+                    type="submit"
+                    className="bg-black text-white px-6 py-2 rounded-full hover:bg-gray-800 transition"
+                >
+                    Post Comment
+                </button>
+            </form>
+        </div>
     )
 
 }
@@ -424,7 +651,7 @@ export const CommentCards = ({ title, des, checkbox, button, isLoggedIn, blogId,
 
 export const CommentList = ({ comments, commentCount, setComments, onCommentUpdate }) => {
 
-    const [visibleCount, setVisibleCount] = useState(2); // 👈 Show 4 initially
+    const [visibleCount, setVisibleCount] = useState(4);
     // const handleCommentLike = async (commentId) => {
     //     try {
     //         const token = localStorage.getItem("token");
@@ -451,45 +678,78 @@ export const CommentList = ({ comments, commentCount, setComments, onCommentUpda
     //         console.error(err.response?.data || err.message);
     //     }
     // };
+    // const handleCommentLike = async (commentId) => {
+    //     const token = localStorage.getItem("token");
+
+    //     // ✅ Logged-in user
+    //     if (token) {
+    //         try {
+    //             const res = await axios.post(
+    //                 "/comment/like",
+    //                 { commentId },
+    //                 { headers: { Authorization: `Bearer ${token}` } }
+    //             );
+
+    //             setComments(prev =>
+    //                 prev.map(c =>
+    //                     c._id === commentId
+    //                         ? { ...c, likesCount: res.data.likesCount, likedByUser: true }
+    //                         : c
+    //                 )
+    //             );
+
+    //             if (onCommentUpdate) onCommentUpdate();
+    //         } catch (err) {
+    //             console.error(err.response?.data || err.message);
+    //         }
+    //         return;
+    //     }
+
+    //     // ✅ Guest user — localStorage + frontend
+    //     const guestLikes = JSON.parse(localStorage.getItem("guestLikes") || "[]");
+    //     if (!guestLikes.includes(commentId)) {
+    //         localStorage.setItem("guestLikes", JSON.stringify([...guestLikes, commentId]));
+
+    //         setComments(prev =>
+    //             prev.map(c =>
+    //                 c._id === commentId
+    //                     ? { ...c, likesCount: c.likesCount + 1, likedByUser: true }
+    //                     : c
+    //             )
+    //         );
+    //     }
+    // };
+
     const handleCommentLike = async (commentId) => {
-        const token = localStorage.getItem("token");
+        try {
+            const token = localStorage.getItem("token");
 
-        // ✅ Logged-in user
-        if (token) {
-            try {
-                const res = await axios.post(
-                    "/comment/like",
-                    { commentId },
-                    { headers: { Authorization: `Bearer ${token}` } }
-                );
-
-                setComments(prev =>
-                    prev.map(c =>
-                        c._id === commentId
-                            ? { ...c, likesCount: res.data.likesCount, likedByUser: true }
-                            : c
-                    )
-                );
-
-                if (onCommentUpdate) onCommentUpdate();
-            } catch (err) {
-                console.error(err.response?.data || err.message);
-            }
-            return;
-        }
-
-        // ✅ Guest user — localStorage + frontend
-        const guestLikes = JSON.parse(localStorage.getItem("guestLikes") || "[]");
-        if (!guestLikes.includes(commentId)) {
-            localStorage.setItem("guestLikes", JSON.stringify([...guestLikes, commentId]));
+            const res = await axios.post(
+                "/comment/like",
+                { commentId },
+                token
+                    ? { headers: { Authorization: `Bearer ${token}` } }
+                    : {}
+            );
 
             setComments(prev =>
                 prev.map(c =>
                     c._id === commentId
-                        ? { ...c, likesCount: c.likesCount + 1, likedByUser: true }
+                        ? {
+                            ...c,
+                            likesCount: res.data.likesCount,
+                            likedByUser: true
+                        }
                         : c
                 )
             );
+
+        } catch (err) {
+            if (err.response?.data?.msg === "Already liked") {
+
+            } else {
+                console.error(err.response?.data || err.message);
+            }
         }
     };
 
@@ -553,7 +813,7 @@ export const CommentList = ({ comments, commentCount, setComments, onCommentUpda
                                                 : "text-gray-600 hover:text-blue-600"
                                                 }`}
                                         >
-                                            {c.likedByUser ? <AiFillLike size={16} /> : <AiOutlineLike size={16} />}
+                                            {c.likedByUser ? <AiFillLike size={16} /> : <AiFillLike size={16} />}
                                             <span>{c.likesCount}</span>
                                         </button>
                                     </div>
@@ -576,18 +836,61 @@ export const CommentList = ({ comments, commentCount, setComments, onCommentUpda
                 </>
             )}
         </div>
+
     );
 }
 
-
-
 export const FollowSocials = () => {
+
+    const socialConfig = {
+        facebook: {
+            icon: FaFacebook,
+            bg: "bg-[#1877F2] hover:bg-[#145DBF]",
+        },
+        linkedin: {
+            icon: FaLinkedinIn,
+            bg: "bg-[#0A66C2] hover:bg-[#004182]",
+        },
+        twitter: {
+            icon: FaTwitter,
+            bg: "bg-[#1DA1F2] hover:bg-[#0d8ddb]",
+        },
+        instagram: {
+            icon: FaInstagram,
+            bg: "bg-gradient-to-r from-[#F58529] via-[#DD2A7B] to-[#8134AF]",
+        },
+        telegram: {
+            icon: FaTelegram,
+            bg: "bg-[#0088cc] hover:bg-[#006b99]",
+        },
+        whatsapp: {
+            icon: FaWhatsapp,
+            bg: "bg-[#25D366] hover:bg-[#1DA851]",
+        },
+    };
+
+
+    const [socials, setSocials] = useState([]);
+
+    useEffect(() => {
+        fetchSocials();
+    }, []);
+
+    const fetchSocials = async () => {
+
+        try {
+            const res = await axios.get('/social-media-icons/active');
+            setSocials(res.data);
+        } catch (err) {
+            console.error(err)
+        }
+    }
     return (
         <div className="bg-white shadow-md rounded-2xl p-5">
             <h3 className="text-lg font-semibold mb-4">Follow Socials</h3>
-            <div className="flex flex-col space-y-3">
+            {/* <div className="flex flex-col space-y-3">
                 <a
-                    href="  https://www.facebook.com/people/ejoboceancom/100063704361932/"
+                    href="https://www.facebook.com/people/ejoboceancom/100063704361932/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex gap-4 px-4 py-2 bg-[#1877F2] hover:bg-[#145DBF] text-white rounded-lg text-center"
@@ -596,14 +899,25 @@ export const FollowSocials = () => {
                     <span>Facebook</span>
                 </a>
                 <a
+                    href="https://www.linkedin.com/company/ejob-ocean-online-services-llp/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 px-4 py-2 bg-[#0A66C2] hover:bg-[#004182] text-white rounded-lg transition-all"
+                >
+                    <FaLinkedinIn size={25} />
+                    <span className="font-medium">LinkedIn</span>
+                </a>
+
+                <a
                     href="https://x.com/EjobOcean?s=08"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex gap-4 px-4 py-2 bg-[#1DA1F2] hover:bg-[#0d8ddb] text-white rounded-lg text-center"
+                    className="flex items-center gap-3 px-4 py-2 bg-[#1DA1F2] hover:bg-[#0d8ddb] text-white rounded-lg transition-all"
                 >
                     <FaTwitter size={25} />
-                    <span>Twitter</span>
+                    <span className="font-medium">Twitter</span>
                 </a>
+
                 <a
                     href="https://www.instagram.com/ejobocean/?igshid=z4e662ypb7im"
                     target="_blank"
@@ -622,6 +936,39 @@ export const FollowSocials = () => {
                     <FaTelegram size={25} />
                     <span>Telegram</span>
                 </a>
+                <a
+                    href="https://chat.whatsapp.com/DDwHG9jRtyqAQrzWs5un7q"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 px-4 py-2 bg-[#25D366] hover:bg-[#1DA851] text-white rounded-lg transition-all"
+                >
+                    <FaWhatsapp size={25} />
+                    <span className="font-medium">WhatsApp</span>
+                </a>
+
+            </div> */}
+            <div className="flex flex-col space-y-3">
+                {socials.map((item) => {
+                    const key = item.name.toLowerCase();
+                    const config = socialConfig[key];
+
+                    if (!config) return null;
+
+                    const Icon = config.icon;
+
+                    return (
+                        <a
+                            key={item._id}
+                            href={item.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`flex items-center gap-3 px-4 py-2 text-white rounded-lg transition-all ${config.bg}`}
+                        >
+                            <Icon size={25} />
+                            <span className="font-medium capitalize">{item.name}</span>
+                        </a>
+                    );
+                })}
             </div>
         </div>
     );
@@ -813,34 +1160,64 @@ export const Categories = () => {
     );
 };
 
-export const LatestPost = ({ id, img, title, date }) => {
+// export const LatestPost = ({ id, img, title, date }) => {
+//     return (
+//         <>
+//             <img
+//                 src={img}
+//                 alt="Author"
+//                 className="h-28 w-32 rounded-md object-cover object-center"
+//             />
+
+//             <div className="flex flex-col">
+
+//                 <p className="text-sm font-medium text-gray-800 leading-snug cursor-pointer">
+//                     <span dangerouslySetInnerHTML={{ __html: title }} />
+//                 </p>
+
+
+//                 <div className="mt-2 flex items-center text-xs text-gray-500">
+//                     <IoMdTime className="mr-1 h-4 w-4" />
+//                     <span dangerouslySetInnerHTML={{ __html: date }} />
+//                 </div>
+//             </div>
+//         </>
+//     );
+// };
+
+
+
+
+export const LatestPost = ({ img, title, author, date }) => {
     return (
-        <>
+        <div className="relative h-[260px] sm:h-[300px] rounded-2xl overflow-hidden bg-black group">
+
+            {/* Image */}
             <img
-                src={img}
-                alt="Author"
-                className="h-28 w-32 rounded-md object-cover object-center"
+                src={img || "/default-blog.jpg"}
+                alt="Blog"
+                className="absolute inset-0 w-full h-full object-cover scale-105"
             />
 
-            <div className="flex flex-col">
+            {/* Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
-                <p className="text-sm font-medium text-gray-800 leading-snug cursor-pointer">
-                    <span dangerouslySetInnerHTML={{ __html: title }} />
-                </p>
+            {/* Content */}
+            <div className="relative z-10 h-full flex flex-col justify-end p-5">
+                <h3
+                    className="text-white text-base sm:text-lg font-bold leading-snug line-clamp-2"
+                    dangerouslySetInnerHTML={{ __html: title }}
+                />
 
-
-                <div className="mt-2 flex items-center text-xs text-gray-500">
-                    <IoMdTime className="mr-1 h-4 w-4" />
-                    <span dangerouslySetInnerHTML={{ __html: date }} />
+                <div className="mt-2 text-xs sm:text-sm text-gray-300 flex items-center gap-2">
+                    <span>{author || "E-Job Ocean"}</span>
+                    <span>•</span>
+                    <span>{date}</span>
                 </div>
             </div>
-        </>
+        </div>
     );
 };
-
-
-
-
 
 
 
@@ -965,39 +1342,173 @@ export const ReactShareButton = ({
 
 
 
-export const WebinarCardsList = ({ webinar,image, onRegisterClick }) => {
+// export const WebinarCardsList = ({ webinar, image, onRegisterClick }) => {
+//     const start = new Date(webinar.WebinarStartDateTime);
+//     const end = new Date(webinar.WebinarEndDateTime);
+//     const now = new Date(); // current time
+
+
+
+
+//     const isUpcoming = start > now; // true if webinar hasn't ended yet
+//     const [isModalOpen, setIsModalOpen] = useState(false);
+//     const capitalizeFirst = (str) => {
+//         if (!str) return "";
+//         return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+//     };
+//     const navigate = useNavigate();
+
+
+//     return (
+//         <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+//             <div className="relative">
+//                 {/* Speaker Banner Image */}
+
+//                 <img
+//                     // src={
+//                     //     webinar.Speaker?.profilePic
+//                     //         ? `${baseURL}/${webinar.Speaker.profilePic}`
+//                     //         : "/default-avatar.png"
+//                     // }
+//                     src={image}
+//                     alt="Speaker"
+//                     className="w-full h-52 object-contain bg-gray-100"
+//                 />
+
+
+
+//                 {/* Webinar Type Badge */}
+//                 {webinar.WebinarType && (
+//                     <div className={`ribbon ${webinar.WebinarType.toLowerCase() === 'paid' ? 'ribbon-green' : 'ribbon-red'}`}>
+//                         <span>{capitalizeFirst(webinar.WebinarType)}</span>
+//                     </div>
+//                 )}
+
+//             </div>
+
+//             <div className="p-5">
+//                 {/* Speaker Info */}
+
+//                 <div className="flex items-center gap-3 mb-4">
+//                     <img
+//                         src={image}
+//                         alt="Speaker"
+//                         className="w-12 h-12 rounded-full object-cover border border-gray-200 shadow-sm"
+//                     />
+//                     {webinar.Speaker && (
+//                         <span className="text-sm font-medium text-gray-900">
+//                             {capitalizeFirst(webinar.Speaker.salutation)}
+//                             {capitalizeFirst(webinar.Speaker.firstName)}{" "}
+
+//                             {capitalizeFirst(webinar.Speaker.lastName)}
+
+//                         </span>
+//                     )}
+//                 </div>
+
+
+//                 {/* Webinar Title */}
+//                 <h3 className="text-lg font-semibold text-gray-900 mb-3 line-clamp-2">
+//                     {capitalizeFirst(webinar.WebinarTitle)}
+//                 </h3>
+
+//                 {/* Date & Time */}
+//                 <div className="text-sm text-gray-600 flex items-center gap-2 mb-3 border-l-4 border-red-600 pl-3">
+//                     <FaRegCalendarAlt className="text-red-600" />
+//                     <span>
+//                         {start.toLocaleString()} - {end.toLocaleTimeString()}
+//                     </span>
+//                 </div>
+//                 <div>
+//                     <h3 className="text-sm font-semibold text-gray-900 mb-3 line-clamp-2">
+//                         {capitalizeFirst(webinar.WebinarMode)}
+
+//                     </h3>
+//                 </div>
+
+//                 {/* Action Button */}
+//                 <div className="flex gap-4">
+//                     {isUpcoming && (
+//                         <button
+//                             onClick={() => {
+//                                 setIsModalOpen(true);
+//                                 if (onRegisterClick) onRegisterClick(webinar);
+//                             }}
+//                             className="mt-auto bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+//                         >
+//                             Register
+//                         </button>
+//                     )}
+
+//                     <RegisterModal
+//                         isOpen={isModalOpen}
+//                         onClose={() => setIsModalOpen(false)}
+//                         webinarId={webinar._id}
+//                         webinarType={webinar.WebinarType}
+//                     />
+//                     <button
+//                         onClick={() => navigate(`/webinars/${webinar.WebinarSlug}`)}
+//                         className="w-full bg-[#101828] text-white text-sm py-2.5 rounded-lg font-medium hover:bg-[#1d2939] transition"
+//                     >
+//                         View Details
+//                     </button>
+//                 </div>
+//             </div>
+//         </div>
+
+//     );
+// };
+
+
+export const WebinarCardsList = ({ webinar, image, onRegisterClick }) => {
     const start = new Date(webinar.WebinarStartDateTime);
     const end = new Date(webinar.WebinarEndDateTime);
     const now = new Date(); // current time
 
-
-
-
     const isUpcoming = start > now; // true if webinar hasn't ended yet
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [hasOneToOne, setHasOneToOne] = useState(false);
     const capitalizeFirst = (str) => {
         if (!str) return "";
         return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
     };
     const navigate = useNavigate();
 
+    useEffect(() => {
+        const checkOneToOne = async () => {
+            if (webinar.Speakers && webinar.Speakers.length > 0) {
+                try {
+                    const res = await axios.get(`/one-to-one/speaker/${webinar.Speakers[0]._id}`);
+                    if (res.data && res.data.length > 0) {
+                        setHasOneToOne(true);
+                    }
+                } catch (err) {
+                    console.error("Error checking one-to-one:", err);
+                }
+            }
+        };
+        checkOneToOne();
+    }, [webinar]);
+    const speakerId =
+        webinar.Speakers?.[0]?._id || webinar.Speaker?._id;
+
 
     return (
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
             <div className="relative">
                 {/* Speaker Banner Image */}
-                
-                    <img
-                        // src={
-                        //     webinar.Speaker?.profilePic
-                        //         ? `${baseURL}/${webinar.Speaker.profilePic}`
-                        //         : "/default-avatar.png"
-                        // }
-                        src={image}
-                        alt="Speaker"
-                        className="w-full h-52 object-contain bg-gray-100"
-                    />
-               
+
+                <img
+                    // src={
+                    //     webinar.Speaker?.profilePic
+                    //         ? `${baseURL}/${webinar.Speaker.profilePic}`
+                    //         : "/default-avatar.png"
+                    // }
+                    src={image}
+                    alt="Speaker"
+                    className="w-full h-52 object-contain bg-gray-100"
+                />
+
 
 
                 {/* Webinar Type Badge */}
@@ -1011,14 +1522,14 @@ export const WebinarCardsList = ({ webinar,image, onRegisterClick }) => {
 
             <div className="p-5">
                 {/* Speaker Info */}
-                
-                    <div className="flex items-center gap-3 mb-4">
-                        <img
-                            src={image}
-                            alt="Speaker"
-                            className="w-12 h-12 rounded-full object-cover border border-gray-200 shadow-sm"
-                        />
-                        {webinar.Speaker && (
+
+                <div className="flex items-center gap-3 mb-4">
+                    <img
+                        src={image}
+                        alt="Speaker"
+                        className="w-12 h-12 rounded-full object-cover border border-gray-200 shadow-sm"
+                    />
+                    {webinar.Speaker && (
                         <span className="text-sm font-medium text-gray-900">
                             {capitalizeFirst(webinar.Speaker.salutation)}
                             {capitalizeFirst(webinar.Speaker.firstName)}{" "}
@@ -1026,9 +1537,14 @@ export const WebinarCardsList = ({ webinar,image, onRegisterClick }) => {
                             {capitalizeFirst(webinar.Speaker.lastName)}
 
                         </span>
-                          )}
-                    </div>
-              
+                    )}
+                    {/* {hasOneToOne && (
+                        <button className="mt-auto bg-green-600 text-white px-1 py-1 rounded hover:bg-green-700">
+                            one to One
+                        </button>
+                    )} */}
+                </div>
+
 
                 {/* Webinar Title */}
                 <h3 className="text-lg font-semibold text-gray-900 mb-3 line-clamp-2">
@@ -1049,46 +1565,74 @@ export const WebinarCardsList = ({ webinar,image, onRegisterClick }) => {
                     </h3>
                 </div>
 
+                <div className="flex gap-3">
+                    <button
+                        onClick={() => navigate(`/webinars/${webinar.WebinarSlug}`)}
+                        className="flex items-center justify-center min-w-[120px] px-4 py-2.5 text-sm font-semibold rounded-lg 
+               bg-[#101828] text-white hover:bg-[#1d2939] transition-all duration-200"
+                    >
+                        View Details
+                    </button>
+
+                    {/* {hasOneToOne && (
+                        <button
+                            className="flex items-center justify-center min-w-[120px] px-4 py-2.5 text-sm font-semibold rounded-lg 
+                 bg-green-600 text-white hover:bg-green-700 transition-all duration-200"
+                        >
+                            One-to-One
+                        </button>
+                    )} */}
+                    {hasOneToOne && speakerId && (
+                        <button
+                            onClick={() => navigate(`/hall-of-fame/${speakerId}`)}
+                            className="flex items-center justify-center min-w-[120px] px-4 py-2.5 
+               text-sm font-semibold rounded-lg 
+               bg-green-600 text-white hover:bg-green-700 
+               transition-all duration-200"
+                        >
+                            One-to-One
+                        </button>
+                    )}
+
+                </div>
+
                 {/* Action Button */}
-                <div className="flex gap-4">
+                {/* <div className="flex gap-4">
+                    <button
+                        onClick={() => navigate(`/webinars/${webinar.WebinarSlug}`)}
+                        className="bg-[#101828] text-white text-sm px-2 py-2.5 rounded-lg font-medium hover:bg-[#1d2939] transition"
+                    >
+                        View Details
+                    </button>
+                    
                     {isUpcoming && (
                         <button
                             onClick={() => {
                                 setIsModalOpen(true);
                                 if (onRegisterClick) onRegisterClick(webinar);
                             }}
-                            className="mt-auto bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                            className="mt-auto bg-blue-600 text-white px-2 py-2 rounded hover:bg-blue-700"
                         >
                             Register
                         </button>
                     )}
-
-                    <RegisterModal
-                        isOpen={isModalOpen}
-                        onClose={() => setIsModalOpen(false)}
-                        webinarId={webinar._id}
-                        webinarType={webinar.WebinarType}
-                    />
-                    <button
-                        onClick={() => navigate(`/webinars/${webinar.WebinarSlug}`)}
-                        className="w-full bg-[#101828] text-white text-sm py-2.5 rounded-lg font-medium hover:bg-[#1d2939] transition"
-                    >
-                        View Details
-                    </button>
-                </div>
+                     {hasOneToOne && (
+                        <button className="mt-auto bg-green-600 text-white px-2 py-2.5 rounded hover:bg-green-700">
+                            one to One
+                        </button>
+                    )}
+                </div> */}
+                <RegisterModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    webinarId={webinar._id}
+                    webinarType={webinar.WebinarType}
+                />
             </div>
         </div>
 
     );
 };
-
-
-
-
-
-
-
-
 
 
 
@@ -1122,11 +1666,25 @@ export const HallOfFameCards = ({ speaker }) => {
         }
     };
 
+    const hasOneToOneSession = () => {
+        // Mentor → sessions available
+        if (isMentor) {
+            return Array.isArray(speaker.sessions) && speaker.sessions.length > 0;
+        }
+
+        // Speaker → check if has one-to-one sessions
+        return speaker.hasOneToOneSession || false;
+    };
+
     const imageUrl = getImageSource();
     const handleClick = () => {
 
         navigate(`/hall-of-fame/${speaker._id}`); // navigate to details page
     };
+
+
+
+
     return (
         <div onClick={handleClick} className="w-72 bg-white rounded-xl shadow-lg overflow-hidden justify-center flex items-center flex-col">
 
@@ -1175,17 +1733,26 @@ export const HallOfFameCards = ({ speaker }) => {
             >
                 Connect On Linkedin <FaLinkedin size={18} />
             </a> */}
+
             <span className="flex gap-10 my-2">
                 {/* <button onClick={() => window.open(speaker.linkedin || "#", "_blank")}
-                    
-                    className="px-4 py-1 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition" >
-                    Linkedin
-                </button> */}
 
-                <button className="px-4 py-1 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition">
-                    Book One to One
-                </button>
+                        className="px-4 py-1 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition" >
+                        Linkedin
+                    </button> */}
+
+                {hasOneToOneSession() && (
+                    <button
+                        className="px-4 py-1 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition"
+                    >
+                        Book One to One
+                    </button>
+                )}
+
+
+
             </span>
+
 
         </div>
     );
@@ -1206,69 +1773,19 @@ export const JobApplicationForm = ({ jobId, closeModal, initialData = {} }) => {
         lastName: "",
         email: "",
         mobile: "",
-        country: "",
-        state: "",
-        city: "",
+
         resume: null,
         ...initialData,
     });
     const [errors, setErrors] = useState({});
-    const [countries, setCountries] = useState([]);
-    const [states, setStates] = useState([]);
-    const [cities, setCities] = useState([]);
 
-    const [loadingDropdown, setLoadingDropdown] = useState({
-        countries: false,
-        states: false,
-        cities: false,
-    });
+
+
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    useEffect(() => {
-        const loadCountries = async () => {
-            setLoadingDropdown(prev => ({ ...prev, countries: true }));
-            try {
-                const response = await axios.get("/country");
-                setCountries(response.data.country || []);
-            } catch (error) { console.error(error); }
-            finally { setLoadingDropdown(prev => ({ ...prev, countries: false })); }
-        };
-        loadCountries();
-    }, []);
 
-    useEffect(() => {
-        const loadStates = async () => {
-            if (!formData.country) {
-                setStates([]);
-                setFormData(prev => ({ ...prev, state: "", city: "" }));
-                return;
-            }
-            setLoadingDropdown(prev => ({ ...prev, states: true }));
-            try {
-                const response = await axios.get(`/state/country/${formData.country}`);
-                setStates(response.data.data || []);
-            } catch (error) { console.error(error); setStates([]); }
-            finally { setLoadingDropdown(prev => ({ ...prev, states: false })); }
-        };
-        loadStates();
-    }, [formData.country]);
 
-    useEffect(() => {
-        const loadCities = async () => {
-            if (!formData.state) {
-                setCities([]);
-                setFormData(prev => ({ ...prev, city: "" }));
-                return;
-            }
-            setLoadingDropdown(prev => ({ ...prev, cities: true }));
-            try {
-                const response = await axios.get(`/city/state/${formData.state}`);
-                setCities(response.data.data || []);
-            } catch (error) { console.error(error); setCities([]); }
-            finally { setLoadingDropdown(prev => ({ ...prev, cities: false })); }
-        };
-        loadCities();
-    }, [formData.state]);
+
 
     const handleChange = (e) => {
         const { name, value, files } = e.target;
@@ -1280,13 +1797,6 @@ export const JobApplicationForm = ({ jobId, closeModal, initialData = {} }) => {
         }
         else if (name === "resume") {
             setFormData(prev => ({ ...prev, resume: files[0] }));
-        } else {
-            setFormData(prev => ({
-                ...prev,
-                [name]: value,
-                ...(name === "country" ? { state: "", city: "" } : {}),
-                ...(name === "state" ? { city: "" } : {})
-            }));
         }
         // clear the error message when user starts typing
         setErrors(prev => ({ ...prev, [name]: "" }));
@@ -1310,9 +1820,7 @@ export const JobApplicationForm = ({ jobId, closeModal, initialData = {} }) => {
         } else if (!/^\d{10}$/.test(formData.mobile)) {
             newErrors.mobile = "Mobile number must be exactly 10 digits.";
         }
-        if (!formData.country) newErrors.country = "Please select a country.";
-        if (!formData.state) newErrors.state = "Please select a state.";
-        if (!formData.city) newErrors.city = "Please select a city.";
+
         if (!formData.resume) newErrors.resume = "Please upload your resume.";
 
         setErrors(newErrors);
@@ -1427,71 +1935,7 @@ export const JobApplicationForm = ({ jobId, closeModal, initialData = {} }) => {
                 {errors.mobile && <p className="text-red-500 text-xs mt-1">{errors.mobile}</p>}
             </div>
 
-            {/* Location Dropdowns */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <label className="block text-sm font-medium mb-1">
-                        Country {loadingDropdown.countries && "(Loading...)"}
-                    </label>
-                    <select
-                        name="country"
-                        value={formData.country}
-                        onChange={handleChange}
-                        className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                        disabled={loadingDropdown.countries}
-                    >
-                        <option value="">-- Select Country --</option>
-                        {countries.map((country) => (
-                            <option key={country._id} value={country.id}>
-                                {country.name}
-                            </option>
-                        ))}
-                    </select>
-                    {errors.country && <p className="text-red-500 text-xs mt-1">{errors.country}</p>}
-                </div>
 
-                <div>
-                    <label className="block text-sm font-medium mb-1">
-                        State {loadingDropdown.states && "(Loading...)"}
-                    </label>
-                    <select
-                        name="state"
-                        value={formData.state}
-                        onChange={handleChange}
-                        className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                        disabled={!formData.country || loadingDropdown.states}
-                    >
-                        <option value="">-- Select State --</option>
-                        {states.map((state) => (
-                            <option key={state._id} value={state.id}>
-                                {state.name}
-                            </option>
-                        ))}
-                    </select>
-                    {errors.state && <p className="text-red-500 text-xs mt-1">{errors.state}</p>}
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium mb-1">
-                        City {loadingDropdown.cities && "(Loading...)"}
-                    </label>
-                    <select
-                        name="city"
-                        value={formData.city}
-                        onChange={handleChange}
-                        className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                        disabled={!formData.state || loadingDropdown.cities}
-                    >
-                        <option value="">-- Select City --</option>
-                        {cities.map((city) => (
-                            <option key={city._id} value={city.id}>
-                                {city.name}
-                            </option>
-                        ))}
-                    </select>
-                    {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
-                </div>
-            </div>
 
             <div className="flex flex-col">
                 <label className="text-sm font-medium mb-1">Upload Resume</label>

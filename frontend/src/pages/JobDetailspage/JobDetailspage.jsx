@@ -6,6 +6,8 @@ import { FaMapMarkerAlt, FaClock, FaBriefcase, FaMoneyBill, FaGraduationCap, FaU
 import HeaderPalecment from '../../media/png/HeaderPalecment.png';
 import { JobApplicationForm, CommentList, CommentCards } from "../../components/ui/cards/cards.jsx";
 
+import { FaHome, FaBuilding } from "react-icons/fa";
+
 
 export default function JobDetailsPage() {
     const { id } = useParams();
@@ -32,7 +34,7 @@ export default function JobDetailsPage() {
 
     const type = "job";
     useEffect(() => {
-        const token = localStorage.getItem("token"); // ya cookies se lo
+        const token = localStorage.getItem("token");
         if (token) {
             setIsLoggedIn(true);
         }
@@ -379,9 +381,9 @@ export default function JobDetailsPage() {
                         {job?.jobTitle}
                     </h1>
 
-                    <p className="text-white/90 text-sm sm:text-base md:text-lg font-medium px-2 sm:px-6">
+                    {/* <p className="text-white/90 text-sm sm:text-base md:text-lg font-medium px-2 sm:px-6">
                         {job?.description}
-                    </p>
+                    </p> */}
                 </div>
             </section>
 
@@ -427,78 +429,71 @@ export default function JobDetailsPage() {
                                     {job.jobTitle}
                                 </h1>
 
-                                <p className="text-white/90 text-lg leading-relaxed max-w-4xl backdrop-blur-sm bg-white/10 p-3 rounded-2xl border border-white/20">
+                                {/* <p className="text-white/90 text-lg leading-relaxed max-w-4xl backdrop-blur-sm bg-white/10 p-3 rounded-2xl border border-white/20">
+                                    {job.description}
+                                </p> */}
+                            </div>
+                        </div>
+
+
+                        <div className="p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 bg-gradient-to-br from-gray-50 to-blue-50/30">
+                            {job.degreeLevel?.name && (
+                                <div className="group bg-white/90 backdrop-blur-sm p-4 rounded-2xl text-center shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 border border-blue-100">
+                                    <div className="w-14 h-14 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
+                                        <FaGraduationCap className="text-white text-2xl" />
+                                    </div>
+                                    <span className="font-bold text-blue-600 block mb-2 text-sm uppercase tracking-wide">Degree Level</span>
+                                    <p className="text-gray-800 font-semibold text-lg">{job.degreeLevel.name}</p>
+                                </div>
+                            )}
+
+                            {job?.experience && (
+
+                                <div className="group bg-white/90 backdrop-blur-sm p-4 rounded-2xl text-center shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 border border-amber-100">
+                                    <div className="w-14 h-14 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
+                                        <FaBriefcase className="text-white text-2xl" />
+                                    </div>
+                                    <span className="font-bold text-amber-600 block mb-2 text-sm uppercase tracking-wide">Experience</span>
+                                    <p className="text-gray-800 font-semibold text-lg">{job.experience}</p>
+                                </div>
+                            )}
+
+
+                            {(locationNames.city || locationNames.state || locationNames.country) && (
+                                <div className="group bg-white/90 p-4 rounded-2xl text-center shadow-lg">
+                                    <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-2xl flex items-center justify-center mb-4">
+                                        <FaMapMarkerAlt className="text-white text-2xl" />
+                                    </div>
+                                    <span className="font-bold text-cyan-600 block mb-2 text-sm uppercase">
+                                        Location
+                                    </span>
+                                    <p className="text-gray-800 font-semibold text-lg">
+                                        {getLocationString()}
+                                    </p>
+                                </div>
+                            )}
+
+                            {job?.mode && (
+                                <div className="group bg-white/90 backdrop-blur-sm p-4 rounded-2xl text-center shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 border border-amber-100">
+                                    <div className="w-14 h-14 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
+                                        <FaBuilding className="text-white text-2xl" />
+                                    </div>
+                                    <span className="font-bold text-amber-600 block mb-2 text-sm uppercase tracking-wide">Mode</span>
+                                    <p className="text-gray-800 font-semibold text-lg">{job.mode}</p>
+                                </div>
+                            )}
+
+
+                        </div>
+                        {job?.description && (
+                            <div className="p-1">
+                                <p className="text-gray-800 text-base leading-relaxed max-w-4xl bg-gray-50 p-5 rounded-xl border border-gray-200">
                                     {job.description}
                                 </p>
                             </div>
-                        </div>
+                        )}
 
-                        {/* Key Info Cards - Modern Grid */}
-                        <div className="p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 bg-gradient-to-br from-gray-50 to-blue-50/30">
-                            {!job.hideSalary && (
-                                <div className="group relative bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 border border-gray-100 overflow-hidden">
-                                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-green-400 to-blue-500"></div>
-                                    <div className="relative z-10">
-                                        <div className="w-14 h-14 bg-gradient-to-br from-green-400 to-blue-500 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                                            <FaMoneyBill className="text-white text-2xl" />
-                                        </div>
-                                        <p className="font-bold text-gray-800 text-lg mb-1">
-                                            {job.salaryFrom} - {job.salaryTo} {job.salaryCurrency}
-                                        </p>
-                                        <span className="text-gray-500 text-sm font-medium">{job.salaryPeriod && `/ ${job.salaryPeriod}`}</span>
-                                        <div className="mt-3 text-xs text-green-600 font-semibold">💰 Competitive Salary</div>
-                                    </div>
-                                </div>
-                            )}
 
-                            {job.jobType && (
-                                <div className="group relative bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 border border-gray-100 overflow-hidden">
-                                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-400 to-pink-500"></div>
-                                    <div className="relative z-10">
-                                        <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-500 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                                            <FaBriefcase className="text-white text-2xl" />
-                                        </div>
-                                        <p className="font-bold text-gray-800 text-sm mb-1">
-                                            {job.jobType?.name || job.jobType}
-                                        </p>
-                                        <span className="text-gray-500 text-sm font-medium">Job Type</span>
-                                        <div className="mt-3 text-xs text-purple-600 font-semibold">💼 Work Style</div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {job.jobShift && (
-                                <div className="group relative bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 border border-gray-100 overflow-hidden">
-                                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-orange-400 to-red-500"></div>
-                                    <div className="relative z-10">
-                                        <div className="w-12 h-12 bg-gradient-to-br from-orange-400 to-red-500 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                                            <FaClock className="text-white text-2xl" />
-                                        </div>
-                                        <p className="font-bold text-gray-800 text-sm mb-1">
-                                            {job.jobShift?.name || job.jobShift}
-                                        </p>
-                                        <span className="text-gray-500 text-sm font-medium">Shift</span>
-                                        <div className="mt-3 text-xs text-orange-600 font-semibold">⏰ Timing</div>
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="group relative bg-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 border border-gray-100 overflow-hidden">
-                                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-cyan-500"></div>
-                                <div className="relative z-10">
-                                    <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                                        <FaMapMarkerAlt className="text-white text-2xl" />
-                                    </div>
-                                    <p className="font-bold text-gray-800 text-sm mb-1">
-                                        {getLocationString()}
-                                    </p>
-                                    <span className="text-gray-500 text-sm font-medium">Location</span>
-                                    <div className="mt-3 text-xs text-blue-600 font-semibold">📍 Work Location</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Skills Section - Modern Tags */}
                         {job.skills?.length > 0 && (
                             <div className="p-10 border-t border-gray-200 bg-gradient-to-r from-white to-indigo-50/20 relative overflow-hidden">
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full -mt-16 -mr-16"></div>
@@ -525,51 +520,15 @@ export default function JobDetailsPage() {
                             </div>
                         )}
 
-                        {/* Benefits Section - Modern Card */}
-                        {job.benefits && (
-                            <div className="p-10 border-t border-gray-200 bg-gradient-to-r from-emerald-50 to-green-50/30 relative overflow-hidden">
-                                <div className="absolute -top-10 -left-10 w-40 h-40 bg-gradient-to-br from-emerald-200 to-green-200 rounded-full opacity-50"></div>
-
-                                <h3 className="text-2xl font-bold text-gray-800 mb-6 relative z-10 flex items-center gap-3">
-                                    <div className="w-2 h-8 bg-gradient-to-b from-emerald-500 to-green-600 rounded-full"></div>
-                                    Perks & Benefits
-                                </h3>
-
-                                <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-lg border border-emerald-100 relative z-10">
-                                    <p className="text-gray-700 text-lg leading-relaxed font-medium">
-                                        {job.benefits}
-                                    </p>
-                                </div>
-                            </div>
-                        )}
+                       
 
                         {/* Additional Info Section - Modern Grid */}
                         <div className="p-10 border-t border-gray-200 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 bg-gradient-to-br from-amber-50 to-orange-50/20">
-                            <div className="group bg-white/90 backdrop-blur-sm p-4 rounded-2xl text-center shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 border border-amber-100">
-                                <div className="w-14 h-14 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
-                                    <FaBriefcase className="text-white text-2xl" />
-                                </div>
-                                <span className="font-bold text-amber-600 block mb-2 text-sm uppercase tracking-wide">Experience</span>
-                                <p className="text-gray-800 font-semibold text-lg">{job.experience || "Flexible"}</p>
-                            </div>
 
-                            <div className="group bg-white/90 backdrop-blur-sm p-4 rounded-2xl text-center shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 border border-blue-100">
-                                <div className="w-14 h-14 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
-                                    <FaGraduationCap className="text-white text-2xl" />
-                                </div>
-                                <span className="font-bold text-blue-600 block mb-2 text-sm uppercase tracking-wide">Degree Level</span>
-                                <p className="text-gray-800 font-semibold text-lg">{job.degreeLevel.name || "Any Graduate"}</p>
-                            </div>
-
-                            <div className="group bg-white/90 backdrop-blur-sm p-4 rounded-2xl text-center shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 border border-green-100">
-                                <div className="w-14 h-14 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
-                                    <FaUsers className="text-white text-2xl" />
-                                </div>
-                                <span className="font-bold text-green-600 block mb-2 text-sm uppercase tracking-wide">Positions</span>
-                                <p className="text-gray-800 font-semibold text-lg">{job.positions || "Multiple"}</p>
-                            </div>
 
                             <div className="group bg-white/90 backdrop-blur-sm p-4 rounded-2xl text-center shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 border border-red-100">
+                              {job?.expiryDate && (
+                                <>
                                 <div className="w-14 h-14 bg-gradient-to-br from-red-400 to-pink-500 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
                                     <FaCalendar className="text-white text-2xl" />
                                 </div>
@@ -577,6 +536,9 @@ export default function JobDetailsPage() {
                                 <p className="text-gray-800 font-semibold text-lg">
                                     {job.expiryDate ? new Date(job.expiryDate).toLocaleDateString() : "Open"}
                                 </p>
+                                </>
+                              )}
+                                
                             </div>
                         </div>
 
@@ -604,7 +566,7 @@ export default function JobDetailsPage() {
                         </div>
 
                         {/* Comments Section */}
-                        <div className="p-10 border-t border-gray-200 bg-gradient-to-br from-white to-blue-50/20">
+                        {/* <div className="p-10 border-t border-gray-200 bg-gradient-to-br from-white to-blue-50/20">
                             <CommentCards
                                 isLoggedIn={isLoggedIn}
                                 blogId={job._id}
@@ -625,7 +587,7 @@ export default function JobDetailsPage() {
                                 setComments={setComments}
                                 onCommentUpdate={fetchComments}
                             />
-                        </div>
+                        </div> */}
                     </div>
                 </section>
 

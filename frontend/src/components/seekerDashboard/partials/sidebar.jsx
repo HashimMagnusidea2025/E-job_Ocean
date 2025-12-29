@@ -250,7 +250,10 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
     {
       icon: <IoMdSettings />, label: "Master Settings",
       children: [
-
+        {
+          path: "/admin-dashboard/social-media", icon: <GoDotFill size={12} className=" dot" />,
+          label: "Social Media"
+        },
         {
           path: "/admin-dashboard/company-category", icon: <GoDotFill size={12} className=" dot" />,
           label: "Company Category"

@@ -1,31 +1,30 @@
-import { useState, useEffect } from 'react';
-import axios from '../../../../utils/axios.js';
+import { useState, useEffect } from "react";
+import axios from "../../../../utils/axios.js";
+
 const baseURL = import.meta.env.VITE_BACKEND_URL;
+
 export default function OurFounders() {
   const [founders, setFounders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchFounders = async () => {
       try {
-        const response = await axios.get('/our-founders');
-        setFounders(response.data);
+        const res = await axios.get("/our-founders");
+        setFounders(res.data || []);
       } catch (err) {
-        setError('Failed to load founders');
         console.error(err);
       } finally {
         setLoading(false);
       }
     };
-
     fetchFounders();
   }, []);
 
   if (loading) {
     return (
-      <section className="text-center py-16 bg-white">
-        <h2 className="text-3xl md:text-[50px] font-bold text-[#339ca0] mb-12">
+      <section className="py-20 text-center bg-white">
+        <h2 className="text-3xl md:text-[50px] font-bold text-[#339ca0] mb-6">
           Our Founders
         </h2>
         <p>Loading...</p>
@@ -33,50 +32,43 @@ export default function OurFounders() {
     );
   }
 
-  if (error) {
-    return (
-      <section className="text-center py-16 bg-white">
-        <h2 className="text-3xl md:text-[50px] font-bold text-[#339ca0] mb-12">
-          Our Founders
-        </h2>
-        <p>{error}</p>
-      </section>
-    );
-  }
-
-  if (founders.length === 0) {
-    return (
-      <section className="text-center py-16 bg-white">
-        <h2 className="text-3xl md:text-[50px] font-bold text-[#339ca0] mb-12">
-          Our Founders
-        </h2>
-        <p>No founders found.</p>
-      </section>
-    );
-  }
   return (
-    <section className="text-center py-16 bg-white">
-      <h2 className="text-3xl md:text-[50px] font-bold text-[#339ca0] mb-12">
+    <section className="px-4 sm:px-6 md:px-28 py-20 bg-white">
+      <h2 className="text-center text-3xl md:text-[50px] font-bold text-[#339ca0] mb-16">
         Our Founders
       </h2>
 
-      <div className="flex flex-wrap justify-center gap-10  mx-auto px-4">
+      <div className="space-y-24">
         {founders.map((founder, index) => (
           <div
-            key={founder._id || index}
-            className="bg-white  shadow-lg rounded-xl p-6 max-w-[400px] w-full relative"
+            key={founder._id}
+            className={`grid grid-cols-1 md:grid-cols-2 gap-12 items-center ${
+              index % 2 !== 0 ? "md:flex-row-reverse" : ""
+            }`}
           >
-            <div className="flex justify-center mb-4 relative">
+            {/* Image */}
+            <div className="flex justify-center">
               <img
                 src={`${baseURL}${founder.image}`}
                 alt={founder.name}
-                className="w-32 h-32 object-cover rounded-full shadow-md"
+                className="w-full max-w-md rounded-xl shadow-xl object-cover"
               />
             </div>
 
-            <h3 className="text-[22px] font-bold text-[#339ca0]">{founder.name}</h3>
-            <p className="font-semibold text-[17px] mb-2">{founder.desgination}</p>
-            <p className="text-sm text-gray-700">{founder.description}</p>
+            {/* Content */}
+            <div>
+              <h3 className="text-2xl md:text-3xl font-bold text-[#339ca0] mb-2">
+                {founder.name}
+              </h3>
+
+              <p className="text-lg font-semibold text-gray-700 mb-4">
+                {founder.desgination}
+              </p>
+
+              <p className="text-gray-700 text-base md:text-lg leading-relaxed">
+                {founder.description}
+              </p>
+            </div>
           </div>
         ))}
       </div>

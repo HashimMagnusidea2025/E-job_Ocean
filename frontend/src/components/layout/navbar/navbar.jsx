@@ -351,7 +351,7 @@ useEffect(() => {
               {showMoreDropdown && (
                 <div className="absolute left-[-130px] top-[28px] mt-1 w-[250px] bg-white border shadow-xl z-50 p-6 rounded-lg text-sm">
                   <ul className="space-y-3">
-                    <li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">WHATSAPP GROUPS</li>
+                    {/* <li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">WHATSAPP GROUPS</li> */}
 
                     <Link to='/testimonials-page'><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">TESTIMONIALS</li></Link>
                     <Link to="/become-a-mentor"><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">BECOME A MENTOR</li></Link>
@@ -467,7 +467,7 @@ useEffect(() => {
 
                 {showMoreDropdown && (
                   <ul className="pl-4 mt-2 space-y-3 text-[15px]">
-                    <li onClick={closeMenu} className="hover:text-[#339ca0] cursor-pointer">WHATSAPP GROUPS</li>
+                    {/* <li onClick={closeMenu} className="hover:text-[#339ca0] cursor-pointer">WHATSAPP GROUPS</li> */}
                     <li onClick={closeMenu}>
                       <Link to="/testimonials-page" className="hover:text-[#339ca0] block">TESTIMONIALS</Link>
                     </li>

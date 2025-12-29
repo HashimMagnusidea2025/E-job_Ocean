@@ -15,7 +15,7 @@ const CommentSchema = mongoose.Schema({
     // id: { type: Number, required: true },
    
     id: { 
-        type: mongoose.Schema.Types.Mixed, //  Number aur String 
+        type: mongoose.Schema.Types.Mixed, 
         required: true 
     },
 
@@ -29,12 +29,8 @@ const CommentSchema = mongoose.Schema({
         ref: "User"
     },
     
-    likes: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User"
-        }
-    ],
+    likes: [mongoose.Schema.Types.Mixed],
+
     type: {
         type: String,
         required: true

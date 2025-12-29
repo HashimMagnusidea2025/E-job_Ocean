@@ -29,7 +29,7 @@ export default function BlogsPage() {
     const fetchCompanydata = async () => {
         try {
             const response = await axioss.get('/general-settings'); // backend endpoint
-            console.log("✅ Full Response:", response);              // logs full Axios response object
+            // logs full Axios response object
             console.log("✅ Data Received:", response.data);          // logs only your actual data
 
             setData(response.data);
@@ -83,6 +83,8 @@ export default function BlogsPage() {
         setPosts(null); // 🟢 clear old posts instantly so loader shows immediately
         try {
             let url = "https://blog.ejobocean.com/wp-json/wp/v2/posts?_embed";
+
+
             const params = {
                 _embed: true,
                 per_page: selectedCategory === "All" ? POSTS_PER_PAGE : 100, // 🧠 fetch more when filtering
@@ -208,7 +210,7 @@ export default function BlogsPage() {
                     <h2 className="text-2xl font-semibold mb-6">All Blog Posts</h2>
 
 
-                    
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {loading ? (
                             // 🟢 Show loader while loading

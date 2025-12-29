@@ -25,10 +25,10 @@ export default function AboutUs() {
                     <JourneyTimeline />
 
                 </div> */}
-                <div className="container mx-auto">
+                {/* <div className="container mx-auto">
                     <HowWeDoIt />
 
-                </div>
+                </div> */}
                 
                 <div className="container mx-auto">
                     <OurFounders/>

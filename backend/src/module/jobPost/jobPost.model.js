@@ -11,9 +11,7 @@ const JobPostSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    benefits: {
-        type: String
-    },
+    
     salaryFrom: {
         type: Number
     },
@@ -27,9 +25,7 @@ const JobPostSchema = mongoose.Schema({
     salaryPeriod: {
         type: String
     },
-    mode: {
-        type: String
-    },
+   
 
     hideSalary: { type: Boolean, default: false },
 
@@ -44,7 +40,7 @@ const JobPostSchema = mongoose.Schema({
     experience: { type: String },
     mode: {
         type: String,
-        enum: ["remote", "onsite", "hybrid"]
+        enum: ["Work From Home", "Work From Office", "Hybrid"]
     },
     externalJob: { type: Boolean, default: false },
     isFreelance: { type: Boolean, default: false },
@@ -53,6 +49,7 @@ const JobPostSchema = mongoose.Schema({
     country: { ref: 'Country', type: Number, required: true },
     state: { ref: 'State', type: Number, required: true },
     city: { ref: 'City', type: Number, required: true },
+    address: { type: String },
 
     skills: [
         {
