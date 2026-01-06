@@ -157,107 +157,107 @@ export default function Navbar() {
   //     window.removeEventListener("userUpdated", loadUserData);
   //   };
   // }, []);
-// Navbar.js में loadUserData function को replace करें
-useEffect(() => {
+  // Navbar.js में loadUserData function को replace करें
+  useEffect(() => {
     const loadUserData = async () => {
-        const userData = localStorage.getItem("user");
-        const token = localStorage.getItem("token");
-        
-        if (userData && token) {
-            const parsedUser = JSON.parse(userData);
-            setUser(parsedUser);
-            setIsLoggedIn(true);
+      const userData = localStorage.getItem("user");
+      const token = localStorage.getItem("token");
 
+      if (userData && token) {
+        const parsedUser = JSON.parse(userData);
+        setUser(parsedUser);
+        setIsLoggedIn(true);
+
+        try {
+          // 🔹 SEEKER के लिए अलग logic
+          if (parsedUser.roleID?.name === "seeker") {
             try {
-                // 🔹 SEEKER के लिए अलग logic
-                if (parsedUser.roleID?.name === "seeker") {
-                    try {
-                        // Seeker profile data fetch करें
-                        const seekerRes = await axios.get("/seeker/me", {
-                            headers: { Authorization: `Bearer ${token}` },
-                        });
-                        
-                        if (seekerRes.data.success && seekerRes.data.data) {
-                            const seekerData = seekerRes.data.data;
-                            
-                            // Seeker का profileImage check करें
-                            if (seekerData.profileImage) {
-                                const cleanBase = baseURL.replace(/\/+$/, "");
-                                const cleanPath = seekerData.profileImage.replace(/^\/+/, "");
-                                setProfileImage(`${cleanBase}/${cleanPath}`);
-                                
-                                console.log("Seeker Profile Image:", `${cleanBase}/${cleanPath}`);
-                            } else {
-                                setProfileImage(null);
-                            }
-                        } else {
-                            setProfileImage(null);
-                        }
-                    } catch (seekerError) {
-                        console.error("Error fetching seeker profile:", seekerError);
-                        setProfileImage(null);
-                    }
-                }
-                // 🔹 EMPLOYER के लिए company logo
-                else if (parsedUser.roleID?.name === "Employer") {
-                    try {
-                        const response = await getCompanyLogo();
-                        if (response.success) {
-                            const fullLogoUrl = `${baseURL}${response.logo}`;
-                            setProfileImage(fullLogoUrl);
-                        } else {
-                            setProfileImage(null);
-                        }
-                    } catch (error) {
-                        console.error("Error fetching employer logo:", error);
-                        setProfileImage(null);
-                    }
-                }
-                // 🔹 MENTOR के लिए
-                else if (parsedUser.roleID?.name === "mentor") {
-                    // Mentor के लिए profilePicture use करें
-                    if (parsedUser.profilePicture) {
-                        setProfileImage(`${baseURL}${parsedUser.profilePicture}`);
-                    } else {
-                        setProfileImage(null);
-                    }
-                }
-                // 🔹 SUPERADMIN के लिए
-                else if (parsedUser.roleID?.name === "superadmin") {
-                    setProfileImage(logo);
-                }
-                // 🔹 DEFAULT case
-                else {
-                    if (parsedUser.profilePicture) {
-                        setProfileImage(`${baseURL}${parsedUser.profilePicture}`);
-                    } else {
-                        setProfileImage(null);
-                    }
-                }
+              // Seeker profile data fetch करें
+              const seekerRes = await axios.get("/seeker/me", {
+                headers: { Authorization: `Bearer ${token}` },
+              });
 
-            } catch (error) {
-                console.error("Error processing user data:", error);
+              if (seekerRes.data.success && seekerRes.data.data) {
+                const seekerData = seekerRes.data.data;
+
+                // Seeker का profileImage check करें
+                if (seekerData.profileImage) {
+                  const cleanBase = baseURL.replace(/\/+$/, "");
+                  const cleanPath = seekerData.profileImage.replace(/^\/+/, "");
+                  setProfileImage(`${cleanBase}/${cleanPath}`);
+
+                  console.log("Seeker Profile Image:", `${cleanBase}/${cleanPath}`);
+                } else {
+                  setProfileImage(null);
+                }
+              } else {
                 setProfileImage(null);
+              }
+            } catch (seekerError) {
+              console.error("Error fetching seeker profile:", seekerError);
+              setProfileImage(null);
             }
-        } else {
-            setUser(null);
-            setProfileImage(null);
-            setIsLoggedIn(false);
+          }
+          // 🔹 EMPLOYER के लिए company logo
+          else if (parsedUser.roleID?.name === "Employer") {
+            try {
+              const response = await getCompanyLogo();
+              if (response.success) {
+                const fullLogoUrl = `${baseURL}${response.logo}`;
+                setProfileImage(fullLogoUrl);
+              } else {
+                setProfileImage(null);
+              }
+            } catch (error) {
+              console.error("Error fetching employer logo:", error);
+              setProfileImage(null);
+            }
+          }
+          // 🔹 MENTOR के लिए
+          else if (parsedUser.roleID?.name === "mentor") {
+            // Mentor के लिए profilePicture use करें
+            if (parsedUser.profilePicture) {
+              setProfileImage(`${baseURL}${parsedUser.profilePicture}`);
+            } else {
+              setProfileImage(null);
+            }
+          }
+          // 🔹 SUPERADMIN के लिए
+          else if (parsedUser.roleID?.name === "superadmin") {
+            setProfileImage(logo);
+          }
+          // 🔹 DEFAULT case
+          else {
+            if (parsedUser.profilePicture) {
+              setProfileImage(`${baseURL}${parsedUser.profilePicture}`);
+            } else {
+              setProfileImage(null);
+            }
+          }
+
+        } catch (error) {
+          console.error("Error processing user data:", error);
+          setProfileImage(null);
         }
+      } else {
+        setUser(null);
+        setProfileImage(null);
+        setIsLoggedIn(false);
+      }
     };
 
     loadUserData();
-    
+
     // Listen for profile updates
     const handleUserUpdate = () => {
-        loadUserData();
+      loadUserData();
     };
 
     window.addEventListener("userUpdated", handleUserUpdate);
     return () => {
-        window.removeEventListener("userUpdated", handleUserUpdate);
+      window.removeEventListener("userUpdated", handleUserUpdate);
     };
-}, []);
+  }, []);
 
 
 
@@ -340,18 +340,20 @@ useEffect(() => {
 
             {/* <li><Link to="/placement-program" className="hover:text-[#339ca0]">PLACEMENT PROGRAM</Link></li> */}
             <li><Link to="/webinars" className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">WEBINARS</Link></li>
-            <li><Link to="/hall-of-fame" className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">LIVE MENTORSHIP</Link></li>
+            <li><Link to="/hall-of-fame" className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer"> MENTORSHIP</Link></li>
             {/* <li><Link to="/live-mentorship" className="hover:text-[#339ca0]">LIVE MENTORSHIP</Link></li> */}
 
             <Link to="/placement-program">
               <li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">JOBS</li>
             </Link>
-            <li className="relative">
+            <Link to='/about-us'><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">ABOUT US</li></Link>
+            <Link to="/knowledge-base"><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">KNOWLEDGE-BASE</li></Link>
+            {/* <li className="relative">
               <span onClick={toggleMoreDropdown} className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">MORE</span>
               {showMoreDropdown && (
                 <div className="absolute left-[-130px] top-[28px] mt-1 w-[250px] bg-white border shadow-xl z-50 p-6 rounded-lg text-sm">
                   <ul className="space-y-3">
-                    {/* <li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">WHATSAPP GROUPS</li> */}
+                    <li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">WHATSAPP GROUPS</li> 
 
                     <Link to='/testimonials-page'><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">TESTIMONIALS</li></Link>
                     <Link to="/become-a-mentor"><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">BECOME A MENTOR</li></Link>
@@ -364,7 +366,7 @@ useEffect(() => {
                   </ul>
                 </div>
               )}
-            </li>
+            </li> */}
 
             <Link to="/ca-register"><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">CA Fresher</li></Link>
 
@@ -456,10 +458,16 @@ useEffect(() => {
 
               <li onClick={closeMenu}><Link to="/webinars" className="p-2 border-b block hover:text-[#339ca0]">WEBINARS</Link></li>
               <li onClick={closeMenu}><Link to="/hall-of-fame" className="p-2 border-b block hover:text-[#339ca0]">HALL OF FAME</Link></li>
-              <li onClick={closeMenu}><Link to="/live-mentorship" className="p-2 border-b block hover:text-[#339ca0]">LIVE MENTORSHIP</Link></li>
-              {/* ✅ MORE Section */}
+              <li onClick={closeMenu}><Link to="/live-mentorship" className="p-2 border-b block hover:text-[#339ca0]"> MENTORSHIP</Link></li>
+
               <li onClick={closeMenu}><Link to="/placement-program" className="p-2 border-b block hover:text-[#339ca0]">JOBS</Link></li>
-              <li className="border-b">
+              <li onClick={closeMenu} className="p-2 border-b block hover:text-[#339ca0]">
+                <Link to="/about-us" className="hover:text-[#339ca0] block">ABOUT US</Link>
+              </li>
+              <li onClick={closeMenu} className="p-2 border-b block hover:text-[#339ca0]">
+                <Link to="/knowledge-base" className="hover:text-[#339ca0] block">KNOWLEDGE-BASE</Link>
+              </li>
+              {/* <li className="border-b">
                 <div onClick={toggleMoreDropdown} className="p-2 flex justify-between items-center cursor-pointer hover:text-[#339ca0]">
                   <span>MORE</span>
                   <span>{showMoreDropdown ? "▲" : "▼"}</span>
@@ -467,15 +475,14 @@ useEffect(() => {
 
                 {showMoreDropdown && (
                   <ul className="pl-4 mt-2 space-y-3 text-[15px]">
-                    {/* <li onClick={closeMenu} className="hover:text-[#339ca0] cursor-pointer">WHATSAPP GROUPS</li> */}
+                    
                     <li onClick={closeMenu}>
                       <Link to="/testimonials-page" className="hover:text-[#339ca0] block">TESTIMONIALS</Link>
                     </li>
                     <li onClick={closeMenu}>
-                      <Link to="/become-a-mentor" className="hover:text-[#339ca0] block">BECOME A MENTOR</Link>
+                      
                     </li>
-                    <li onClick={closeMenu} className="hover:text-[#339ca0] cursor-pointer">HIRE FORM US</li>
-                    <li onClick={closeMenu} className="hover:text-[#339ca0] cursor-pointer">B2B CORPORATE TRAINING</li>
+                    
                     <li onClick={closeMenu}>
                       <Link to="/about-us" className="hover:text-[#339ca0] block">ABOUT US</Link>
                     </li>
@@ -484,7 +491,7 @@ useEffect(() => {
                     </li>
                   </ul>
                 )}
-              </li>
+              </li> */}
               {!isLoggedIn ? (
                 <>
                   <li onClick={closeMenu}><Link to="/ca-register" className="p-2 block hover:text-[#339ca0]">CA Fresher</Link></li>

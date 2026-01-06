@@ -98,6 +98,7 @@ export default function OurFreeCourses() {
                 {jobs.map((job) => (
                     <SwiperSlide key={job._id}>
                         <OurFreeCoursesCrds
+                            id={job._id}
                             title={job.jobTitle}
                             image={
                                 `${baseURL}${job.companyId?.company?.employerLogo}`

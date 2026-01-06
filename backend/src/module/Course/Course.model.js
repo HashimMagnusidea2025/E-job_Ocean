@@ -29,13 +29,17 @@ const CourseSchema = new mongoose.Schema({
         type: Number,
         min: 0,
     },
+    paymentType: {
+        type: String,
+        enum: ['free', 'Paid'],
+        default: 'free',
+    },
     image: {
         type: String,
     },
-    skills: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'SkillsCategory',
-    }],
+    courseFile: {
+        type: String,
+    },
     duration: {
         type: String,
     },
@@ -56,7 +60,15 @@ const CourseSchema = new mongoose.Schema({
     },
     mode: {
         type: String,
-        enum: ['Online', 'Offline', 'Hybrid'],
+        enum: ['Online', 'Offline'],
+    },
+    onlineLink: {
+        type: String,
+       
+    },
+    address: {
+        type: String,
+        
     },
     capacity: {
         type: Number,

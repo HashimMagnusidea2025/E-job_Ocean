@@ -213,17 +213,17 @@ export default function BlogsPage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {loading ? (
-                            // 🟢 Show loader while loading
+                            //  Show loader while loading
                             <div className="col-span-full flex justify-center items-center h-64">
                                 <div className="w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
                             </div>
                         ) : !posts || filteredPosts.length === 0 ? (
-                            // 🟢 Show “no blogs” message if no data
+                            //  Show “no blogs” message if no data
                             <p className="col-span-full text-center text-gray-600">
                                 No blogs found matching your search.
                             </p>
                         ) : (
-                            // 🟢 Show posts normally
+                            //  Show posts normally
                             filteredPosts.map((value) => (
                                 <BlogsPostCards
                                     key={value.id}
@@ -250,7 +250,6 @@ export default function BlogsPage() {
                             ))
                         )}
                     </div>
-
 
                     {totalPages > 1 && (
                         <div className="flex justify-center items-center mt-10 gap-4">

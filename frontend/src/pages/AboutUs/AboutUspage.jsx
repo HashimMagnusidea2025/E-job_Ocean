@@ -7,13 +7,14 @@ import UniquePedagogy from "../../components/layout/section/UniquePedagogy/Uniqu
 import OurFounders from "../../components/layout/section/OurFounders/OurFounders";
 import IndustryExperts from "../../components/layout/section/IndustryExperts/IndustryExperts";
 import AlumniCompanies from "../../components/layout/section/AlumniCompanies/AlumniCompanies";
+import { FollowSocialsRow, } from "../../components/ui/cards/cards.jsx";
 
 export default function AboutUs() {
 
     return (
         <>
             <div className="w-full font-[Poppins]">
-                
+
                 <div>
                     <StatsSection />
 
@@ -29,9 +30,9 @@ export default function AboutUs() {
                     <HowWeDoIt />
 
                 </div> */}
-                
+
                 <div className="container mx-auto">
-                    <OurFounders/>
+                    <OurFounders />
 
                 </div>
                 {/* <div className="">
@@ -40,10 +41,13 @@ export default function AboutUs() {
                 {/* <div className="container mx-auto">
                     <AlumniCompanies/>
                 </div> */}
+                <div className="container mx-auto">
+                    <div className="max-w-lg mx-auto text-center">
+                        <FollowSocialsRow />
+                    </div>
+                </div>
+
             </div>
-
-
-
 
         </>
     )

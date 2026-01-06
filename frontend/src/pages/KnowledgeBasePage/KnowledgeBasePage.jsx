@@ -11,6 +11,9 @@ export default function KnowledgeBasePage() {
   const [showModal, setShowModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [modalMode, setModalMode] = useState(""); // "download" or "view"
+  const [course, setCourse] = useState([]);
+  const [activeTab, setActiveTab] = useState("knowledge");
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -31,8 +34,23 @@ export default function KnowledgeBasePage() {
     }
   };
 
+  const fetchCourses = async () => {
+
+    try {
+      const res = await axios.get('/courses/');
+      if (res.data.success) {
+        setCourse(res.data.data);
+      }
+      console.log(res.data);
+
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   useEffect(() => {
     fetchData();
+    fetchCourses();
   }, []);
 
   useEffect(() => {
@@ -54,7 +72,7 @@ export default function KnowledgeBasePage() {
           )
         );
       }
-      
+
       if (item.fromStatus === "Disabled") {
         window.open(`${baseURL}/${item.uploadPDF}`, "_blank");
       } else if (item.fromStatus === "Enabled") {
@@ -74,7 +92,6 @@ export default function KnowledgeBasePage() {
     setModalMode("view");
     setShowModal(true);
   };
-
 
   const closeModal = () => {
     setShowModal(false);
@@ -128,41 +145,139 @@ export default function KnowledgeBasePage() {
         />
       </div>
 
-      {filteredData.length === 0 ? (
-        <p className="text-center text-gray-500">No records found</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredData.map((item) => (
-            <div
-              key={item._id}
-              className="bg-white border rounded-lg shadow p-5 flex flex-col justify-between"
-            >
-              <div>
-                <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
-                <p className="text-gray-600 mb-2 line-clamp-4">{item.description}</p>
-              </div>
+      {/* Tab Navigation */}
+      <div className="flex mb-6">
+        <button
+          onClick={() => setActiveTab("knowledge")}
+          className={`px-4 py-2 mr-2 rounded-t-lg ${activeTab === "knowledge" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"}`}
+        >
+          Knowledge Base
+        </button>
+        <button
+          onClick={() => setActiveTab("courses")}
+          className={`px-4 py-2 rounded-t-lg ${activeTab === "courses" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"}`}
+        >
+          Courses
+        </button>
+      </div>
 
-              <div className="mt-4 flex gap-2">
-                {item.uploadPDF && (
-                  <button
-                    onClick={() => handleDownload(item, "download")}
-                    className="flex-1 text-center px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
-                  >
-                    Download
-                  </button>
-                )}
-
-                <button
-                  onClick={() => handleView(item)}
-                  className="flex-1 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+      {activeTab === "knowledge" && (
+        <>
+          {filteredData.length === 0 ? (
+            <p className="text-center text-gray-500">No records found</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredData.map((item) => (
+                <div
+                  key={item._id}
+                  className="bg-white border rounded-lg shadow p-5 flex flex-col justify-between"
                 >
-                  View
-                </button>
-              </div>
+                  <div>
+                    <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
+                    <p className="text-gray-600 mb-2 line-clamp-4">{item.description}</p>
+                  </div>
+
+                  <div className="mt-4 flex gap-2">
+                    {item.uploadPDF && (
+                      <button
+                        onClick={() => handleDownload(item, "download")}
+                        className="flex-1 text-center px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                      >
+                        Download
+                      </button>
+                    )}
+
+                    <button
+                      onClick={() => handleView(item)}
+                      className="flex-1 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                    >
+                      View
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          )}
+        </>
       )}
+
+      {activeTab === "courses" && (
+        <>
+          {course.length === 0 ? (
+            <p className="text-center text-gray-500 py-10">No courses found</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
+              {course.map((item) => (
+                <div
+                  key={item._id}
+                  className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-xl transition duration-300"
+                >
+                  {/* IMAGE */}
+                  <div className="h-36 bg-gray-100">
+                    <img
+                      src={`${baseURL}/${item.image}`}  
+                      alt={item.courseTitle}
+                      className="w-full h-full object-cover"
+                    />
+
+                  </div>
+
+
+                  {/* CONTENT */}
+                  <div className="p-5">
+                    <h3 className="text-lg font-semibold text-gray-800 line-clamp-2">
+                      {item.courseTitle}
+                    </h3>
+
+                    <p className="text-sm text-gray-600 mt-2 line-clamp-3">
+                      {item.courseDescription}
+                    </p>
+
+                    {/* TAGS */}
+                    <div className="flex gap-2 mt-4">
+                      <span className="text-xs px-2 py-1 rounded bg-blue-50 text-blue-600">
+                        {item.level}
+                      </span>
+                      <span className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-700">
+                        {item.mode}
+                      </span>
+                    </div>
+
+                    {/* INFO */}
+                    <div className="flex justify-between items-center mt-5">
+                      <div>
+                        <p className="text-xs text-gray-400">Duration</p>
+                        <p className="text-sm font-medium text-gray-800">
+                          {item.duration}
+                        </p>
+                      </div>
+
+                      <div className="text-right">
+                        <p className="text-xs text-gray-400">Fees</p>
+                        <p className="text-base font-semibold text-gray-800">
+                          {item.paymentType === "free" ? (
+                            <span className="text-green-600">Free</span>
+                          ) : (
+                            <>₹{item.fees}</>
+                          )}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* ACTION */}
+                  <div className="px-5 pb-5">
+                    <button className="w-full py-2 rounded-md bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition">
+                      View Course
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
 
       {/* 🔹 Modal (for both View & Disabled cases) */}
       {showModal && selectedItem && (

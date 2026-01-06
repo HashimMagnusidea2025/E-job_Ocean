@@ -21,9 +21,9 @@ const upload = multer({ storage });
 
 const CourseRouter = express.Router();
 
-CourseRouter.post("/", upload.single('image'), createCourse);
+CourseRouter.post("/", upload.fields([{ name: 'image', maxCount: 1 }, { name: 'courseFile', maxCount: 1 }]), createCourse);
 CourseRouter.get("/", getAllCourses);
-CourseRouter.put("/:id", upload.single('image'), updateCourse);
+CourseRouter.put("/:id", upload.fields([{ name: 'image', maxCount: 1 }, { name: 'courseFile', maxCount: 1 }]), updateCourse);
 CourseRouter.delete("/:id", deleteCourse);
 
 export default CourseRouter;

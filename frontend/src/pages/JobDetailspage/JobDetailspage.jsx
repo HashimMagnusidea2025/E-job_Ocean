@@ -520,29 +520,30 @@ export default function JobDetailsPage() {
                             </div>
                         )}
 
-                       
+
 
                         {/* Additional Info Section - Modern Grid */}
                         <div className="p-10 border-t border-gray-200 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 bg-gradient-to-br from-amber-50 to-orange-50/20">
 
+                            {job?.expiryDate && (
+                                <div className="group bg-white/90 backdrop-blur-sm p-4 rounded-2xl text-center shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 border border-red-100">
 
-                            <div className="group bg-white/90 backdrop-blur-sm p-4 rounded-2xl text-center shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 border border-red-100">
-                              {job?.expiryDate && (
-                                <>
-                                <div className="w-14 h-14 bg-gradient-to-br from-red-400 to-pink-500 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
-                                    <FaCalendar className="text-white text-2xl" />
+                                    <>
+                                        <div className="w-14 h-14 bg-gradient-to-br from-red-400 to-pink-500 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
+                                            <FaCalendar className="text-white text-2xl" />
+                                        </div>
+                                        <span className="font-bold text-red-600 block mb-2 text-sm uppercase tracking-wide">Apply Before</span>
+                                        <p className="text-gray-800 font-semibold text-lg">
+                                            {job.expiryDate ? new Date(job.expiryDate).toLocaleDateString() : "Open"}
+                                        </p>
+                                    </>
+
+
                                 </div>
-                                <span className="font-bold text-red-600 block mb-2 text-sm uppercase tracking-wide">Apply Before</span>
-                                <p className="text-gray-800 font-semibold text-lg">
-                                    {job.expiryDate ? new Date(job.expiryDate).toLocaleDateString() : "Open"}
-                                </p>
-                                </>
-                              )}
-                                
-                            </div>
+                            )}
                         </div>
 
-                        {/* Action Buttons - Modern Design */}
+                        
                         <div className="p-8 flex flex-col md:flex-row gap-6 justify-center items-center border-t border-gray-200 bg-gradient-to-r from-slate-50 to-gray-100/50">
                             <button
                                 onClick={handleApplyClick}

@@ -78,10 +78,9 @@ export const importcaRegistrations = async (req, res) => {
       return res.status(400).json({ message: "No file uploaded" });
     }
     const jsonData = JSON.parse(req.file.buffer.toString());
-    // :white_tick: You can set your static ID here
-    // Map JSON fields to match MongoDB schema
+   
     const formattedData = jsonData.map((item) => ({
-      CA_Id: item.id, // Static ID
+      CA_Id: item.id, 
       name: item.name,
       email: item.email,
       phone: item.phone,

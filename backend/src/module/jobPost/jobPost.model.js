@@ -38,10 +38,20 @@ const JobPostSchema = mongoose.Schema({
     expiryDate: { type: Date },
     degreeLevel: { type: mongoose.Schema.Types.ObjectId, ref: "DegreeLevelCategory" },
     experience: { type: String },
+    // mode: {
+    //     type: String,
+    //     enum: ["Work From Home", "Work From Office", "Hybrid"]
+    // },
     mode: {
-        type: String,
-        enum: ["Work From Home", "Work From Office", "Hybrid"]
-    },
+    type: String,
+    enum: [
+        "Work From Home",
+        "Work From Office",
+        "Hybrid",
+        "Work from Office" // fallback
+    ]
+},
+
     externalJob: { type: Boolean, default: false },
     isFreelance: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },

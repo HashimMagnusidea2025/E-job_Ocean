@@ -5,7 +5,7 @@ import { format, getDay, parseISO, isSameDay } from "date-fns";
 import { FaRegCalendarAlt, FaClock } from "react-icons/fa";
 import axios from "../../../utils/axios.js";
 
-export default function DateTimeSelection({ speakerId, mentorId,userType, onContinue }) {
+export default function DateTimeSelection({ speakerId, mentorId, userType, onContinue, preselectedSlot, }) {
   const [date, setDate] = useState(new Date());
   const [availableDays, setAvailableDays] = useState([]);
   const [sessions, setSessions] = useState([]);
@@ -28,7 +28,7 @@ export default function DateTimeSelection({ speakerId, mentorId,userType, onCont
         // } else if (mentorId) {
         //   endpoint = `/one-to-one/mentor/${mentorId}`;
         // }
-         if (userType === 'mentor' && mentorId) {
+        if (userType === 'mentor' && mentorId) {
           // Mentor ke sessions ke liye correct endpoint
           endpoint = `/one-to-one/mentor/${mentorId}`;
           console.log("Fetching mentor sessions from:", endpoint);
@@ -41,7 +41,7 @@ export default function DateTimeSelection({ speakerId, mentorId,userType, onCont
           endpoint = `/one-to-one/speaker/${speakerId}`;
         }
 
-         if (endpoint) {
+        if (endpoint) {
           const response = await axios.get(endpoint);
           data = response.data;
           console.log("Fetched sessions:", data);
@@ -53,7 +53,7 @@ export default function DateTimeSelection({ speakerId, mentorId,userType, onCont
         //   const response = await axios.get(endpoint);
         //   data = response.data;
         // }
-        
+
         setSessions(data);
 
         // Take only non-empty selectDays
@@ -70,7 +70,7 @@ export default function DateTimeSelection({ speakerId, mentorId,userType, onCont
         setLoading(false);
       }
     };
- if (speakerId || mentorId) fetchSessions();
+    if (speakerId || mentorId) fetchSessions();
     // if (speakerId || mentorId) fetchSessions();
   }, [speakerId, mentorId, userType]);
 
@@ -169,6 +169,14 @@ export default function DateTimeSelection({ speakerId, mentorId,userType, onCont
 
   const timeSlots = getAvailableTimeSlots();
 
+useEffect(() => {
+  if (preselectedSlot) {
+    setSelectedTimeSlot(preselectedSlot);
+    setShowTimeSlots(true);
+  }
+}, [preselectedSlot]);
+
+
   if (loading) {
     return (
       <div className="bg-gradient-to-br from-[#95bbbe] via-white to-[#82c9ce] rounded-2xl shadow-xl p-6 max-w-md mx-auto font-[Poppins]">
@@ -187,10 +195,9 @@ export default function DateTimeSelection({ speakerId, mentorId,userType, onCont
           <FaRegCalendarAlt className="w-5 h-5 text-black" />
           Available Sessions
         </h2>
-           {userType && (
-          <span className={`text-xs px-2 py-1 rounded ${
-            userType === 'mentor' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
-          }`}>
+        {userType && (
+          <span className={`text-xs px-2 py-1 rounded ${userType === 'mentor' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+            }`}>
             {userType}
           </span>
         )}
@@ -294,11 +301,10 @@ export default function DateTimeSelection({ speakerId, mentorId,userType, onCont
                 <button
                   key={index}
                   onClick={() => handleTimeSlotSelect(slot)}
-                  className={`p-3 rounded-lg border-2 transition-all ${
-                    selectedTimeSlot?.sessionId === slot.sessionId
-                      ? "border-blue-500 bg-blue-200 text-black"
-                      : "border-gray-200 bg-white text-black hover:border-blue-300"
-                  }`}
+                  className={`p-3 rounded-lg border-2 transition-all ${selectedTimeSlot?.sessionId === slot.sessionId
+                    ? "border-blue-500 bg-blue-200 text-black"
+                    : "border-gray-200 bg-white text-black hover:border-blue-300"
+                    }`}
                 >
                   <div className="text-sm font-medium">
                     {formatTime(slot.startTime)} - {formatTime(slot.endTime)}
@@ -323,11 +329,10 @@ export default function DateTimeSelection({ speakerId, mentorId,userType, onCont
       <button
         onClick={handleContinue}
         disabled={!selectedTimeSlot}
-        className={`mt-6 w-full py-3 rounded-xl font-semibold shadow-md transition transform ${
-          selectedTimeSlot
-            ? "bg-gradient-to-r from-[#339ca0] to-black text-white hover:from-[#339ca9] hover:to-black hover:scale-[1.02]"
-            : "bg-gray-300 text-gray-500 cursor-not-allowed"
-        }`}
+        className={`mt-6 w-full py-3 rounded-xl font-semibold shadow-md transition transform ${selectedTimeSlot
+          ? "bg-gradient-to-r from-[#339ca0] to-black text-white hover:from-[#339ca9] hover:to-black hover:scale-[1.02]"
+          : "bg-gray-300 text-gray-500 cursor-not-allowed"
+          }`}
       >
         {selectedTimeSlot ? "Continue" : "Select Time Slot"}
       </button>

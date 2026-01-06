@@ -7,7 +7,7 @@ import { google } from "googleapis";
 );
 
 
-// Set token after user authentication (store in DB or file once you get it)
+
 oauth2Client.setCredentials({
   access_token: process.env.GOOGLE_ACCESS_TOKEN,
   refresh_token: process.env.GOOGLE_REFRESH_TOKEN,

@@ -1,6 +1,6 @@
 import CareerLevelCategoryModel from "../models/careerLevelCategory.model.js";
 
-// Create  new Career-Level Category
+
 export const createCareerLevelCategory = async (req, res) => {
     try {
         const { name, status } = req.body;

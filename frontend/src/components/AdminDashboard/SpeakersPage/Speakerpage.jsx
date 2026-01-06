@@ -3,6 +3,8 @@ import DataTable from "react-data-table-component";
 import axios from "../../../utils/axios.js";
 import Layout from "../../seekerDashboard/partials/layout.jsx";
 import { FaEye, FaEdit, FaTrash, FaToggleOn, FaToggleOff } from "react-icons/fa";
+import { Editor } from "primereact/editor";
+
 import {
     useReactTable,
     getCoreRowModel,
@@ -12,6 +14,8 @@ import {
 } from "@tanstack/react-table";
 const baseURL = import.meta.env.VITE_BACKEND_URL; // Vite
 // या CRA में: const baseURL = process.env.REACT_APP_BACKEND_URL;
+
+
 const Speakerpage = () => {
     const [speakers, setSpeakers] = useState([]);
     const [open, setOpen] = useState(false);
@@ -378,8 +382,8 @@ const Speakerpage = () => {
                 <div className="flex items-center gap-2">
                     <span
                         className={`px-2 py-1 text-xs rounded text-white ${row.original.status === "active"
-                                ? "bg-green-500"
-                                : "bg-red-500"
+                            ? "bg-green-500"
+                            : "bg-red-500"
                             }`}
                     >
                         {row.original.status}
@@ -504,7 +508,7 @@ const Speakerpage = () => {
                                         </td>
                                     ))}
                                 </tr>
-                                
+
                             ))}
                         </tbody>
                     </table>
@@ -740,25 +744,27 @@ const Speakerpage = () => {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
                                         <label className="block text-sm font-medium mb-1">Introduction</label>
-                                        <textarea
-                                            placeholder="Write a short introduction..."
-                                            className="w-full border border-gray-300 p-3 rounded-lg h-28 resize-none focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                                        <Editor
                                             value={formData.introduction}
-                                            onChange={(e) =>
-                                                setFormData({ ...formData, introduction: e.target.value })
+                                            onTextChange={(e) =>
+                                                setFormData({ ...formData, introduction: e.htmlValue })
                                             }
-                                        ></textarea>
+                                            style={{ height: "180px" }}
+                                            placeholder="Write a short introduction..."
+                                        />
+
                                     </div>
                                     <div>
                                         <label className="block text-sm font-medium mb-1">Description</label>
-                                        <textarea
-                                            placeholder="Write detailed description..."
-                                            className="w-full border border-gray-300 p-3 rounded-lg h-28 resize-none focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                                        <Editor
                                             value={formData.description}
-                                            onChange={(e) =>
-                                                setFormData({ ...formData, description: e.target.value })
+                                            onTextChange={(e) =>
+                                                setFormData({ ...formData, description: e.htmlValue })
                                             }
-                                        ></textarea>
+                                            style={{ height: "220px" }}
+                                            placeholder="Write detailed description..."
+                                        />
+
                                     </div>
                                 </div>
 

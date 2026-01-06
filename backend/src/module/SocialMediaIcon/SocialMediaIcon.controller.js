@@ -61,7 +61,7 @@ export const deleteSocialMediaIcons = async (req, res) => {
 // Get only active social media icons
 export const getActiveSocialMediaIcons = async (req, res) => {
     try {
-        const icons = await SocialMediaIconModel.find({ status: "active" });
+        const icons = await SocialMediaIconModel.find({ status: "active"});
 
         res.status(200).json(icons);
     } catch (error) {

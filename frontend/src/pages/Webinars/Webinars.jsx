@@ -16,13 +16,27 @@ export default function WebinarspageList({ webinar }) {
   };
 
 
-  //  Fetch Active Speakers 
+  //  Fetch Active Speakers
   useEffect(() => {
     const fetchSpeakers = async () => {
       try {
         const { data } = await axios.get("/speakers/active");
-        setSpeakers(data);
-        console.log("Fetched Speakers:", data);
+
+        // Fetch sessions for each speaker
+        const speakersWithSessions = await Promise.all(
+          data.map(async (speaker) => {
+            try {
+              const sessionRes = await axios.get(`/one-to-one/speaker/${speaker._id}`);
+              return { ...speaker, sessions: sessionRes.data };
+            } catch (err) {
+              console.error(`Error fetching sessions for speaker ${speaker._id}:`, err);
+              return { ...speaker, sessions: [] };
+            }
+          })
+        );
+
+        setSpeakers(speakersWithSessions);
+        console.log("Fetched Speakers with sessions:", speakersWithSessions);
       } catch (error) {
         console.error("Failed to fetch speakers:", error);
       }
@@ -186,6 +200,15 @@ export default function WebinarspageList({ webinar }) {
             <div className="lg:w-1/5 w-full">
               <div className="flex lg:flex-col gap-6 border-b lg:border-b-0 lg:border-r border-gray-300 pb-4 lg:pb-0 lg:pr-4 text-lg font-medium">
                 <button
+                  onClick={() => setActiveTab("all")}
+                  className={`text-left transition ${activeTab === "all"
+                    ? "text-black font-bold"
+                    : "text-gray-600 hover:text-black"
+                    }`}
+                >
+                  All
+                </button>
+                <button
                   onClick={() => setActiveTab("upcoming")}
                   className={`text-left transition ${activeTab === "upcoming"
                     ? "text-black font-bold"
@@ -203,15 +226,7 @@ export default function WebinarspageList({ webinar }) {
                 >
                   Past
                 </button>
-                <button
-                  onClick={() => setActiveTab("all")}
-                  className={`text-left transition ${activeTab === "all"
-                    ? "text-black font-bold"
-                    : "text-gray-600 hover:text-black"
-                    }`}
-                >
-                  All
-                </button>
+                
                 <button
                   onClick={() => setActiveTab("Speaker")}
                   className={`text-left transition ${activeTab === "Speaker"

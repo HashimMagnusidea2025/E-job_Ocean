@@ -50,7 +50,7 @@ export default function BlogDetailsPage2({ blogs }) {
     const { slug, categorySlug } = useParams();
 
 
-    const [id, setId] = useState(null); // ✅ Add this
+    const [id, setId] = useState(null); //  Add this
 
     const [liked, setLiked] = useState(false);
     const [comments, setComments] = useState([]);
@@ -99,9 +99,9 @@ export default function BlogDetailsPage2({ blogs }) {
     const fetchComments = async () => {
         if (!id) return; // ✅ Prevent calling before id is ready
         try {
-            
+
             const res = await axios.get(`/comment/${id}?type=${type}`);
-            
+
             setComments(res.data.comments);
             setCommentCount(res.data.count);
         } catch (err) {
@@ -116,7 +116,7 @@ export default function BlogDetailsPage2({ blogs }) {
 
     // ✅ Comment add होने के बाद refresh करने का function
     const handleCommentAdded = () => {
-       
+
         fetchComments(); // ✅ Comments को फिर से fetch करें
     };
     const [isLoggedIn, setIsLoggedIn] = useState(false);;
@@ -132,9 +132,9 @@ export default function BlogDetailsPage2({ blogs }) {
         const fetchLikeCount = async () => {
             if (!id) return;
             try {
-                
+
                 const res = await axios.get(`/blogs/like/likes/${id}/${type}`);
-               
+
                 setLikeCount(res.data.totalCount);
             } catch (err) {
                 console.error(err.response?.data || err.message);
@@ -151,7 +151,7 @@ export default function BlogDetailsPage2({ blogs }) {
             try {
                 const res = await axios.get(`/reaction/${id}`);
                 setReactions(res.data.reactions);
-                
+
 
             } catch (err) {
                 console.error("Error fetching reactions:", err);
@@ -167,8 +167,8 @@ export default function BlogDetailsPage2({ blogs }) {
             .then((res) => {
                 setPosts(res.data);
                 console.log(res.data);
-                
-                
+
+
                 console.log(res.data[0].slug);
 
             })
@@ -323,13 +323,13 @@ export default function BlogDetailsPage2({ blogs }) {
         try {
             const token = localStorage.getItem("token");
 
-            
+
             const res = await axios.post(
                 "/blogs/like",
                 { id: id, type },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            
+
             if (res.data.totalCount !== undefined) {
                 setLikeCount(res.data.totalCount);
                 setLiked(true);

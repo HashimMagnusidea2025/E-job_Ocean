@@ -48,7 +48,7 @@ export default function CMSPage() {
             console.error("Error viewing content:", err);
         }
     };
-    // 🧩 DELETE CMS CONTENT
+    //  DELETE CMS CONTENT
     const handleDeleteContent = async (id) => {
         const confirm = await Swal.fire({
             title: "Are you sure?",
@@ -371,108 +371,76 @@ export default function CMSPage() {
                 </div>
 
 
-                <div className="mt-16">
-
-                    <DataTable
-                        columns={[
-                            {
-                                name: "ID",
-                                selector: (row, index) => index + 1,
-                                width: "70px",
-                            },
-                            {
-                                name: "Page",
-                                selector: (row) => row.page?.name || "—",
-                                sortable: true,
-                            },
-                            {
-                                name: "Line 1",
-                                selector: (row) => row.line_1 || "—",
-                                wrap: true,
-                            },
-                            {
-                                name: "Line 2",
-                                selector: (row) => row.line_2 || "—",
-                                wrap: true,
-                            },
-                            {
-                                name: "Line 3",
-                                selector: (row) => row.line_3 || "—",
-                                wrap: true,
-                            },
-                            {
-                                name: "Line 4",
-                                selector: (row) => row.line_4 || "—",
-                                wrap: true,
-                            },
-                            {
-                                name: "Line 5",
-                                selector: (row) => row.line_5 || "—",
-                                wrap: true,
-                            },
-                            {
-                                name: "Status",
-                                selector: (row) => row.status,
-                                sortable: true,
-                            },
-                            {
-                                name: "Actions",
-                                cell: (row) => (
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={() => handleViewContent(row)}
-                                            className="text-blue-500 hover:text-blue-700"
-                                        >
-                                            <FaEye size={20} />
-                                        </button>
-                                        <button
-                                            onClick={() => handleEditContent(row)}
-                                            className="text-green-500 hover:text-green-700"
-                                        >
-                                            <FaEdit size={20} />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDeleteContent(row._id)}
-                                            className="text-red-500 hover:text-red-700"
-                                        >
-                                            <FaTrash size={20} />
-                                        </button>
-                                    </div>
-                                ),
-                            },
-                        ]}
-                        data={cmsContent}
-                        pagination
-                        highlightOnHover
-                        striped
-                        responsive
-                    />
-                </div>
+                {/* DataTable for CMS Content */}
+                <DataTable
+                    columns={[
+                        {
+                            name: "ID",
+                            selector: (row, index) => index + 1,
+                            width: "70px",
+                        },
+                        { name: "Page", selector: (row) => row.page?.name || "—", sortable: true },
+                        
+                        { name: "Status", selector: (row) => row.status, sortable: true },
+                        {
+                            name: "Actions",
+                            cell: (row) => (
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => handleViewContent(row)}
+                                        className="text-blue-500 hover:text-blue-700"
+                                        title="View"
+                                    >
+                                        <FaEye size={20} />
+                                    </button>
+                                    <button
+                                        onClick={() => handleEditContent(row)}
+                                        className="text-green-500 hover:text-green-700"
+                                        title="Edit"
+                                    >
+                                        <FaEdit size={20} />
+                                    </button>
+                                    <button
+                                        onClick={() => handleDeleteContent(row._id)}
+                                        className="text-red-500 hover:text-red-700"
+                                        title="Delete"
+                                    >
+                                        <FaTrash size={20} />
+                                    </button>
+                                </div>
+                            ),
+                        },
+                    ]}
+                    data={cmsContent}
+                    pagination
+                    highlightOnHover
+                    striped
+                    responsive
+                />
 
 
-
-                {/* {modelCms && (
+                {modelCms && (
                     <div
-                        className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 "
-                        onClick={() => setModelCms(false)} // ✅ close when clicking outside
+                        className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+                        onClick={() => setModelCms(false)} // close when clicking outside
                     >
                         <div
-                            className="bg-white w-full max-w-lg rounded-lg shadow-lg p-6 "
-                            onClick={(e) => e.stopPropagation()} // ✅ prevent closing when clicking inside modal
+                            className="bg-white w-full max-w-lg rounded-lg shadow-lg p-6 max-h-[90vh] overflow-y-auto"
+                            onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
                         >
                             <h3 className="text-xl font-semibold mb-4 capitalize">Add CMS Page</h3>
 
                             <form onSubmit={handleCMSContentSubmit} className="space-y-4">
                                 {[1, 2, 3, 4, 5].map((num) => (
                                     <div key={num}>
-                                        <label className="block text-gray-700">Line {num}</label>
+                                        <label className="block text-gray-700 mb-1">Line {num}</label>
                                         <ReactQuill
                                             theme="snow"
                                             value={cmsContentData[`line_${num}`]}
                                             onChange={(val) =>
                                                 setCmsContentData({ ...cmsContentData, [`line_${num}`]: val })
                                             }
-                                            className="w-full border rounded px-3 py-2 mt-1"
+                                            className="bg-white border border-gray-300 rounded-lg"
                                         />
                                     </div>
                                 ))}
@@ -508,7 +476,7 @@ export default function CMSPage() {
                                     </select>
                                 </div>
 
-                                <div className="flex justify-end gap-2 mt-4">
+                                <div className="flex justify-end gap-2 mt-4 sticky bottom-0 bg-white pt-2 pb-1">
                                     <button
                                         type="button"
                                         onClick={() => setModelCms(false)}
@@ -524,87 +492,9 @@ export default function CMSPage() {
                                     </button>
                                 </div>
                             </form>
-
                         </div>
                     </div>
-                )} */}
-
-                {modelCms && (
-  <div
-    className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
-    onClick={() => setModelCms(false)} // close when clicking outside
-  >
-    <div
-      className="bg-white w-full max-w-lg rounded-lg shadow-lg p-6 max-h-[90vh] overflow-y-auto"
-      onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
-    >
-      <h3 className="text-xl font-semibold mb-4 capitalize">Add CMS Page</h3>
-
-      <form onSubmit={handleCMSContentSubmit} className="space-y-4">
-        {[1, 2, 3, 4, 5].map((num) => (
-          <div key={num}>
-            <label className="block text-gray-700 mb-1">Line {num}</label>
-            <ReactQuill
-              theme="snow"
-              value={cmsContentData[`line_${num}`]}
-              onChange={(val) =>
-                setCmsContentData({ ...cmsContentData, [`line_${num}`]: val })
-              }
-              className="bg-white border border-gray-300 rounded-lg"
-            />
-          </div>
-        ))}
-
-        <div>
-          <label className="block text-gray-700">Page Category</label>
-          <select
-            name="page"
-            value={cmsContentData.page}
-            onChange={handleCMSContentChange}
-            className="w-full border rounded px-3 py-2 mt-1"
-            required
-          >
-            <option value="">Select Page Category</option>
-            {cmsPages.map((cat) => (
-              <option key={cat._id} value={cat._id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label className="block text-gray-700">Status</label>
-          <select
-            name="status"
-            value={cmsContentData.status}
-            onChange={handleCMSContentChange}
-            className="w-full border rounded px-3 py-2 mt-1"
-          >
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
-        </div>
-
-        <div className="flex justify-end gap-2 mt-4 sticky bottom-0 bg-white pt-2 pb-1">
-          <button
-            type="button"
-            onClick={() => setModelCms(false)}
-            className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            Save
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-)}
+                )}
 
 
             </div>

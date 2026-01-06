@@ -661,34 +661,34 @@ export default function OpportunitiesSection() {
                     </div>
                 ) : (
                     <Swiper
-  modules={[Navigation, Pagination, Autoplay, Grid]}
-  navigation
-  spaceBetween={20}
-  centerInsufficientSlides={true}
-  className="mt-10"
+                        modules={[Navigation, Pagination, Autoplay, Grid]}
+                        navigation
+                        spaceBetween={20}
+                        centerInsufficientSlides={true}
+                        className="mt-10"
 
-  // Mobile default
-  slidesPerView={1}
-  grid={{ rows: 1 }}
+                        // Mobile default
+                        slidesPerView={1}
+                        grid={{ rows: 1 }}
 
-  breakpoints={{
-    640: {
-      slidesPerView: 1,
-      grid: { rows: 1 },
-    },
-    768: {
-      slidesPerView: 2,
-      grid: { rows: 1 },
-    },
-    1024: {
-      slidesPerView: 4,          // ✅ 4 columns
-      grid: {
-        rows: 2,                // ✅ 2 rows
-        fill: "row",            // ⭐ MOST IMPORTANT
-      },
-    },
-  }}
->
+                        breakpoints={{
+                            640: {
+                                slidesPerView: 1,
+                                grid: { rows: 1 },
+                            },
+                            768: {
+                                slidesPerView: 2,
+                                grid: { rows: 1 },
+                            },
+                            1024: {
+                                slidesPerView: 4,          // ✅ 4 columns
+                                grid: {
+                                    rows: 3,                // ✅ 2 rows
+                                    fill: "row",            // ⭐ MOST IMPORTANT
+                                },
+                            },
+                        }}
+                    >
 
 
                         {filteredJobs.map((job) => {

@@ -5,39 +5,109 @@ import Footer from "../../components/layout/footer/footer";
 import { HallOfFameCards } from "../../components/ui/cards/cards";
 
 export default function HallOfFamepage() {
-    const [mentors, setMentors] = useState([]);
+    const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState('mentors');
 
+    // useEffect(() => {
+    //     const fetchData = async () => {
+    //         try {
+    //             setLoading(true);
+    //             let endpoint = "";
+    //             if (activeTab === 'mentors') {
+    //                 endpoint = "/users/mentors/with-sessions";
+    //             } else if (activeTab === 'speakers') {
+    //                 endpoint = "/one-to-one";
+    //             }
+
+    //             const { data: response } = await axios.get(endpoint);
+
+    //             let list = Array.isArray(response)
+    //                 ? response
+    //                 : Array.isArray(response.data)
+    //                     ? response.data
+    //                     : [];
+
+    //             if (activeTab === 'speakers') {
+    //                 // Filter speakers who have one-to-one sessions
+    //                 list = list.filter(speaker => speaker.hasOneToOneSession);
+
+    //                 // Fetch sessions for each speaker
+    //                 const speakersWithSessions = await Promise.all(
+    //                     list.map(async (speaker) => {
+    //                         try {
+    //                             const sessionRes = await axios.get(`/one-to-one/speaker/${speaker._id}`);
+    //                             return { ...speaker, sessions: sessionRes.data };
+    //                         } catch (err) {
+    //                             console.error(`Error fetching sessions for speaker ${speaker._id}:`, err);
+    //                             return { ...speaker, sessions: [] };
+    //                         }
+    //                     })
+    //                 );
+    //                 list = speakersWithSessions;
+    //             }
+
+    //             setData(list);
+    //             console.log(`Fetched ${activeTab}:`, list);
+    //         } catch (err) {
+    //             console.error(`Error fetching ${activeTab}:`, err);
+    //         } finally {
+    //             setLoading(false);
+    //         }
+    //     };
+
+    //     fetchData();
+    // }, [activeTab]);
     useEffect(() => {
-        const fetchMentorsWithSessions = async () => {
+        const fetchData = async () => {
             try {
                 setLoading(true);
-                
-                const { data } = await axios.get("/users/mentors/with-sessions");
 
-                const mentorList = Array.isArray(data)
-                    ? data
-                    : Array.isArray(data.data)
-                        ? data.data
-                        : [];
+                // 🔹 MENTORS
+                if (activeTab === "mentors") {
+                    const res = await axios.get("/users/mentors/with-sessions");
+                    setData(Array.isArray(res.data) ? res.data : []);
+                }
 
-                setMentors(mentorList);
-                console.log("Fetched Mentor Users with Sessions:", mentorList);
+                // 🔹 SPEAKERS + ONE TO ONE SESSIONS
+                if (activeTab === "speakers") {
+                    const res = await axios.get("/one-to-one");
+
+                    // Group sessions by Speaker
+                    const speakerMap = {};
+
+                    res.data.forEach((session) => {
+                        const speaker = session.Speaker;
+                        if (!speaker) return;
+
+                        if (!speakerMap[speaker._id]) {
+                            speakerMap[speaker._id] = {
+                                ...speaker,
+                                sessions: [],
+                            };
+                        }
+
+                        speakerMap[speaker._id].sessions.push(session);
+                    });
+
+                    setData(Object.values(speakerMap));
+                }
+
             } catch (err) {
-                console.error("Error fetching mentors:", err);
+                console.error("Error:", err);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchMentorsWithSessions();
-    }, []);
+        fetchData();
+    }, [activeTab]);
 
     if (loading) {
         return (
             <div className="container mx-auto font-[Poppins]">
                 <div className="px-4 py-10">
-                    <div className="text-center">Loading mentors...</div>
+                    <div className="text-center">Loading...</div>
                 </div>
             </div>
         );
@@ -46,60 +116,46 @@ export default function HallOfFamepage() {
     return (
         <div className="container mx-auto font-[Poppins]">
             <div className="px-4 py-10">
-                <h1 className="text-4xl font-extrabold text-center">LIVE MENTORSHIP</h1>
+                <h1 className="text-4xl font-extrabold text-center">MENTORSHIP</h1>
                 <div className="w-40 h-1 bg-black mx-auto my-2"></div>
                 <p className="text-center text-gray-600 mb-8">
-                    Connect with our expert mentors
+                    Connect with our expert mentors and speakers
                 </p>
 
-                <div className="flex flex-wrap justify-center gap-9 mt-10">
-                    {mentors.length > 0 ? (
-                        mentors.map((mentor, index) => (
-                            <div key={index} className="w-full max-w-sm">
-                                <HallOfFameCards speaker={mentor} />
+                {/* Tabs */}
+                <div className="flex justify-center mb-8">
+                    <button
+                        onClick={() => setActiveTab('speakers')}
+                        className={`px-6 py-2 mx-2 rounded-lg font-medium transition ${activeTab === 'speakers'
+                            ? 'bg-black text-white'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            }`}
+                    >
+                        Speakers
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('mentors')}
+                        className={`px-6 py-2 mx-2 rounded-lg font-medium transition ${activeTab === 'mentors'
+                            ? 'bg-black text-white'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                            }`}
+                    >
+                        Mentors
+                    </button>
 
-                                {/* Mentor के Sessions Display */}
-                                {/* {mentor.sessions && mentor.sessions.length > 0 && (
-                                    <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                                        <h3 className="font-semibold text-lg mb-3 text-center">
-                                            Available Sessions ({mentor.sessionCount || mentor.sessions.length})
-                                        </h3>
-                                        <div className="space-y-3">
-                                            {mentor.sessions.map((session, sessionIndex) => (
-                                                <div key={session._id || sessionIndex} className="p-3 bg-white border rounded-lg shadow-sm">
-                                                    <h4 className="font-medium text-blue-600 text-sm">
-                                                        {session.courseTitle}
-                                                    </h4>
-                                                    <p className="text-xs text-gray-600 mt-1">
-                                                        {session.courseDescription}
-                                                    </p>
-                                                    <div className="flex justify-between text-xs text-gray-500 mt-2">
-                                                        <span>
-                                                            {session.selectDate} • {session.startTime} - {session.endTime}
-                                                        </span>
-                                                        <span className={`px-2 py-1 rounded ${
-                                                            session.paymentType === 'Free' 
-                                                                ? 'bg-green-100 text-green-800' 
-                                                                : 'bg-blue-100 text-blue-800'
-                                                        }`}>
-                                                            {session.paymentType}
-                                                        </span>
-                                                    </div>
-                                                    {session.fees && session.fees !== "" && (
-                                                        <div className="text-xs font-medium mt-1 text-right">
-                                                            Fees: ₹{session.fees}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )} */}
+                </div>
+
+                <div className="flex flex-wrap justify-center gap-9 mt-10">
+                    {data.length > 0 ? (
+                        data.map((item, index) => (
+                            <div key={index} className="">
+                                <HallOfFameCards speaker={item} noClick={activeTab === 'speakers'} />
+
                             </div>
                         ))
                     ) : (
                         <p className="text-center text-gray-500 col-span-full">
-                            No mentors found
+                            No {activeTab} found
                         </p>
                     )}
                 </div>

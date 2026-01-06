@@ -153,7 +153,6 @@ function App() {
         <Route path="/webinars/:slug" element={<WebinarDetailsPage />} />
 
 
-
         <Route path="/hall-of-fame" element={<><Navbar /><HallOfFamepage /><Footer /></>} />
 
           <Route path="/hall-of-fame/:speakerId" element={<><Navbar /><SpeakerDetailsPage /><Footer /></>} /> 

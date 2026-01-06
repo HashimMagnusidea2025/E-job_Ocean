@@ -48,7 +48,7 @@ export default function CARegistrationSection() {
 
         {/* Button */}
         <button
-            onClick={() => navigate("/ca-registration")}
+            onClick={() => navigate("/ca-register")}
             className="mt-10 inline-flex items-center gap-3 bg-[#339ca0] text-white px-10 py-4 rounded-xl text-lg font-semibold shadow-lg hover:shadow-xl hover:bg-[#2b8588] transition-all duration-300"
         >
             <FaUserTie />

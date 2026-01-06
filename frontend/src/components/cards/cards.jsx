@@ -585,7 +585,7 @@ export const OurCourses = () => {
 
 
 
-export const OurFreeCoursesCrds = ({ image, title, companyname, date }) => {
+export const OurFreeCoursesCrds = ({ id, image, title, companyname, date }) => {
     const formatDate = (isoDate) => {
         if (!isoDate) return "N/A";
 
@@ -597,6 +597,8 @@ export const OurFreeCoursesCrds = ({ image, title, companyname, date }) => {
             year: "numeric",
         });
     };
+
+    const navigate = useNavigate();
 
     return (
         <div className="mx-auto h-[330px] bg-white w-[300px] sm:w-[310px] rounded-lg shadow hover:shadow-xl transition-all overflow-hidden border">
@@ -625,7 +627,7 @@ export const OurFreeCoursesCrds = ({ image, title, companyname, date }) => {
                         {formatDate(date)}
                     </span>
 
-                    <button className="bg-gradient-to-r from-[#339ca0] to-black text-white px-3 py-1 rounded text-sm">
+                    <button onClick={(e) => { e.stopPropagation(); navigate(`/job-details/${id}`); }} className="bg-gradient-to-r from-[#339ca0] to-black text-white px-3 py-1 rounded text-sm">
                         View Job
                     </button>
                 </div>

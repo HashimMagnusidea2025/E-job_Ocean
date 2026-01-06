@@ -246,11 +246,11 @@ class AuthController {
         return res.json({ token, user });
       }
 
-      // Normal login
+     
       if (!user)
         return res.status(401).json({ message: "Invalid email or password" });
 
-      //  NEW CHECK for mentor approval
+    
       if (
         user.roleID?.name?.toLowerCase() === "mentor" &&
         user.Approved !== "Approved"
@@ -276,7 +276,7 @@ class AuthController {
   static async approveMentor(req, res) {
     try {
       const { userId, password, action } = req.body;
-      // action = "approve" or "reject"
+      
 
       const user = await UserModel.findById(userId);
       if (!user) return res.status(404).json({ message: "User not found" });
@@ -385,14 +385,14 @@ class AuthController {
 
       }
 
-      // Verify token
+     
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const user = await UserModel.findById(decoded.id);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
 
-      // Hash and update password
+     
       const hashedPassword = await bcrypt.hash(newPassword, 10);
       user.password = hashedPassword;
       await user.save();
@@ -405,17 +405,7 @@ class AuthController {
   }
 
 
-  // static async slugMentor(req,res) {
-
-  //   try {
-  //     const mentor = await UserModel.findOne({ slug: req.params.slug, type: "mentor" });
-  //     if (!mentor) return res.status(404).json({ message: "Mentor not found" });
-  //     res.json(mentor);
-  //   } catch (err) {
-  //     res.status(500).json({ message: err.message });
-  //   }
-
-  // }
+  
 
   static async slugMentor(req, res) {
     try {
@@ -441,7 +431,7 @@ class AuthController {
 
 
 
-  //  Send OTP to Email
+ 
   static async sendOtpEmail(req, res) {
     try {
       const { email } = req.body;
@@ -453,7 +443,7 @@ class AuthController {
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
       user.otp = otp;
-      user.otpExpires = Date.now() + 5 * 60 * 1000; // 5 minutes
+      user.otpExpires = Date.now() + 5 * 60 * 1000; 
       await user.save();
 
       const mailOptions = {
@@ -619,20 +609,20 @@ class AuthController {
       const user = await UserModel.findOne({ phone }).populate("roleID");
       if (!user) return res.status(404).json({ message: "User not found" });
 
-      // Generate OTP
+      
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-      // Save OTP
+      
       user.otp = otp;
-      user.otpExpires = Date.now() + 10 * 60 * 1000; // 10 min
+      user.otpExpires = Date.now() + 10 * 60 * 1000; 
       await user.save();
 
-      // Prepare SMS
+     
       const message = encodeURIComponent(
         `Dear User, your OTP is ${otp}. Valid for 10 mins. Do not share with anyone.`
       );
 
-      // BestSMS API
+  
       const smsUrl = `http://control.bestsms.co.in/api/sendhttp.php?authkey=74499AuRsBHOF65828953P1&mobiles=${phone}&sender=SWLCRM&route=4&country=91&DLT_TE_ID=1707166152169848224&message=SMS%20Dear%20User%20OTP%20is%20${otp}%20Valid%20for%20only%2010%20mins.%20For%20safety%20dont%20share%20with%20anyone.%20From%20Best%20SMS%20Call%20SWLCRM`;
 
       await axios.get(smsUrl);
@@ -658,20 +648,20 @@ class AuthController {
       const user = await UserModel.findOne({ phone }).populate("roleID");
       if (!user) return res.status(404).json({ message: "User not found" });
 
-      // Generate OTP
+      
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-      // Save OTP
+      
       user.otp = otp;
-      user.otpExpires = Date.now() + 10 * 60 * 1000; // 10 min
+      user.otpExpires = Date.now() + 10 * 60 * 1000; 
       await user.save();
 
-      // Prepare SMS
+     
       const message = encodeURIComponent(
         `Dear User, your OTP is ${otp}. Valid for 10 mins. Do not share with anyone.`
       );
 
-      // BestSMS API
+   
       const smsUrl = `http://control.bestsms.co.in/api/sendhttp.php?authkey=74499AuRsBHOF65828953P1&mobiles=${phone}&sender=SWLCRM&route=4&country=91&DLT_TE_ID=1707166152169848224&message=SMS%20Dear%20User%20OTP%20is%20${otp}%20Valid%20for%20only%2010%20mins.%20For%20safety%20dont%20share%20with%20anyone.%20From%20Best%20SMS%20Call%20SWLCRM`;
 
       await axios.get(smsUrl);
@@ -700,7 +690,7 @@ class AuthController {
       if (Date.now() > user.otpExpires)
         return res.status(400).json({ message: "OTP expired" });
 
-      // Clear OTP
+     
       user.otp = null;
       user.otpExpires = null;
       await user.save();

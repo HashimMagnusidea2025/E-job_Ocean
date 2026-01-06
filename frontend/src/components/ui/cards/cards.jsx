@@ -15,7 +15,12 @@ import RegisterModal from "../../../pages/Webinars/RegisterModal.jsx";
 import { FaWhatsapp } from "react-icons/fa";
 import { FaLinkedinIn } from "react-icons/fa6";
 import { FaFacebook, FaTwitter, FaLinkedin, FaPinterest, FaGlobe, FaTelegram, FaInstagram } from "react-icons/fa";
+import {
+    FaFacebookF,
 
+    FaTelegramPlane,
+
+} from "react-icons/fa";
 const baseURL = import.meta.env.VITE_BACKEND_URL; // Vite
 // या CRA में: const baseURL = process.env.REACT_APP_BACKEND_URL;
 import noImage from '../../../media/png/no.png';
@@ -840,6 +845,89 @@ export const CommentList = ({ comments, commentCount, setComments, onCommentUpda
     );
 }
 
+export const FollowSocialsRow = () => {
+    const socialConfig = {
+        facebook: {
+            icon: FaFacebookF,
+            bg: "bg-[#1877F2]",
+        },
+        twitter: {
+            icon: FaTwitter,
+            bg: "bg-[#1DA1F2]",
+        },
+        instagram: {
+            icon: FaInstagram,
+            bg: "bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF]",
+        },
+        linkedin: {
+            icon: FaLinkedinIn,
+            bg: "bg-[#0A66C2]",
+        },
+        telegram: {
+            icon: FaTelegramPlane,
+            bg: "bg-[#0088cc]",
+        },
+        whatsapp: {
+            icon: FaWhatsapp,
+            bg: "bg-[#25D366]",
+        },
+    };
+
+    const [socials, setSocials] = useState([]);
+
+    useEffect(() => {
+        fetchSocials();
+    }, []);
+
+    const fetchSocials = async () => {
+        try {
+            const res = await axios.get("/social-media-icons/active");
+            setSocials(res.data);
+        } catch (error) {
+            console.error(error);
+            setSocials([]);
+        }
+    };
+
+    return (
+        <div className="w-full flex flex-col items-center gap-6 py-10">
+            <h2 className="text-2xl font-semibold text-gray-800">
+                Follow Us on Social Media
+            </h2>
+
+            <div className="flex flex-wrap justify-center gap-2">
+                {socials.map((item) => {
+                    const key = item.name.toLowerCase();
+                    const config = socialConfig[key];
+                    if (!config) return null;
+
+                    const Icon = config.icon;
+
+                    return (
+                        <a
+                            key={item._id}
+                            href={item.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`
+                w-12 h-12 flex items-center justify-center
+                rounded-full text-white text-lg
+                shadow-md transition-all
+                hover:scale-110
+                ${config.bg}
+              `}
+                            title={item.name}
+                        >
+                            <Icon />
+                        </a>
+                    );
+                })}
+            </div>
+        </div>
+    );
+};
+
+
 export const FollowSocials = () => {
 
     const socialConfig = {
@@ -882,7 +970,8 @@ export const FollowSocials = () => {
             const res = await axios.get('/social-media-icons/active');
             setSocials(res.data);
         } catch (err) {
-            console.error(err)
+            console.error(err);
+            setSocials([]); // Set to empty array on error
         }
     }
     return (
@@ -1593,7 +1682,17 @@ export const WebinarCardsList = ({ webinar, image, onRegisterClick }) => {
                             One-to-One
                         </button>
                     )}
-
+                    {/* {isUpcoming && (
+                        <button
+                            onClick={() => {
+                                setIsModalOpen(true);
+                                if (onRegisterClick) onRegisterClick(webinar);
+                            }}
+                            className="mt-auto bg-blue-600 text-white px-2 py-2 rounded hover:bg-blue-700"
+                        >
+                            Register
+                        </button>
+                    )} */}
                 </div>
 
                 {/* Action Button */}
@@ -1636,7 +1735,7 @@ export const WebinarCardsList = ({ webinar, image, onRegisterClick }) => {
 
 
 
-export const HallOfFameCards = ({ speaker }) => {
+export const HallOfFameCards = ({ speaker, noClick = false }) => {
 
     const navigate = useNavigate();
     // ✅ Determine if it's Speaker or Mentor
@@ -1647,39 +1746,43 @@ export const HallOfFameCards = ({ speaker }) => {
     // const fullName = `${speaker.salutation ? speaker.salutation + " " : ""}${speaker.firstName} ${speaker.lastName}`;
 
     // ✅ Better Mentor Detection
-    const isMentor =
-        speaker.hasOwnProperty("profilePicture") ||
-        speaker.hasOwnProperty("sessionCount") ||
-        (Array.isArray(speaker.sessions) && speaker.sessions !== undefined);
+    // const isMentor =
+    //     speaker.hasOwnProperty("profilePicture") ||
+    //     speaker.hasOwnProperty("sessionCount") ||
+    //     (Array.isArray(speaker.sessions) && speaker.sessions !== undefined);
 
+
+    // ✅ Correct Mentor Detection
+    const isMentor =
+        speaker.profilePicture || speaker.sessionCount;
     const userType = isMentor ? "mentor" : "speaker";
     const fullName = `${speaker.salutation ? speaker.salutation + " " : ""}${speaker.firstName} ${speaker.lastName}`;
 
-    // ✅ Correct image source based on user type
+    // ✅ Image Source (NO undefined, NO default avatar)
     const getImageSource = () => {
-        if (isMentor) {
-            // Mentor ke liye profilePicture use karein
-            return speaker.profilePicture ? `${baseURL}/${speaker.profilePicture}` : "/default-avatar.png";
-        } else {
-            // Speaker ke liye profilePic use karein
-            return speaker.profilePic ? `${baseURL}/${speaker.profilePic}` : "/default-avatar.png";
+        if (isMentor && speaker.profilePicture) {
+            return `${baseURL}/${speaker.profilePicture}`;
         }
+
+        if (!isMentor && speaker.profilePic) {
+            return `${baseURL}/${speaker.profilePic}`;
+        }
+
+        return null; // image hi mat dikhao
     };
 
-    const hasOneToOneSession = () => {
-        // Mentor → sessions available
-        if (isMentor) {
-            return Array.isArray(speaker.sessions) && speaker.sessions.length > 0;
-        }
+    // const imageUrl = getImageSource();
 
-        // Speaker → check if has one-to-one sessions
-        return speaker.hasOneToOneSession || false;
+
+    const hasOneToOneSession = () => {
+        return Array.isArray(speaker.sessions) && speaker.sessions.length > 0;
     };
 
     const imageUrl = getImageSource();
     const handleClick = () => {
-
-        navigate(`/hall-of-fame/${speaker._id}`); // navigate to details page
+        if (!noClick || hasOneToOneSession()) {
+            navigate(`/hall-of-fame/${speaker._id}`); // navigate to details page
+        }
     };
 
 
@@ -1705,17 +1808,30 @@ export const HallOfFameCards = ({ speaker }) => {
             <h3 className="font-semibold text-[15px] mt-3">{fullName}</h3>
 
 
-            <div className="flex">
+            {/* <div className="flex">
                 <p className="text-sm mt-1">
                     <span className="font-bold text-[12px]">Course / Qualification :</span> {speaker.qualification || "N/A"}
                 </p>
-            </div>
+            </div> */}
 
 
-            <p className="text-sm mt-2 text-gray-700 line-clamp-3 px-2">
+            {/* <p className="text-sm mt-2 text-gray-700 line-clamp-3 px-2">
                 <span className="text-yellow-600 text-lg mr-1">👨‍💼</span>
                 {speaker.introduction || "No introduction available."}
-            </p>
+            </p> */}
+            <div className="mt-2 text-sm text-gray-700 line-clamp-3 px-2">
+                <span className="text-yellow-600 text-lg mr-1">👨‍💼</span>
+
+                <div
+                    className="inline prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{
+                        __html:
+                            userType === "mentor"
+                                ? speaker.des || "<p>No introduction available.</p>"
+                                : speaker.introduction || "<p>No introduction available.</p>",
+                    }}
+                />
+            </div>
 
 
 
@@ -1741,14 +1857,13 @@ export const HallOfFameCards = ({ speaker }) => {
                         Linkedin
                     </button> */}
 
-                {hasOneToOneSession() && (
+                {!isMentor && hasOneToOneSession() && (
                     <button
                         className="px-4 py-1 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition"
                     >
                         Book One to One
                     </button>
                 )}
-
 
 
             </span>

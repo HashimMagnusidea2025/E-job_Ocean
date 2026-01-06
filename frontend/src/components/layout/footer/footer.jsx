@@ -302,16 +302,14 @@ export default function Footer() {
                         </ul>
                     </div> */}
 
-                  
                     <div>
                         <h3 className="font-bold uppercase text-sm border-b-2 border-red-500 inline-block mb-2">Must Read</h3>
                         <ul className="text-sm space-y-3 mt-2">
                             <li><a href="/blogs">Blogs</a></li>
-                            <li>Testimonials</li>
+                            <li><a href="/testimonials-page">Testimonials</a></li>
                         </ul>
                     </div>
 
-                    
                     <div>
                         <h3 className="font-bold uppercase text-sm border-b-2 border-red-500 inline-block mb-2">Support</h3>
                         <ul className="text-sm space-y-3 mt-2">

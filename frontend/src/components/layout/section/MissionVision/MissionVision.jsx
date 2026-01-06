@@ -55,7 +55,7 @@ export default function MissionVision() {
           />
         </div>
       </div>
-            
+
       {/* Vision Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-10">
         <div className="w-full flex justify-center order-1 md:order-none">

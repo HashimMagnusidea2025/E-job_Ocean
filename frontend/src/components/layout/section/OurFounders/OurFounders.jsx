@@ -33,7 +33,7 @@ export default function OurFounders() {
   }
 
   return (
-    <section className="px-4 sm:px-6 md:px-28 py-20 bg-white">
+    <section className="px-4 sm:px-6 md:px-12 py-20 bg-white">
       <h2 className="text-center text-3xl md:text-[50px] font-bold text-[#339ca0] mb-16">
         Our Founders
       </h2>
@@ -42,9 +42,8 @@ export default function OurFounders() {
         {founders.map((founder, index) => (
           <div
             key={founder._id}
-            className={`grid grid-cols-1 md:grid-cols-2 gap-12 items-center ${
-              index % 2 !== 0 ? "md:flex-row-reverse" : ""
-            }`}
+            className={`grid grid-cols-1 md:grid-cols-2 gap-7  items-center ${index % 2 !== 0 ? "md:flex-row-reverse" : ""
+              }`}
           >
             {/* Image */}
             <div className="flex justify-center">
