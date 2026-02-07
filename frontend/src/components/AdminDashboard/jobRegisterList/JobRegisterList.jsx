@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import DataTable from "react-data-table-component";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  flexRender,
+} from "@tanstack/react-table";
 import { FaEye, FaEdit, FaTrash } from "react-icons/fa";
 import axios from "../../../utils/axios";
 import Swal from "sweetalert2";
@@ -7,6 +13,8 @@ import Layout from "../../seekerDashboard/partials/layout";
 
 export default function JobRegisterList() {
     const [registrations, setRegistrations] = useState([]);
+    const [filteredRegistrations, setFilteredRegistrations] = useState([]);
+    const [searchText, setSearchText] = useState("");
     const [loading, setLoading] = useState(true);
 
     // Modals
@@ -29,7 +37,11 @@ export default function JobRegisterList() {
     const fetchRegistrations = async () => {
         try {
             const { data } = await axios.get("/job-register");
-            setRegistrations(data.registrations || []);
+            const regs = data.registrations || [];
+            console.log(regs);
+            
+            setRegistrations(regs);
+            setFilteredRegistrations(regs);
         } catch (err) {
             console.error(err);
         } finally {
@@ -158,6 +170,23 @@ export default function JobRegisterList() {
         setSelected(null);
     };
 
+    const handleSearch = (e) => {
+        const value = e.target.value.toLowerCase();
+        setSearchText(value);
+
+        const filtered = registrations.filter((reg) => {
+            return (
+                (reg.jobId?.jobTitle || "").toLowerCase().includes(value) ||
+                `${reg.firstName} ${reg.lastName}`.toLowerCase().includes(value) ||
+                reg.email.toLowerCase().includes(value) ||
+                reg.mobile.toLowerCase().includes(value) ||
+                `${reg.city}, ${reg.state}, ${reg.country}`.toLowerCase().includes(value)
+            );
+        });
+
+        setFilteredRegistrations(filtered);
+    };
+
     // Save Edit
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -180,39 +209,163 @@ export default function JobRegisterList() {
         }
     };
 
-    // Table columns
     const columns = [
-        { name: "Job Title", selector: row => row.jobId?.jobTitle || "-", sortable: true },
-        { name: "Name", selector: row => `${row.firstName} ${row.lastName}`, sortable: true },
-        { name: "Email", selector: row => row.email, sortable: true },
-        { name: "Mobile", selector: row => row.mobile, sortable: true },
-        { name: "Location", selector: row => `${row.city}, ${row.state}, ${row.country}`, sortable: true },
         {
-            name: "Actions",
-            cell: row => (
+            header: "ID",
+            cell: ({ row }) => row.index + 1,
+        },
+        {
+            accessorKey: "jobTitle",
+            header: "Job Title",
+            cell: ({ row }) => row.original.jobId?.jobTitle || "-",
+        },
+        {
+            accessorKey: "name",
+            header: "Name",
+            cell: ({ row }) => `${row.original.firstName} ${row.original.lastName}`,
+        },
+        {
+            accessorKey: "email",
+            header: "Email",
+        },
+        {
+            accessorKey: "mobile",
+            header: "Mobile",
+        },
+        // {
+        //     accessorKey: "location",
+        //     header: "Location",
+        //     cell: ({ row }) => `${row.original.city}, ${row.original.state}, ${row.original.country}`,
+        // },
+        {
+            header: "Actions",
+            cell: ({ row }) => (
                 <div className="flex gap-3">
-                    <FaEye size={22} className="text-blue-500 cursor-pointer" onClick={() => handleView(row)} />
-                    <FaEdit size={22} className="text-green-500 cursor-pointer" onClick={() => handleEdit(row)} />
-                    <FaTrash size={22} className="text-red-500 cursor-pointer" onClick={() => handleDelete(row._id)} />
+                    <button
+                        onClick={() => handleView(row.original)}
+                        className="text-blue-600"
+                    >
+                        <FaEye size={20} />
+                    </button>
+                    <button
+                        onClick={() => handleEdit(row.original)}
+                        className="text-green-600"
+                    >
+                        <FaEdit size={20} />
+                    </button>
+                    <button
+                        onClick={() => handleDelete(row.original._id)}
+                        className="text-red-600"
+                    >
+                        <FaTrash size={20} />
+                    </button>
                 </div>
-            )
-        }
+            ),
+        },
     ];
+
+    const table = useReactTable({
+        data: filteredRegistrations,
+        columns,
+        state: {
+            globalFilter: searchText,
+        },
+        onGlobalFilterChange: setSearchText,
+        getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+    });
 
     return (
         <Layout>
-            <div className="p-4">
-                <h2 className="text-2xl font-bold mb-4">Job Registrations</h2>
-                <DataTable
-                    columns={columns}
-                    data={registrations}
-                    progressPending={loading}
-                    pagination
-                    highlightOnHover
-                />
+            <div className="p-2">
+                {/* Header */}
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-3xl font-bold text-gray-800">Job Registrations</h2>
+                    <input
+                        type="text"
+                        placeholder="Search registrations..."
+                        value={searchText}
+                        onChange={handleSearch}
+                        className="border p-2 rounded"
+                    />
+                </div>
+
+                {loading ? (
+                    <div className="text-center py-6 text-gray-500">Loading...</div>
+                ) : (
+                    <div className="bg-white rounded-lg shadow overflow-x-auto">
+                        <table className="min-w-full border">
+                            <thead className="bg-gray-100">
+                                {table.getHeaderGroups().map(headerGroup => (
+                                    <tr key={headerGroup.id}>
+                                        {headerGroup.headers.map(header => (
+                                            <th
+                                                key={header.id}
+                                                className="px-4 py-3 text-left text-sm font-semibold border"
+                                            >
+                                                {flexRender(
+                                                    header.column.columnDef.header,
+                                                    header.getContext()
+                                                )}
+                                            </th>
+                                        ))}
+                                    </tr>
+                                ))}
+                            </thead>
+
+                            <tbody>
+                                {table.getRowModel().rows.map(row => (
+                                    <tr key={row.id} className="hover:bg-gray-50">
+                                        {row.getVisibleCells().map(cell => (
+                                            <td key={cell.id} className="px-4 py-2 border text-sm">
+                                                {flexRender(
+                                                    cell.column.columnDef.cell,
+                                                    cell.getContext()
+                                                )}
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))}
+
+                                {table.getRowModel().rows.length === 0 && (
+                                    <tr>
+                                        <td colSpan={columns.length} className="text-center py-6 text-gray-500">
+                                            No registrations found
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+
+                        {/* Pagination */}
+                        <div className="flex justify-between items-center p-4">
+                            <button
+                                onClick={() => table.previousPage()}
+                                disabled={!table.getCanPreviousPage()}
+                                className="px-4 py-2 border rounded disabled:opacity-50"
+                            >
+                                Previous
+                            </button>
+
+                            <span className="text-sm">
+                                Page {table.getState().pagination.pageIndex + 1} of{" "}
+                                {table.getPageCount()}
+                            </span>
+
+                            <button
+                                onClick={() => table.nextPage()}
+                                disabled={!table.getCanNextPage()}
+                                className="px-4 py-2 border rounded disabled:opacity-50"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
 
-            {/* ✅ VIEW MODAL */}
+            {/*  VIEW MODAL */}
             {viewModal && selected && (
                 <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
                     <div className="bg-white rounded-lg shadow-lg w-[500px] p-6">
@@ -239,7 +392,7 @@ export default function JobRegisterList() {
                 </div>
             )}
 
-            {/* ✅ EDIT MODAL */}
+            {/*  EDIT MODAL */}
             {editModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-lg p-6 w-full max-w-2xl relative shadow-lg">

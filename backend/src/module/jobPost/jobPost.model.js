@@ -11,7 +11,7 @@ const JobPostSchema = mongoose.Schema({
         type: String,
         required: true
     },
-    
+
     salaryFrom: {
         type: Number
     },
@@ -25,40 +25,76 @@ const JobPostSchema = mongoose.Schema({
     salaryPeriod: {
         type: String
     },
-   
 
     hideSalary: { type: Boolean, default: false },
 
-    careerLevel: { type: mongoose.Schema.Types.ObjectId, ref: "CareerLevelCategory" },
-    functionalArea: { type: mongoose.Schema.Types.ObjectId, ref: "FunctionalAreaCategory" },
+    // careerLevel: { type: mongoose.Schema.Types.ObjectId, ref: "CareerLevelCategory" },
+    // functionalArea: { type: mongoose.Schema.Types.ObjectId, ref: "FunctionalAreaCategory" },
+    careerLevel: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "CareerLevelCategory"
+        }
+    ],
+
+    functionalArea: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "FunctionalAreaCategory"
+        }
+    ],
+
     jobType: { type: mongoose.Schema.Types.ObjectId, ref: "jobTypeCategory" },
     jobShift: { type: mongoose.Schema.Types.ObjectId, ref: "jobShiftCategory" },
 
     positions: { type: Number },
     expiryDate: { type: Date },
-    degreeLevel: { type: mongoose.Schema.Types.ObjectId, ref: "DegreeLevelCategory" },
+    // degreeLevel: { type: mongoose.Schema.Types.ObjectId, ref: "DegreeLevelCategory" },
+    degreeLevel: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "DegreeLevelCategory"
+        }
+    ],
+
     experience: { type: String },
     // mode: {
     //     type: String,
     //     enum: ["Work From Home", "Work From Office", "Hybrid"]
     // },
     mode: {
-    type: String,
-    enum: [
-        "Work From Home",
-        "Work From Office",
-        "Hybrid",
-        "Work from Office" // fallback
-    ]
-},
+        type: String,
+        enum: [
+            "Work From Home",
+            "Work From Office",
+            "Hybrid",
+            "Work from Office" // fallback
+        ]
+    },
 
     externalJob: { type: Boolean, default: false },
     isFreelance: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
 
-    country: { ref: 'Country', type: Number, required: true },
-    state: { ref: 'State', type: Number, required: true },
-    city: { ref: 'City', type: Number, required: true },
+    // country: { ref: 'Country', type: Number, required: true },
+    // state: { ref: 'State', type: Number, required: true },
+    // city: { ref: 'City', type: Number, required: true },
+    country: [{
+        type: Number,
+        ref: "Country",
+        required: true
+    }],
+    state: [{
+        type: Number,
+        ref: "State",
+        required: true
+    }],
+    city: [{
+        type: Number,
+        ref: "City",
+        required: true
+    }],
+
     address: { type: String },
 
     skills: [

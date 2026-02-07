@@ -6,18 +6,9 @@ import blobStream from 'blob-stream';
 
 import dotenv from 'dotenv';
 dotenv.config();
-// import Razorpay from "razorpay";
-// import dotenv from "dotenv";
 import webinarRegistrationModel from "../webinarRegistration/webinarRegistration.model.js";
-
-
-
-// dotenv.config();
-
-// const razorpay = new Razorpay({
-//   key_id: process.env.RAZORPAY_KEY,
-//   key_secret: process.env.RAZORPAY_SECRET,
-// });
+import CourseSchemaModel from "../Course/Course.model.js";
+import CourseRegisterModel from "../CourseRegister/CourseRegister.model.js";
 
 
 
@@ -85,17 +76,24 @@ export const getPaymentByRegistration = async (req, res) => {
   try {
     const { registrationId } = req.params;
 
-    const payment = await PaymentModel.findOne({ registration_id: registrationId })
-      .populate("registration_id", "firstName lastName email webinarId");
+    const payment = await PaymentModel.findOne({ registration_id: registrationId });
 
     if (!payment) {
-      return res.status(404).json({ message: "Payment not found" });
+      return res.status(404).json({ success: false, message: "Payment not found" });
     }
 
-    res.json(payment);
+    // Conditionally populate based on type
+    let populatedPayment = payment;
+    if (payment.type === 'course') {
+      populatedPayment = await PaymentModel.findById(payment._id).populate({ path: "registration_id", model: "course-registers", select: "firstName lastName email courseId" });
+    } else {
+      populatedPayment = await PaymentModel.findById(payment._id).populate({ path: "registration_id", model: "webinarregistrations", select: "firstName lastName email webinarId" });
+    }
+
+    res.json({ success: true, data: populatedPayment });
   } catch (err) {
     console.error("Error fetching payment by registration:", err);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -292,8 +290,16 @@ export const verifyRazorpayPayment = async (req, res) => {
 
     // Get registration data to determine state for GST calculation
     let registration = null;
+    let course = null;
     if (registrationId) {
-      registration = await webinarRegistrationModel.findById(registrationId);
+      if (type === 'course') {
+        registration = await CourseRegisterModel.findById(registrationId);
+        if (courseId) {
+          course = await CourseSchemaModel.findById(courseId);
+        }
+      } else {
+        registration = await webinarRegistrationModel.findById(registrationId);
+      }
     }
 
     // Parse amounts
@@ -362,7 +368,8 @@ export const verifyRazorpayPayment = async (req, res) => {
       baseAmount: baseAmount,
       gstDetails: finalGstDetails,
       totalAmount: totalAmount,
-      webinarTitle: registration?.webinarId?.WebinarTitle || "Webinar Session"
+      webinarTitle: type === 'course' ? (course?.courseTitle || "Course Registration") : (registration?.webinarId?.WebinarTitle || "Webinar Session"),
+      type: type
     });
 
     // Send email receipt
@@ -572,8 +579,9 @@ const generatePDFInvoice = async (invoiceData) => {
       doc.fontSize(12).font('Helvetica-Bold')
         .text('Service Description', 50, 220);
 
+      const serviceLabel = invoiceData.type === 'course' ? 'Course' : 'Webinar';
       doc.fontSize(10).font('Helvetica')
-        .text(`Webinar: ${invoiceData.webinarTitle}`, 50, 240);
+        .text(`${serviceLabel}: ${invoiceData.webinarTitle}`, 50, 240);
 
       // Table Header
       doc.fontSize(10).font('Helvetica-Bold')
@@ -587,8 +595,9 @@ const generatePDFInvoice = async (invoiceData) => {
       let yPosition = 300;
 
       // Base Amount
+      const feeLabel = invoiceData.type === 'course' ? 'Course Registration Fee' : 'Session Registration Fee';
       doc.fillColor('#000000')
-        .text('Session Registration Fee', 60, yPosition)
+        .text(feeLabel, 60, yPosition)
         .text(invoiceData.baseAmount.toFixed(2), 450, yPosition, { width: 90, align: 'right' });
       yPosition += 20;
 

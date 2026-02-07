@@ -44,12 +44,12 @@ export default function JourneyTimeline() {
             key={index}
             className="relative flex flex-col items-center text-center sm:max-w-[220px] transition-transform hover:-translate-y-1"
           >
-            {/* Horizontal connector line for desktop */}
+           
             {index < timelineData.length - 1 && (
               <div className="hidden sm:block absolute top-8 right-[-70px] w-16 border-t-2 border-dashed border-gray-400"></div>
             )}
 
-            {/* Vertical connector line for mobile */}
+           
             {index < timelineData.length - 1 && (
               <div className="sm:hidden absolute bottom-[-30px] w-1 h-6 border-l-2 border-dashed border-gray-400"></div>
             )}
@@ -60,7 +60,7 @@ export default function JourneyTimeline() {
             </div>
 
             {/* Date */}
-            <div className="mt-3 text-[#339ca0] bg-[#339ca0] text-black font-semibold text-xs px-4 py-1 rounded-full shadow">
+            <div className="mt-3 text-[#339ca0] bg-[#339ca0]  font-semibold text-xs px-4 py-1 rounded-full shadow">
               {item.date}
             </div>
 

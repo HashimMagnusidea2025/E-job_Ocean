@@ -1,31 +1,36 @@
 import React, { useEffect, useState } from "react";
 import Layout from "../../seekerDashboard/partials/layout";
-import DataTable from "react-data-table-component";
 import axios from "../../../utils/axios.js";
 import Swal from "sweetalert2";
 import { FaEdit, FaTrash, FaEye } from "react-icons/fa";
-
-
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  flexRender,
+} from "@tanstack/react-table";
 
 export default function BecomeAMentorRegisterList() {
     const [mentors, setMentors] = useState([]);
+    const [filteredMentors, setFilteredMentors] = useState([]);
+    const [searchText, setSearchText] = useState("");
 
     const fetchMentors = async () => {
         try {
             const res = await axios.get("/auth/mentors");
             if (res.data.success) {
-                setMentors(res.data.data); // Already filtered
+                setMentors(res.data.data);
+                setFilteredMentors(res.data.data);
             }
         } catch (err) {
             console.error(err);
         }
     };
 
-
     useEffect(() => {
         fetchMentors();
     }, []);
-
 
     const handleView = (mentor) => {
         Swal.fire({
@@ -39,7 +44,6 @@ export default function BecomeAMentorRegisterList() {
     };
 
     const handleEdit = (mentor) => {
-        // You can open a modal or navigate to an edit page
         console.log("Edit mentor:", mentor);
     };
 
@@ -56,7 +60,7 @@ export default function BecomeAMentorRegisterList() {
             try {
                 await axios.delete(`/auth/mentor/${mentor._id}`);
                 Swal.fire("Deleted!", "Mentor has been deleted.", "success");
-                fetchMentors(); // refresh list
+                fetchMentors();
             } catch (err) {
                 console.error(err);
                 Swal.fire("Error", "Failed to delete mentor.", "error");
@@ -64,147 +68,213 @@ export default function BecomeAMentorRegisterList() {
         }
     };
 
+    const handleSearch = (e) => {
+        const value = e.target.value.toLowerCase();
+        setSearchText(value);
 
-    const handleApprove = async (mentor) => {
-        const { value: password } = await Swal.fire({
-            title: `Approve ${mentor.firstName}?`,
-            input: "text",
-            inputLabel: "Set a password for mentor login",
-            inputPlaceholder: "Enter password",
-            showCancelButton: true,
+        const filtered = mentors.filter((mentor) => {
+            return (
+                mentor.firstName.toLowerCase().includes(value) ||
+                mentor.lastName.toLowerCase().includes(value) ||
+                mentor.email.toLowerCase().includes(value)
+            );
         });
 
-        if (!password) return;
-
-        try {
-            const res = await axios.post("/auth/approve-mentor", {
-                userId: mentor._id,
-                password,
-            });
-
-            Swal.fire("Approved!", "Mentor account activated successfully.", "success");
-            fetchMentors();
-        } catch (err) {
-            console.error(err);
-            Swal.fire("Error", "Failed to approve mentor.", "error");
-        }
+        setFilteredMentors(filtered);
     };
 
     const columns = [
         {
-            name: "S.No",
-            selector: (row, index) => index + 1,
-            width: "80px",
-            sortable: true,
+            header: "ID",
+            cell: ({ row }) => row.index + 1,
         },
         {
-            name: "Name",
-            selector: (row) => `${row.firstName} ${row.lastName}`,
-            sortable: true,
+            accessorKey: "firstName",
+            header: "First Name",
         },
         {
-            name: "Email",
-            selector: (row) => row.email,
-            sortable: true,
+            accessorKey: "lastName",
+            header: "Last Name",
         },
-        // {
-        //   name: "Phone",
-        //   selector: (row) => row.phone,
-        // },
         {
-  name: "Approved",
-  selector: (row) => (
-    <div className="flex items-center gap-2">
-      <select
-        value={row.Approved}
-        onChange={async (e) => {
-          const action = e.target.value;
-
-          if (action === "Approved") {
-            // Prompt for password
-            const { value: password } = await Swal.fire({
-              title: `Approve ${row.firstName}?`,
-              input: "text",
-              inputLabel: "Set a password for mentor login",
-              inputPlaceholder: "Enter password",
-              showCancelButton: true,
-            });
-
-            if (!password) return;
-
-            await axios.post("/auth/approve-mentor", {
-              userId: row._id,
-              password,
-              action: "approve",
-            });
-
-            Swal.fire(
-              "Approved!",
-              "Mentor account activated successfully.",
-              "success"
-            );
-
-          } else if (action === "Rejected") {
-            await axios.post("/auth/approve-mentor", {
-              userId: row._id,
-              action: "reject",
-            });
-
-            Swal.fire("Rejected!", "Mentor account rejected.", "error");
-          }
-
-          // Refresh list
-          fetchMentors();
-        }}
-        className={`px-2 py-1 rounded ${
-          row.Approved === "Approved"
-            ? "bg-green-500 text-white"
-            : row.Approved === "Rejected"
-            ? "bg-red-500 text-white"
-            : "bg-yellow-500 text-black"
-        }`}
-      >
-        <option value="pending">Pending</option>
-        <option value="Approved">Approved</option>
-        <option value="Rejected">Rejected</option>
-      </select>
-    </div>
-  ),
-},
-
-
-
+            accessorKey: "email",
+            header: "Email",
+        },
         {
-            name: "Action",
-            cell: (row) => (
-                <div className="flex items-center gap-2">
+            header: "Approved",
+            cell: ({ row }) => (
+                <select
+                    value={row.original.Approved}
+                    onChange={async (e) => {
+                        const action = e.target.value;
 
+                        if (action === "Approved") {
+                            const { value: password } = await Swal.fire({
+                                title: `Approve ${row.original.firstName}?`,
+                                input: "text",
+                                inputLabel: "Set a password for mentor login",
+                                inputPlaceholder: "Enter password",
+                                showCancelButton: true,
+                            });
 
-                    <FaEye size={22} className="text-green-500 cursor-pointer" onClick={() => handleView(row)} />
-                    <FaEdit size={22} className="text-blue-500 cursor-pointer" onClick={() => handleEdit(row)} />
-                    <FaTrash size={22} className="text-red-500 cursor-pointer" onClick={() => handleDelete(row)} />
+                            if (!password) return;
+
+                            await axios.post("/auth/approve-mentor", {
+                                userId: row.original._id,
+                                password,
+                                action: "approve",
+                            });
+
+                            Swal.fire(
+                                "Approved!",
+                                "Mentor account activated successfully.",
+                                "success"
+                            );
+                        } else if (action === "Rejected") {
+                            await axios.post("/auth/approve-mentor", {
+                                userId: row.original._id,
+                                action: "reject",
+                            });
+
+                            Swal.fire("Rejected!", "Mentor account rejected.", "error");
+                        }
+
+                        fetchMentors();
+                    }}
+                    className={`px-2 py-1 rounded ${row.original.Approved === "Approved"
+                            ? "bg-green-500 text-white"
+                            : row.original.Approved === "Rejected"
+                                ? "bg-red-500 text-white"
+                                : "bg-yellow-500 text-black"
+                        }`}
+                >
+                    <option value="pending">Pending</option>
+                    <option value="Approved">Approved</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
+            ),
+        },
+        {
+            header: "Actions",
+            cell: ({ row }) => (
+                <div className="flex gap-3">
+                    <button
+                        onClick={() => handleView(row.original)}
+                        className="text-blue-600"
+                    >
+                        <FaEye size={20} />
+                    </button>
+                    <button
+                        onClick={() => handleEdit(row.original)}
+                        className="text-green-600"
+                    >
+                        <FaEdit size={20} />
+                    </button>
+                    <button
+                        onClick={() => handleDelete(row.original)}
+                        className="text-red-600"
+                    >
+                        <FaTrash size={20} />
+                    </button>
                 </div>
             ),
         },
-
-
-
     ];
 
-
+    const table = useReactTable({
+        data: filteredMentors,
+        columns,
+        state: {
+            globalFilter: searchText,
+        },
+        onGlobalFilterChange: setSearchText,
+        getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+    });
 
     return (
         <Layout>
             <div className="p-6">
-                <h1 className="text-2xl font-semibold mb-4">Mentor Registration List</h1>
-                <DataTable
-                    columns={columns}
-                    data={mentors}
-                    pagination
-                    highlightOnHover
-                    striped
-                    responsive
-                />
+                <div className="flex justify-between items-center mb-6">
+                    <h1 className="text-2xl font-semibold">Mentor Registration List</h1>
+                    <input
+                        type="text"
+                        placeholder="Search mentors..."
+                        value={searchText}
+                        onChange={handleSearch}
+                        className="border p-2 rounded"
+                    />
+                </div>
+
+                <div className="bg-white rounded-lg shadow overflow-x-auto">
+                    <table className="min-w-full border">
+                        <thead className="bg-gray-100">
+                            {table.getHeaderGroups().map(headerGroup => (
+                                <tr key={headerGroup.id}>
+                                    {headerGroup.headers.map(header => (
+                                        <th
+                                            key={header.id}
+                                            className="px-4 py-3 text-left text-sm font-semibold border"
+                                        >
+                                            {flexRender(
+                                                header.column.columnDef.header,
+                                                header.getContext()
+                                            )}
+                                        </th>
+                                    ))}
+                                </tr>
+                            ))}
+                        </thead>
+
+                        <tbody>
+                            {table.getRowModel().rows.map(row => (
+                                <tr key={row.id} className="hover:bg-gray-50">
+                                    {row.getVisibleCells().map(cell => (
+                                        <td key={cell.id} className="px-4 py-2 border text-sm">
+                                            {flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext()
+                                            )}
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))}
+
+                            {table.getRowModel().rows.length === 0 && (
+                                <tr>
+                                    <td colSpan={columns.length} className="text-center py-6 text-gray-500">
+                                        No mentors found
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+
+                    {/* Pagination */}
+                    <div className="flex justify-between items-center p-4">
+                        <button
+                            onClick={() => table.previousPage()}
+                            disabled={!table.getCanPreviousPage()}
+                            className="px-4 py-2 border rounded disabled:opacity-50"
+                        >
+                            Previous
+                        </button>
+
+                        <span className="text-sm">
+                            Page {table.getState().pagination.pageIndex + 1} of{" "}
+                            {table.getPageCount()}
+                        </span>
+
+                        <button
+                            onClick={() => table.nextPage()}
+                            disabled={!table.getCanNextPage()}
+                            className="px-4 py-2 border rounded disabled:opacity-50"
+                        >
+                            Next
+                        </button>
+                    </div>
+                </div>
             </div>
         </Layout>
     );

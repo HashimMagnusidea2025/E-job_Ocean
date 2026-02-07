@@ -10,6 +10,7 @@ import { FaCheckCircle, FaUserTie, FaMars, FaBriefcase, FaMoneyBillWave, FaMoney
 import { MdWorkOutline, MdOutlineNotInterested } from 'react-icons/md';
 import { BsPersonVcard } from 'react-icons/bs';
 import axios from '../../utils/axios.js';
+import { useNavigate } from 'react-router';
 const baseUrl = import.meta.env.VITE_BACKEND_URL
 const ViewPublicProfile = () => {
     const [experiences, setExperiences] = useState([]);
@@ -24,7 +25,7 @@ const ViewPublicProfile = () => {
     const [experienceLocations, setExperienceLocations] = useState({});
 
     const [seekerLocation, setSeekerLocation] = useState({ country: "", state: "", city: "" });
-
+    const navigate = useNavigate();
 
 
     const fetchExperienceLocationNames = async (exp) => {
@@ -286,6 +287,14 @@ const ViewPublicProfile = () => {
     return (
         <div className=''>
             <Navbar />
+            <div className="container mx-auto px-4 mt-6">
+                <button
+                    onClick={() => navigate(-1)}
+                    className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg shadow-sm hover:bg-gray-100 transition"
+                >
+                    ← Back
+                </button>
+            </div>
             <div className="w-full container mx-auto grid md:grid-cols-3 gap-6  pt-10 font-[Poppins]">
 
                 <div className="md:col-span-2 bg-white shadow-md rounded-md overflow-hidden">
@@ -308,15 +317,14 @@ const ViewPublicProfile = () => {
                             <h2 className="text-xl sm:text-[25px] font-bold">
                                 {seekerInfo?.user.firstName} {seekerInfo?.user.lastName}</h2>
 
-                             <span className='text-md text-black '>
-                                    {[seekerLocation.city, seekerLocation.state, seekerLocation.country]
-                                        .filter(Boolean)
-                                        .join(', ') || 'Location not specified'}
-                                </span>
+                            <span className='text-md text-black '>
+                                {[seekerLocation.city, seekerLocation.state, seekerLocation.country]
+                                    .filter(Boolean)
+                                    .join(', ') || 'Location not specified'}
+                            </span>
                             {/* <p className="text-sm text-black">Member Since, Sep 19, 2018</p> */}
                         </div>
                     </div>
-
 
                     <div className="py-6 px-4">
                         {/* <div className='bg-[#f1f5fd] py-10 sm:py-14 px-8'>
@@ -325,7 +333,6 @@ const ViewPublicProfile = () => {
                             </button>
                         </div> */}
 
-
                         <div className="mt-6">
                             <h3 className="text-lg sm:text-[30px] font-semibold mb-2">About me</h3>
                             <p className="text-gray-700 text-md">
@@ -333,8 +340,8 @@ const ViewPublicProfile = () => {
 
                             </p>
                         </div>
-                        <hr className='mt-4' />
-                        {/* Skills */}
+                        <hr className='mt-4'/>
+
                         <div className="mt-6 ">
                             <h3 className="text-lg sm:text-[25px] font-semibold mb-2">Skills</h3>
                             <div className="flex flex-wrap gap-4">
@@ -368,7 +375,6 @@ const ViewPublicProfile = () => {
 
                             </div>
 
-
                             {experiences.filter(exp => exp.isActive).map(exp => (
                                 <div key={exp._id} className="mt-2 p-3">
                                     <h3 className="font-semibold text-lg sm:text-[20px]">{exp.jobTitle}</h3>
@@ -388,20 +394,17 @@ const ViewPublicProfile = () => {
                                 </div>
                             ))}
 
-
-
                         </div>
                     </div>
 
                     {/* Education */}
-                    <div className="pt-10">
+                    <div className="pt-10 my-10">
                         <div className="bg-white rounded-lg shadow  border-gray-200 p-6 w-full relative">
 
                             <div className="flex justify-between items-center mb-4">
                                 <h2 className="text-xl sm:text-[32px] font-semibold text-gray-800">Education</h2>
 
                             </div>
-
 
                             {educations.filter(edu => edu.isActive).map(edu => (
                                 <div key={edu._id} className="mt-2">
@@ -446,7 +449,7 @@ const ViewPublicProfile = () => {
                         </ul>
                     </div>
 
-                    <div className="w-full mx-auto bg-white shadow-lg rounded-xl p-6 space-y-4 border">
+                    <div className="w-full mx-auto bg-white shadow-lg rounded-xl p-6 space-y-4 border sticky  top-20">
                         <h2 className="text-xl font-semibold text-blue-600">Candidate Details</h2>
 
                         <div className="grid grid-cols-2 gap-7 text-sm text-gray-700">

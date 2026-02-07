@@ -4,8 +4,8 @@ import noImage from '../../media/png/no-image.png';
 import { useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import Layout from '../seekerDashboard/partials/layout';
-const baseURL = import.meta.env.VITE_BACKEND_URL; // Vite
-// या CRA में: const baseURL = process.env.REACT_APP_BACKEND_URL;
+const baseURL = import.meta.env.VITE_BACKEND_URL;
+
 export default function EditAccountDetails() {
     const [previewLogo, setPreviewLogo] = useState(null);
     const [users, setUsers] = useState(null);
@@ -57,14 +57,14 @@ export default function EditAccountDetails() {
         designation: "",
         registrationNumber: "",
         logo: "",
-        hiringcompanies: "", //  New field added
+        hiringcompanies: "", 
     });
 
-    // Function to get full image URL
+    
     const getFullImageUrl = (path) => {
         if (!path) return noImage;
         if (path.startsWith('http')) return path;
-        // Replace with your actual backend base URL
+       
         return `${baseURL}${path}`;
     };
 
@@ -107,7 +107,7 @@ export default function EditAccountDetails() {
             try {
                 const token = localStorage.getItem("token");
 
-                // First try to fetch company data (for admin-created companies)
+                
                 try {
                     const companyRes = await axios.get("/Company-Information/my-company", {
                         headers: { Authorization: `Bearer ${token}` },
@@ -154,17 +154,17 @@ export default function EditAccountDetails() {
                             hiringcompanies: companyData.company?.hiringcompanies || "",
 
                         });
-                        // Generate map embed code if company location exists
+                        
                         if (companyData.company?.address?.companyLocation) {
                             generateMapEmbedCode(companyData.company.address.companyLocation);
                         }
-                        return; // Exit if company data found
+                        return; 
                     }
                 } catch (companyErr) {
                     console.log("No company found, fetching user data instead");
                 }
 
-                // If no company found, fetch user data (for self-registered users)
+                
                 const userRes = await axios.get("/auth/me", {
                     headers: { Authorization: `Bearer ${token}` },
                 });
@@ -174,7 +174,7 @@ export default function EditAccountDetails() {
                     firstName: userRes.data.firstName || "",
                     lastName: userRes.data.lastName || "",
                     email: userRes.data.email || "",
-                    // Don't set company data for self-registered users as it doesn't exist yet
+                  
                     name: prev.name || "",
                     industry: prev.industry || "",
                     ownershipType: prev.ownershipType || "",
@@ -242,17 +242,7 @@ export default function EditAccountDetails() {
         });
     };
 
-    // const handleLogoChange = (e) => {
-
-    //     const file = e.target.files[0];
-    //     if (file) {
-    //         setLogoFile(file);
-    //         setPreviewLogo(URL.createObjectURL(file));
-
-    //     }
-    //     setLogoFile(e.target.files[0]);
-    // };
-    // Handle logo changes
+   
     const handleLogoChange = (e, type) => {
         const file = e.target.files[0];
         if (file) {
@@ -267,7 +257,7 @@ export default function EditAccountDetails() {
     };
 
 
-    // Function to generate map embed code from location
+  
     const generateMapEmbedCode = (location) => {
         if (!location) {
             setMapEmbedCode('');
@@ -284,24 +274,24 @@ export default function EditAccountDetails() {
         try {
             const token = localStorage.getItem("token");
 
-            // Create user object with password data if provided
+          
             const user = {
                 firstName: formData.firstName,
                 lastName: formData.lastName,
                 email: formData.email,
             };
 
-            // Add password to user object if both current and new passwords are provided
+           
             if (passwords.currentPassword && passwords.newPassword) {
                 user.currentPassword = passwords.currentPassword;
                 user.password = passwords.newPassword;
             }
-            // Convert string IDs to appropriate types for backend
+         
             const addressData = {
                 ...formData.address,
                 country: formData.address.country ? parseInt(formData.address.country) : null,
                 state: formData.address.state ? parseInt(formData.address.state) : null,
-                // city remains as string
+              
             };
 
             const companyData = {
@@ -333,9 +323,9 @@ export default function EditAccountDetails() {
 
             const form = new FormData();
 
-            // For self-registered users, we need to create a company first
+            
             if (!companyId) {
-                // Create a new company
+                
                 form.append("user", users?._id || "");
                 form.append("userData", JSON.stringify(user));
                 form.append("company", JSON.stringify(companyData));
@@ -361,7 +351,7 @@ export default function EditAccountDetails() {
 
                 if (createRes.data && createRes.data.data) {
                     setCompanyId(createRes.data.data._id);
-                    // Reset logo file state after successful upload
+                
 
                     setLogoFile(null);
                     setHiringCompaniesFile(null);
@@ -372,17 +362,17 @@ export default function EditAccountDetails() {
                     Swal.fire("Success", "Company profile created successfully", "success");
                 }
             } else {
-                // Update existing company
+                
                 form.append("user", users?._id || "");
                 form.append("userData", JSON.stringify(user));
                 form.append("company", JSON.stringify(companyData));
                 form.append("hrContact", JSON.stringify(hrContact));
 
-                // Only append logo if a new file was selected
+                
                 if (logoFile) {
                     form.append("employerLogo", logoFile);
                 } else {
-                    // If no new logo file, include the existing logo path to prevent it from being cleared
+                    
                     form.append("existingLogo", formData.logo || "");
                 }
 
@@ -405,18 +395,18 @@ export default function EditAccountDetails() {
                     logo: updatedCompanyData.company?.employerLogo || prev.logo,
                     hiringcompanies: updatedCompanyData.company?.hiringcompanies || prev.hiringcompanies
                 }));
-                // Reset logo file state after successful update
+              
                 setLogoFile(null);
                 setHiringCompaniesFile(null);
                 setPreviewLogo(null);
                 setPreviewHiringCompanies(null);
 
-                // Trigger logo update event for Navbar
+               
                 window.dispatchEvent(new Event('logoUpdated'));
                 Swal.fire("Success", "Company profile updated successfully", "success");
             }
 
-            // Reset password fields after successful submission
+           
             setPasswords({
                 currentPassword: "",
                 newPassword: ""
@@ -432,13 +422,13 @@ export default function EditAccountDetails() {
         console.log("🔑 Password Modal Values:", passwords);
         setIsPasswordModalOpen(false);
     };
-    // Function to generate map URL based on company location
+   
     const generateMapUrl = (location) => {
         if (!location) return '';
         const encodedLocation = encodeURIComponent(location);
         return `https://maps.google.com/maps?q=${encodedLocation}&output=embed`;
     };
-    // Update map URL when companyLocation changes
+    
     useEffect(() => {
         setMapUrl(generateMapUrl(formData.address.companyLocation));
     }, [formData.address.companyLocation]);
@@ -450,7 +440,7 @@ export default function EditAccountDetails() {
                     <h1 className='text-[20px] text-center md:text-[35px] font-semibold'>{companyId ? 'Update Profile' : 'Create Company Profile'}</h1>
                 </div>
 
-                {/* User Info */}
+               
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-sm">First Name</label>
@@ -816,30 +806,7 @@ export default function EditAccountDetails() {
                         />
                     </div>
 
-                    {/* <div className="mt-6">
-                        <label className="block text-sm font-medium mb-2">Location Preview</label>
-                        <div className="border rounded-md overflow-hidden">
-                            {mapEmbedCode ? (
-                                <iframe
-                                    src={mapEmbedCode}
-                                    width="100%"
-                                    height="300"
-                                    style={{ border: 0 }}
-                                    allowFullScreen=""
-                                    loading="lazy"
-                                    referrerPolicy="no-referrer-when-downgrade"
-                                    title="Company Location Map"
-                                ></iframe>
-                            ) : (
-                                <div className="h-64 bg-gray-100 flex items-center justify-center">
-                                    <p className="text-gray-500">Enter company location to see map preview</p>
-                                </div>
-                            )}
-                        </div>
-                        <p className="text-xs text-gray-500 mt-2">
-                            Preview of your company location. Make sure the address above is accurate.
-                        </p>
-                    </div> */}
+                    
                 </section>
 
                 {/* HR Info */}

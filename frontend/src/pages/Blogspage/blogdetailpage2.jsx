@@ -36,6 +36,7 @@ import axioss from "axios";
 
 import { LikeButton, FacebookButton, XTwitterButton, PinterestButton, EmailButton, ShareButton, LinkedinButton } from "../../components/ui/button/button";
 import { CommentList, FollowSocials, SubscribeNow, Categories, BlogsCategoryCards, LatestPost } from "../../components/ui/cards/cards.jsx";
+import { WhatsAppGroupSection } from "../../components/layout/section/WhatsAppGroupSection/WhatsAppGroupSection.jsx";
 
 
 import { useParams } from "react-router";
@@ -357,7 +358,6 @@ export default function BlogDetailsPage2({ blogs }) {
 
     const shareUrl = window.location.href;
 
-
     return (
         <div className="w-full font-[Poppins] bg-gray-50">
             <Navbar />
@@ -513,6 +513,7 @@ export default function BlogDetailsPage2({ blogs }) {
                                                     onClick={handleLike}
                                                     liked={liked}
                                                 />
+
                                             </div>
 
                                             <ReactShareButton
@@ -534,7 +535,7 @@ export default function BlogDetailsPage2({ blogs }) {
 
                                                 {showReactions && (
                                                     <div className="absolute bottom-14 left-0 bg-white shadow-xl border rounded-full px-4 py-2 flex gap-3 z-50 animate-bounce">
-                                                        {["👍", "❤️", "😂", "😮", "😢", "🔥"].map((emoji, index) => (
+                                                        {["🤩", "🔥", "😊", "👍🏼", "👏", "❤️"].map((emoji, index) => (
                                                             <button
                                                                 key={index}
                                                                 className="text-2xl hover:scale-125 transition"
@@ -601,7 +602,7 @@ export default function BlogDetailsPage2({ blogs }) {
 
                                         {showReactions && (
                                             <div className="absolute bottom-14 left-0 bg-white shadow-xl border rounded-full px-4 py-2 flex gap-3 z-50 animate-bounce">
-                                                {["👍", "❤️", "😂", "😮", "😢", "🔥"].map((emoji, index) => (
+                                                {["🤩", "🔥", "😊", "👍🏼", "👏", "❤️"].map((emoji, index) => (
                                                     <button
                                                         key={index}
                                                         className="text-2xl hover:scale-125 transition"
@@ -721,7 +722,7 @@ export default function BlogDetailsPage2({ blogs }) {
 
 
             </div>
-
+            <WhatsAppGroupSection />
             <Footer />
         </div>
     );

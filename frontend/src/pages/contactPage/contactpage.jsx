@@ -139,40 +139,39 @@ export default function ContactPage() {
                         onSubmit={handleSubmit}
                         className="md:w-3/5 flex flex-col gap-5 bg-white/70 p-6 rounded-2xl shadow-md border border-white/50"
                     >
-                       {["fullName", "contactNumber", "email"].map((field, i) => (
-    <div key={i}>
-        <label className="block text-sm font-medium text-gray-700 mb-1 capitalize">
-            {field.replace("Number", " Number")} *
-        </label>
+                        {["fullName", "contactNumber", "email"].map((field, i) => (
+                            <div key={i}>
+                                <label className="block text-sm font-medium text-gray-700 mb-1 capitalize">
+                                    {field.replace("Number", " Number")} *
+                                </label>
 
-        <input
-            type={field === "email" ? "email" : "text"}
-            name={field}
-            value={formData[field]}
-            onChange={(e) => {
-                // ✅ Special handling for contactNumber
-                if (field === "contactNumber") {
-                    const value = e.target.value.replace(/\D/g, ""); // remove non-numeric chars
-                    if (value.length <= 10) {
-                        setFormData({ ...formData, contactNumber: value });
-                        setErrors({ ...errors, contactNumber: "" });
-                    }
-                } else {
-                    handleChange(e);
-                }
-            }}
-            className={`w-full border rounded-lg p-2 bg-white/60 focus:ring-2 focus:outline-none ${
-                errors[field]
-                    ? "border-red-500 focus:ring-red-500"
-                    : "border-gray-300 focus:ring-[#008080]"
-            }`}
-        />
+                                <input
+                                    type={field === "email" ? "email" : "text"}
+                                    name={field}
+                                    value={formData[field]}
+                                    onChange={(e) => {
+                                        // ✅ Special handling for contactNumber
+                                        if (field === "contactNumber") {
+                                            const value = e.target.value.replace(/\D/g, ""); // remove non-numeric chars
+                                            if (value.length <= 10) {
+                                                setFormData({ ...formData, contactNumber: value });
+                                                setErrors({ ...errors, contactNumber: "" });
+                                            }
+                                        } else {
+                                            handleChange(e);
+                                        }
+                                    }}
+                                    className={`w-full border rounded-lg p-2 bg-white/60 focus:ring-2 focus:outline-none ${errors[field]
+                                            ? "border-red-500 focus:ring-red-500"
+                                            : "border-gray-300 focus:ring-[#008080]"
+                                        }`}
+                                />
 
-        {errors[field] && (
-            <p className="text-red-500 text-sm mt-1">{errors[field]}</p>
-        )}
-    </div>
-))}
+                                {errors[field] && (
+                                    <p className="text-red-500 text-sm mt-1">{errors[field]}</p>
+                                )}
+                            </div>
+                        ))}
 
 
                         <div>
@@ -198,7 +197,7 @@ export default function ContactPage() {
                         {/* ✅ Google reCAPTCHA */}
                         <div className="flex justify-center my-2">
                             <ReCAPTCHA
-                                sitekey="6Le7NgYsAAAAAF0y5u52pMhAFPK3P1yo4Vcf-KDB"
+                                sitekey="6LfbA1wsAAAAAPifQAj_kxrAIMDlSmq8LKWFSUDk"
                                 onChange={setCaptchaToken}
                             />
                         </div>

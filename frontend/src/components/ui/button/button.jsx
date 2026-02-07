@@ -9,7 +9,7 @@ import { FaCommentAlt } from "react-icons/fa";
 import { FaFacebookF, FaPinterestP, FaLinkedinIn } from "react-icons/fa";
 import { FaXTwitter } from "react-icons/fa6";
 import { MdEmail, MdShare } from "react-icons/md";
-import { FaRegStar,FaStar  } from "react-icons/fa";
+import { FaRegStar, FaStar } from "react-icons/fa";
 
 // export const LikeButton = ({ blogId, type, likeCount, setLikeCount }) => {
 //   const [liked, setLiked] = useState(false);
@@ -70,8 +70,8 @@ export const LikeButton = ({ blogId, type, liked, setLikeCount, likeCount, onCli
 
 
 export const FavoriteButton = ({ jobId, type }) => {
-  const [favorited, setFavorited] = useState(false);
 
+  const [favorited, setFavorited] = useState(false);
 
   const handleFavorite = async () => {
 
@@ -80,13 +80,13 @@ export const FavoriteButton = ({ jobId, type }) => {
 
       if (!token) {
         if (!token) {
-          Swal.fire("Login required", "Please log in to favorite this item", "warning");
+          Swal.fire("Login required", "Please log in to favorite this Job", "warning");
           return;
         }
       }
 
       const res = await axios.post('/favorite/toggle',
-         { jobId, type },
+        { jobId, type },
         { headers: { Authorization: `Bearer ${token}` } }
       )
       setFavorited(res.data.favorited);
@@ -107,7 +107,7 @@ export const FavoriteButton = ({ jobId, type }) => {
         const res = await axios.get("/favorite/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
-            const isFavorited = res.data.data.some((f) => f.jobId?._id === jobId);
+        const isFavorited = res.data.data.some((f) => f.jobId?._id === jobId);
         setFavorited(isFavorited);
       } catch (err) {
         console.error("Error fetching my favorites:", err);
@@ -119,7 +119,7 @@ export const FavoriteButton = ({ jobId, type }) => {
   return (
     <>
 
-      <div  className=" flex items-center gap-1 text-gray-600 text-sm">
+      <div className=" flex items-center gap-1 text-gray-600 text-sm">
         <button onClick={handleFavorite} className="text-gray-600 flex items-center gap-1 hover:text-blue-600 transition">
           {favorited ? <FaStar size={20} color="text-gray-600" /> : <FaRegStar size={20} />}
 

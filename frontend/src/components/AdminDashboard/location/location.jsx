@@ -1,7 +1,13 @@
 import React, { useEffect, useState } from "react";
 import axios from "../../../utils/axios";
 import Swal from "sweetalert2";
-import DataTable from "react-data-table-component";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  flexRender,
+} from "@tanstack/react-table";
 import { FaEdit, FaTrash, FaToggleOn, FaToggleOff } from "react-icons/fa";
 import Layout from "../../seekerDashboard/partials/layout";
 
@@ -10,7 +16,7 @@ const LocationPage = () => {
     const [editingLocation, setEditingLocation] = useState(null);
     const [formData, setFormData] = useState({ name: "", status: "active" });
     const [showModal, setShowModal] = useState(false);
-    const [filterText, setFilterText] = useState("");
+    const [searchText, setSearchText] = useState("");
 
     const fetchLocations = async () => {
         try {
@@ -59,7 +65,7 @@ const LocationPage = () => {
         try {
             const formattedData = {
                 ...formData,
-                name: toCamelCase(formData.name), // 👈 convert to camelCase
+                name: toCamelCase(formData.name), //  convert to camelCase
             };
 
             if (editingLocation) {
@@ -110,77 +116,62 @@ const LocationPage = () => {
         }
     };
 
-    const filteredLocations = locations.filter((loc) =>
-        loc.name.toLowerCase().includes(filterText.toLowerCase())
-    );
-
     const columns = [
-        
         {
-            name: "ID",
-            selector: (row, index) => index + 1,
-            width: "60px",
+            header: "ID",
+            cell: ({ row }) => row.index + 1,
         },
         {
-            name: "Name",
-            selector: (row) => row.name,
-            sortable: true,
+            accessorKey: "name",
+            header: "Name",
         },
         {
-            name: "Status",
-            cell: (row) => (
-               <div className="flex  gap-1">
-                 <span
-                    className={`px-2 py-1 rounded-full text-xs font-semibold ${row.status === "active"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
-                        }`}
-                >
-                    {row.status}
-                </span>
-                <button
-                        onClick={() => toggleStatus(row)}
-                        title="Toggle Status"
-                        className={`transition duration-200 ${row.status === "active"
-                                ? "text-green-500 hover:text-green-700"
-                                : "text-red-500 hover:text-red-700"
-                            }`}
-                    >
-                        {row.status === "active" ? (
-                            <FaToggleOn size={26} />
-                        ) : (
-                            <FaToggleOff size={26} />
-                        )}
-                    </button>
-               </div>
-            ),
-            sortable: true,
+            header: "Status",
+            cell: ({ row }) =>
+                row.original.status === "active" ? (
+                    <span className="text-green-600 font-semibold">Active</span>
+                ) : (
+                    <span className="text-red-600 font-semibold">Inactive</span>
+                ),
         },
         {
-            name: "Actions",
-            cell: (row) => (
-                <div className="flex gap-3 items-center">
+            header: "Actions",
+            cell: ({ row }) => (
+                <div className="flex gap-3">
                     <button
-                        onClick={() => handleEdit(row)}
-                        className="text-blue-600 hover:text-blue-800"
-                        title="Edit"
+                        onClick={() => handleEdit(row.original)}
+                        className="text-green-600"
                     >
-                        <FaEdit size={18} />
+                        <FaEdit size={20} />
                     </button>
                     <button
-                        onClick={() => handleDelete(row._id)}
-                        className="text-red-600 hover:text-red-800"
-                        title="Delete"
+                        onClick={() => toggleStatus(row.original)}
+                        className="text-blue-600"
                     >
-                        <FaTrash size={18} />
+                        {row.original.status === "active" ? <FaToggleOn size={20} /> : <FaToggleOff size={20} />}
                     </button>
-                    
+                    <button
+                        onClick={() => handleDelete(row.original._id)}
+                        className="text-red-600"
+                    >
+                        <FaTrash size={20} />
+                    </button>
                 </div>
-            )
-        }
-
-
+            ),
+        },
     ];
+
+    const table = useReactTable({
+        data: locations,
+        columns,
+        state: {
+            globalFilter: searchText,
+        },
+        onGlobalFilterChange: setSearchText,
+        getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+    });
 
     return (
         <Layout>
@@ -192,8 +183,8 @@ const LocationPage = () => {
                     <input
                         type="text"
                         placeholder="Search by name..."
-                        value={filterText}
-                        onChange={(e) => setFilterText(e.target.value)}
+                        value={searchText}
+                        onChange={(e) => setSearchText(e.target.value)}
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                 </div>
@@ -213,16 +204,73 @@ const LocationPage = () => {
 
 
             {/* Table */}
-            <div className="bg-white shadow-md rounded-xl p-4">
-                <DataTable
-                    columns={columns}
-                    data={filteredLocations}
-                    pagination
-                    highlightOnHover
-                    dense
-                    responsive
-                    noDataComponent="No locations found."
-                />
+            <div className="bg-white rounded-lg shadow overflow-x-auto">
+                <table className="min-w-full border">
+                    <thead className="bg-gray-100">
+                        {table.getHeaderGroups().map(headerGroup => (
+                            <tr key={headerGroup.id}>
+                                {headerGroup.headers.map(header => (
+                                    <th
+                                        key={header.id}
+                                        className="px-4 py-3 text-left text-sm font-semibold border"
+                                    >
+                                        {flexRender(
+                                            header.column.columnDef.header,
+                                            header.getContext()
+                                        )}
+                                    </th>
+                                ))}
+                            </tr>
+                        ))}
+                    </thead>
+
+                    <tbody>
+                        {table.getRowModel().rows.map(row => (
+                            <tr key={row.id} className="hover:bg-gray-50">
+                                {row.getVisibleCells().map(cell => (
+                                    <td key={cell.id} className="px-4 py-2 border text-sm">
+                                        {flexRender(
+                                            cell.column.columnDef.cell,
+                                            cell.getContext()
+                                        )}
+                                    </td>
+                                ))}
+                            </tr>
+                        ))}
+
+                        {table.getRowModel().rows.length === 0 && (
+                            <tr>
+                                <td colSpan={columns.length} className="text-center py-6 text-gray-500">
+                                    No locations found
+                                </td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+
+                {/* Pagination */}
+                <div className="flex justify-between items-center p-4">
+                    <button
+                        onClick={() => table.previousPage()}
+                        disabled={!table.getCanPreviousPage()}
+                        className="px-4 py-2 border rounded disabled:opacity-50"
+                    >
+                        Previous
+                    </button>
+
+                    <span className="text-sm">
+                        Page {table.getState().pagination.pageIndex + 1} of{" "}
+                        {table.getPageCount()}
+                    </span>
+
+                    <button
+                        onClick={() => table.nextPage()}
+                        disabled={!table.getCanNextPage()}
+                        className="px-4 py-2 border rounded disabled:opacity-50"
+                    >
+                        Next
+                    </button>
+                </div>
             </div>
 
             {/* Modal Form */}

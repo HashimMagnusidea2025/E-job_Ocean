@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from "react";
-import DataTable from "react-data-table-component";
 import noImage from "../../../media/png/no-image.png";
 import Layout from "../../seekerDashboard/partials/layout";
 import axios from "../../../utils/axios.js";
 import Swal from "sweetalert2";
 import { FaEdit, FaTrash, FaToggleOn, FaToggleOff } from "react-icons/fa";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  flexRender,
+} from "@tanstack/react-table";
 const baseURL = import.meta.env.VITE_BACKEND_URL;
 export default function CreateCompany() {
   const [users, setUsers] = useState([]);
@@ -18,7 +24,7 @@ export default function CreateCompany() {
   const [logoPreview, setLogoPreview] = useState(noImage);
   const [mapUrl, setMapUrl] = useState('')
   const [filteredCompany, setfilteredCompany] = useState([]);
-  // categories
+  // Categories
   const [companyCategories, setCompanyCategories] = useState([]);
   const [ownershipCategories, setOwnershipCategories] = useState([]);
   const [noofofficeCategories, setNoofofficeCategories] = useState([]);
@@ -28,6 +34,7 @@ export default function CreateCompany() {
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
   const [error, seterror] = useState();
+  const [searchText, setSearchText] = useState("");
 
   const [formData, setFormData] = useState({
     user: "",
@@ -55,14 +62,14 @@ export default function CreateCompany() {
 
 
 
-  // ✅ Generate Map URL
+  //  Generate Map URL
   const generateMapUrl = (location) => {
     if (!location) return "";
     const encodedLocation = encodeURIComponent(location);
     return `https://maps.google.com/maps?q=${encodedLocation}&z=15&output=embed`;
   };
 
-  // ✅ Update mapUrl whenever textarea changes
+  //  Update mapUrl whenever textarea changes
   useEffect(() => {
     if (formData.company.address.companyLocation) {
       setMapUrl(generateMapUrl(formData.company.address.companyLocation));
@@ -115,6 +122,25 @@ export default function CreateCompany() {
     } catch (err) {
       Swal.fire("Error", "Failed to update status", "error");
     }
+  };
+
+  const handleSearch = (e) => {
+    const value = e.target.value.toLowerCase();
+    setSearchText(value);
+
+    const filtered = companies.filter((company) => {
+      const userName = `${company.user?.firstName || ""} ${company.user?.lastName || ""}`.toLowerCase();
+
+      return (
+        company.company?.name.toLowerCase().includes(value) ||
+        company.company?.industry.toLowerCase().includes(value) ||
+        company.company?.ownershipType.toLowerCase().includes(value) ||
+        userName.includes(value) ||
+        (company.status || '').toLowerCase().includes(value)
+      );
+    });
+
+    setfilteredCompany(filtered);
   };
 
   // categories & users
@@ -248,7 +274,7 @@ export default function CreateCompany() {
     try {
       const payload = new FormData();
 
-      // For create: send user ID as string
+     
       // For update: send user ID as string (not object)
       payload.append("user", formData.user);
 
@@ -268,13 +294,13 @@ export default function CreateCompany() {
       if (logoFile) payload.append("employerLogo", logoFile);
 
       if (editingCompany) {
-        // ✅ update company
+        //  update company
         await axios.put(`/Company-Information/${editingCompany}`, payload, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         Swal.fire("Updated", "Company updated successfully!", "success");
       } else {
-        // ✅ create company
+        //  create company
         await axios.post("/Company-Information", payload, {
           headers: { "Content-Type": "multipart/form-data" },
         });
@@ -298,70 +324,162 @@ export default function CreateCompany() {
 
   const columns = [
     {
-      name: "ID",
-      cell: (row, index) => index + 1,
-      width: "35px",
+      header: "ID",
+      cell: ({ row }) => row.index + 1,
     },
     {
-      name: "Company Category",
-      selector: (row) => row.company?.industry,
+      accessorKey: "company.name",
+      header: "Company Name",
     },
     {
-      name: "Company Name", selector: (row) => row.company?.name, sortable: true,
-
-    },
-    { name: "Ownership Type", selector: (row) => row.company?.ownershipType, sortable: true },
-    {
-      name: "User",
-      selector: (row) => `${row.user?.firstName || ""} ${row.user?.lastName || ""}`,
+      accessorKey: "company.industry",
+      header: "Industry",
     },
     {
-      name: "Status",
-      cell: (row) => (
-        <div className="flex items-center gap-2">
-          <span
-            className={`px-2 py-1 text-xs rounded text-white ${row.status === "active" ? "bg-green-500" : "bg-red-500"
-              }`}
-          >
-            {row.status}
-          </span>
-          <button onClick={() => handleToggleStatus(row._id)}>
-            {row.status === "active" ? (
-              <FaToggleOn size={22} className="text-green-500" />
-            ) : (
-              <FaToggleOff size={22} className="text-red-500" />
-            )}
-          </button>
-        </div>
-      ),
+      accessorKey: "company.ownershipType",
+      header: "Ownership Type",
     },
     {
-      name: "Actions",
-      cell: (row) => (
+      header: "User",
+      cell: ({ row }) => `${row.original.user?.firstName || ""} ${row.original.user?.lastName || ""}`,
+    },
+    {
+      header: "Status",
+      cell: ({ row }) =>
+        row.original.status === "active" ? (
+          <span className="text-green-600 font-semibold">Active</span>
+        ) : (
+          <span className="text-red-600 font-semibold">Inactive</span>
+        ),
+    },
+    {
+      header: "Actions",
+      cell: ({ row }) => (
         <div className="flex gap-3">
-          <FaEdit size={20} className="text-blue-600 cursor-pointer" onClick={() => openEditModal(row)} />
-          <FaTrash size={20} className="text-red-600 cursor-pointer" onClick={() => handleDelete(row._id)} />
+          <button
+            onClick={() => openEditModal(row.original)}
+            className="text-green-600"
+          >
+            <FaEdit size={20} />
+          </button>
+          <button
+            onClick={() => handleToggleStatus(row.original._id)}
+            className={row.original.status === "active" ? "text-red-600" : "text-green-600"}
+          >
+            {row.original.status === "active" ? <FaToggleOff size={20} /> : <FaToggleOn size={20} />}
+          </button>
+          <button
+            onClick={() => handleDelete(row.original._id)}
+            className="text-red-600"
+          >
+            <FaTrash size={20} />
+          </button>
         </div>
       ),
     },
   ];
 
+  const table = useReactTable({
+    data: filteredCompany,
+    columns,
+    state: {
+      globalFilter: searchText,
+    },
+    onGlobalFilterChange: setSearchText,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+  });
+
   return (
     <Layout>
-      {/* Table */}
-      <div className="mt-4 bg-white p-6 rounded-lg shadow-md">
-        <div className=" flex justify-between items-center">
-          <h2 className="text-xl font-semibold mb-4">All Companies</h2>
-          <div className="flex justify-end mb-6 mt-5">
+      <div className="p-2">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-3xl font-bold text-gray-800">Companies</h2>
+          <input
+            type="text"
+            placeholder="Search companies..."
+            value={searchText}
+            onChange={handleSearch}
+            className="border p-2 rounded"
+          />
+          <button
+            onClick={openCreateModal}
+            className="bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition"
+          >
+            + Create Company
+          </button>
+        </div>
+
+        <div className="bg-white rounded-lg shadow overflow-x-auto">
+          <table className="min-w-full border">
+            <thead className="bg-gray-100">
+              {table.getHeaderGroups().map(headerGroup => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map(header => (
+                    <th
+                      key={header.id}
+                      className="px-4 py-3 text-left text-sm font-semibold border"
+                    >
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+
+            <tbody>
+              {table.getRowModel().rows.map(row => (
+                <tr key={row.id} className="hover:bg-gray-50">
+                  {row.getVisibleCells().map(cell => (
+                    <td key={cell.id} className="px-4 py-2 border text-sm">
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+
+              {table.getRowModel().rows.length === 0 && (
+                <tr>
+                  <td colSpan={columns.length} className="text-center py-6 text-gray-500">
+                    No companies found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+
+          {/* Pagination */}
+          <div className="flex justify-between items-center p-4">
             <button
-              onClick={openCreateModal}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-md"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+              className="px-4 py-2 border rounded disabled:opacity-50"
             >
-              + Add Company
+              Previous
+            </button>
+
+            <span className="text-sm">
+              Page {table.getState().pagination.pageIndex + 1} of{" "}
+              {table.getPageCount()}
+            </span>
+
+            <button
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+              className="px-4 py-2 border rounded disabled:opacity-50"
+            >
+              Next
             </button>
           </div>
         </div>
-        <DataTable columns={columns} data={companies} pagination highlightOnHover striped />
       </div>
 
       {/* MODAL */}

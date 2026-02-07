@@ -4,8 +4,17 @@ import Layout from '../../seekerDashboard/partials/layout';
 import { FaEdit, FaTrash, FaToggleOn, FaToggleOff, FaEye } from "react-icons/fa";
 import Select from "react-select";
 import Swal from 'sweetalert2';
-const baseURL = import.meta.env.VITE_BACKEND_URL; // Vite
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  flexRender,
+} from "@tanstack/react-table";
+const baseURL = import.meta.env.VITE_BACKEND_URL; 
+
 export default function CourseList() {
+  
   const [courses, setCourses] = useState([]);
   const [categories, setCategories] = useState([]);
   const [speakers, setSpeakers] = useState([]);
@@ -16,6 +25,8 @@ export default function CourseList() {
   const [isViewing, setIsViewing] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [filter, setFilter] = useState('');
+  const [filteredCourses, setFilteredCourses] = useState([]);
+  const [searchText, setSearchText] = useState("");
 
   const [formData, setFormData] = useState({
     courseTitle: '',
@@ -39,19 +50,20 @@ export default function CourseList() {
     courseFile: null,
   });
 
-  // Fetch courses
+ 
   const fetchCourses = async () => {
     try {
       const res = await axios.get('/courses');
       if (res.data.success) {
         setCourses(res.data.data);
+        setFilteredCourses(res.data.data);
       }
     } catch (err) {
       setError('Failed to fetch courses');
     }
   };
 
-  // Fetch categories
+  
   const fetchCategories = async () => {
     try {
       const res = await axios.get('/course-category');
@@ -62,7 +74,7 @@ export default function CourseList() {
     }
   };
 
-  // Fetch speakers
+  
   const fetchSpeakers = async () => {
     try {
       const res = await axios.get('/speakers');
@@ -73,17 +85,138 @@ export default function CourseList() {
     }
   };
 
-  // Fetch skills
-  
+  const handleSearch = (e) => {
+    const value = e.target.value.toLowerCase();
+    setSearchText(value);
+
+    const filtered = courses.filter((course) => {
+      const instructorName = course.instructor ? `${course.instructor.firstName} ${course.instructor.lastName}`.toLowerCase() : '';
+      const categoryName = course.category?.CourseCategory?.toLowerCase() || '';
+
+      return (
+        course.courseTitle.toLowerCase().includes(value) ||
+        course.courseDescription.toLowerCase().includes(value) ||
+        instructorName.includes(value) ||
+        categoryName.includes(value) ||
+        (course.status || '').toLowerCase().includes(value) ||
+        (course.RegisterStartDate || '').toLowerCase().includes(value) ||
+        (course.RegisterEndDate || '').toLowerCase().includes(value)
+      );
+    });
+
+    setFilteredCourses(filtered);
+  };
+
+  const columns = [
+    {
+      header: "ID",
+      cell: ({ row }) => row.index + 1,
+    },
+    {
+      accessorKey: "courseTitle",
+      header: "Title",
+    },
+    {
+      header: "Category",
+      accessorKey: "category.CourseCategory",
+    },
+    {
+      header: "Fees",
+      cell: ({ row }) =>
+        row.original.paymentType === 'Paid' ? (
+          <span className="text-green-600 font-semibold">${row.original.fees}</span>
+        ) : (
+          <span className="text-gray-600 font-semibold">Free</span>
+        ),
+    },
+    {
+      header: "Instructor",
+      cell: ({ row }) =>
+        row.original.instructor ? `${row.original.instructor.firstName} ${row.original.instructor.lastName}` : 'N/A',
+    },
+    {
+      header: "Dates",
+      cell: ({ row }) => (
+        <div className="text-sm">
+          <div>{new Date(row.original.RegisterStartDate).toLocaleDateString()}</div>
+          <div className="text-gray-500">to {new Date(row.original.RegisterEndDate).toLocaleDateString()}</div>
+        </div>
+      ),
+    },
+    {
+      header: "Status",
+      cell: ({ row }) =>
+        row.original.status === "active" ? (
+          <span className="text-green-600 font-semibold">Active</span>
+        ) : (
+          <span className="text-red-600 font-semibold">Inactive</span>
+        ),
+    },
+    {
+      header: "Actions",
+      cell: ({ row }) => (
+        <div className="flex gap-3">
+          <button
+            onClick={() => {
+              setIsViewing(true);
+              setSelectedCourse(row.original);
+              setShowModal(true);
+            }}
+            className="text-blue-600"
+          >
+            <FaEye size={20} />
+          </button>
+          <button
+            onClick={() => {
+              setIsEditing(true);
+              setSelectedCourse(row.original);
+              setFormData({
+                ...row.original,
+                paymentType: row.original.paymentType || 'free',
+                category: row.original.category?._id || '',
+                instructor: row.original.instructor?._id || '',
+                RegisterStartDate: row.original.RegisterStartDate ? new Date(row.original.RegisterStartDate).toISOString().split('T')[0] : '',
+                RegisterEndDate: row.original.RegisterEndDate ? new Date(row.original.RegisterEndDate).toISOString().split('T')[0] : '',
+                image: null,
+                courseFile: null,
+              });
+              setShowModal(true);
+            }}
+            className="text-green-600"
+          >
+            <FaEdit size={20} />
+          </button>
+          <button
+            onClick={() => handleDelete(row.original._id)}
+            className="text-red-600"
+          >
+            <FaTrash size={20} />
+          </button>
+        </div>
+      ),
+    },
+  ];
+
+  const table = useReactTable({
+    data: filteredCourses,
+    columns,
+    state: {
+      globalFilter: searchText,
+    },
+    onGlobalFilterChange: setSearchText,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+  });
 
   useEffect(() => {
     fetchCourses();
     fetchCategories();
     fetchSpeakers();
-    
+
   }, []);
 
-  // Handle input change
+ 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData({
@@ -94,7 +227,7 @@ export default function CourseList() {
   const handleImageChange = (e) => {
     setFormData({
       ...formData,
-      image: e.target.files[0], //  file object
+      image: e.target.files[0], 
     });
   };
   const handleCourseFileChange = (e) => {
@@ -104,53 +237,7 @@ export default function CourseList() {
     });
   };
 
-  // Submit form
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   setLoading(true);
-  //   setError('');
-
-  //   try {
-  //     let res;
-  //     if (isEditing) {
-  //       res = await axios.put(`/courses/${selectedCourse._id}`, formData);
-  //     } else {
-  //       res = await axios.post('/courses', formData);
-  //     }
-  //     if (res.data.success) {
-  //       if (isEditing) {
-  //         setCourses(courses.map(course => course._id === selectedCourse._id ? res.data.data : course));
-  //       } else {
-  //         setCourses([res.data.data, ...courses]);
-  //       }
-  //       setShowModal(false);
-  //       setIsEditing(false);
-  //       setSelectedCourse(null);
-  //       setFormData({
-  //         courseTitle: '',
-  //         courseDescription: '',
-  //         content: '',
-  //         RegisterStartDate: '',
-  //         RegisterEndDate: '',
-  //         fees: '',
-      
-  //         duration: '',
-  //         instructor: '',
-  //         prerequisites: '',
-  //         category: '',
-  //         level: '',
-  //         mode: '',
-  //         capacity: '',
-
-  //         status: 'active'
-  //       });
-  //     }
-  //   } catch (err) {
-  //     setError(err.response?.data?.message || `Failed to ${isEditing ? 'update' : 'create'} course`);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -186,7 +273,7 @@ export default function CourseList() {
         setIsEditing(false);
         setSelectedCourse(null);
 
-        // ✅ SWEET ALERT SUCCESS
+        
         Swal.fire({
           icon: 'success',
           title: isEditing ? 'Course Updated 🎉' : 'Course Created 🎉',
@@ -201,7 +288,7 @@ export default function CourseList() {
       const msg =
         err.response?.data?.message || 'Something went wrong';
 
-      // ❌ SWEET ALERT ERROR
+   
       Swal.fire({
         icon: 'error',
         title: 'Oops!',
@@ -215,19 +302,7 @@ export default function CourseList() {
   };
 
 
-  // Delete course
-  // const handleDelete = async (courseId) => {
-  //   if (window.confirm('Are you sure you want to delete this course?')) {
-  //     try {
-  //       const res = await axios.delete(`/courses/${courseId}`);
-  //       if (res.data.success) {
-  //         setCourses(courses.filter(course => course._id !== courseId));
-  //       }
-  //     } catch (err) {
-  //       setError('Failed to delete course');
-  //     }
-  //   }
-  // };
+  
   const handleDelete = async (courseId) => {
     const result = await Swal.fire({
       title: 'Are you sure?',
@@ -279,9 +354,9 @@ export default function CourseList() {
           <div className="flex items-center space-x-4 mt-4 md:mt-0">
             <input
               type="text"
-              placeholder="Filter courses..."
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
+              placeholder="Search courses..."
+              value={searchText}
+              onChange={handleSearch}
               className="px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
             />
             <button
@@ -300,7 +375,7 @@ export default function CourseList() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-800">Course List</h2>
-            <p className="text-sm text-gray-600 mt-1">{courses.filter(course => course.courseTitle.toLowerCase().includes(filter.toLowerCase())).length} courses available</p>
+            <p className="text-sm text-gray-600 mt-1">{filteredCourses.length} courses available</p>
           </div>
 
           {courses.length === 0 ? (
@@ -320,108 +395,73 @@ export default function CourseList() {
               </button>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course Category</th>
-
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fees</th>
-                    {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th> */}
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Instructor</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dates</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                  </tr>
+            <div className="bg-white rounded-lg shadow overflow-x-auto">
+              <table className="min-w-full border">
+                <thead className="bg-gray-100">
+                  {table.getHeaderGroups().map(headerGroup => (
+                    <tr key={headerGroup.id}>
+                      {headerGroup.headers.map(header => (
+                        <th
+                          key={header.id}
+                          className="px-4 py-3 text-left text-sm font-semibold border"
+                        >
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                        </th>
+                      ))}
+                    </tr>
+                  ))}
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {courses.filter(course => course.courseTitle.toLowerCase().includes(filter.toLowerCase())).map(course => {
-                    return (
-                      <tr key={course._id} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-6 py-4">
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">{course.courseTitle}</div>
 
+                <tbody>
+                  {table.getRowModel().rows.map(row => (
+                    <tr key={row.id} className="hover:bg-gray-50">
+                      {row.getVisibleCells().map(cell => (
+                        <td key={cell.id} className="px-4 py-2 border text-sm">
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
 
-                          </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div>
-
-
-                            <div className="text-xs text-gray-500 mt-1">{course.category?.CourseCategory || 'Uncategorized'}</div>
-                          </div>
-                        </td>
-
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 py-1 text-xs rounded-full ${course.paymentType === 'Paid' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                            {course.paymentType === 'Paid' ? `$${course.fees}` : 'Free'}
-                          </span>
-                        </td>
-                        {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {course.duration || 'N/A'}
-                        </td> */}
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {course.instructor ? `${course.instructor.salutation || ''} ${course.instructor.firstName} ${course.instructor.lastName}`.trim() : 'N/A'}
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="text-sm">
-                            <div className="text-gray-900">{new Date(course.RegisterStartDate).toLocaleDateString()}</div>
-                            <div className="text-gray-500 text-xs">to {new Date(course.RegisterEndDate).toLocaleDateString()}</div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${course.status === 'active'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
-                            }`}>
-                            {course.status === 'active' ? 'Active' : 'Inactive'}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-lg font-medium">
-                          <button
-                            onClick={() => {
-                              setIsViewing(true);
-                              setSelectedCourse(course);
-                              setShowModal(true);
-                            }}
-                            className="text-blue-600 hover:text-blue-900 mr-3"
-                          >
-                            <FaEye />
-                          </button>
-                          <button
-                            onClick={() => {
-                              setIsEditing(true);
-                              setSelectedCourse(course);
-                              setFormData({
-                                ...course,
-                                paymentType: course.paymentType || 'free',
-                                category: course.category?._id || course.category,
-                                instructor: course.instructor?._id || course.instructor,
-                                RegisterStartDate: course.RegisterStartDate ? new Date(course.RegisterStartDate).toISOString().split('T')[0] : '',
-                                RegisterEndDate: course.RegisterEndDate ? new Date(course.RegisterEndDate).toISOString().split('T')[0] : '',
-                                image: null,
-                                courseFile: null,
-                              });
-                              setShowModal(true);
-                            }}
-                            className="text-indigo-600 hover:text-indigo-900 mr-3"
-                          >
-                            <FaEdit />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(course._id)}
-                            className="text-red-600 hover:text-red-900"
-                          >
-                            <FaTrash />
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
+                  {table.getRowModel().rows.length === 0 && (
+                    <tr>
+                      <td colSpan={columns.length} className="text-center py-6 text-gray-500">
+                        No courses found
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
+
+              {/* Pagination */}
+              <div className="flex justify-between items-center p-4">
+                <button
+                  onClick={() => table.previousPage()}
+                  disabled={!table.getCanPreviousPage()}
+                  className="px-4 py-2 border rounded disabled:opacity-50"
+                >
+                  Previous
+                </button>
+
+                <span className="text-sm">
+                  Page {table.getState().pagination.pageIndex + 1} of{" "}
+                  {table.getPageCount()}
+                </span>
+
+                <button
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}
+                  className="px-4 py-2 border rounded disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
             </div>
           )}
         </div>

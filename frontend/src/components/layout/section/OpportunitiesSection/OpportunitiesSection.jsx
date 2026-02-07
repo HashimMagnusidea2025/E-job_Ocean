@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { FaMapMarkerAlt, FaClock, FaMoneyBill, FaUserAlt, FaBuilding, FaBriefcase, FaWrench, FaHeart, FaEye, FaComment } from "react-icons/fa";
+import { FaMapMarkerAlt, FaClock, FaMoneyBill, FaUserAlt, FaBuilding, FaWrench, FaHeart, FaEye, FaComment } from "react-icons/fa";
 import axios from "../../../../utils/axios.js";
 import depositphotos from "../../../../media/jpg/depositphotos.jpg";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Pagination, Autoplay, Grid } from "swiper/modules";
+import { FaBriefcase } from "react-icons/fa";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 const tabs = ["Job Vacancies", "CA Articleship", "Industrial Training", "Internships"];
 import Swal from "sweetalert2";
@@ -26,6 +28,9 @@ export default function OpportunitiesSection() {
 
     const [activeTab, setActiveTab] = useState()
 
+    const POSTS_PER_PAGE = 8;
+    const [currentPage, setCurrentPage] = useState(1);
+
     // Form state
     const [formData, setFormData] = useState({
         firstName: "",
@@ -37,7 +42,6 @@ export default function OpportunitiesSection() {
         city: "",
         resume: null,
     });
-
 
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
@@ -80,7 +84,7 @@ export default function OpportunitiesSection() {
     const [tempModeFilter, setTempModeFilter] = useState("");
     const [tempExperienceFilter, setTempExperienceFilter] = useState("");
 
-    // ✅ Filter jobs based on APPLIED filters (not temporary ones)
+    //  Filter jobs based on APPLIED filters (not temporary ones)
     const filteredJobs = jobs.filter((job) => {
         // Match country/state/city using job.country, job.state, job.city
         const matchesCountry = appliedCountryFilter ? job.country == appliedCountryFilter : true;
@@ -94,7 +98,7 @@ export default function OpportunitiesSection() {
         const matchesExperience = appliedExperienceFilter ? job.experience?.toLowerCase() === appliedExperienceFilter.toLowerCase() : true;
 
 
-        // ✅ Search from HeroSection (title / keyword / location)
+        //  Search from HeroSection (title / keyword / location)
         const matchesTitle = searchTitle
             ? job.jobTitle?.toLowerCase().includes(searchTitle) ||
             job.skills?.some((s) =>
@@ -128,6 +132,17 @@ export default function OpportunitiesSection() {
             matchesSearchLocation
         );
     });
+    const totalPages = Math.ceil(filteredJobs.length / POSTS_PER_PAGE);
+
+    const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
+    const paginatedJobs = filteredJobs.slice(
+        startIndex,
+        startIndex + POSTS_PER_PAGE
+    );
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filteredJobs.length]);
 
     const handleReadMore = async (job) => {
         try {
@@ -218,6 +233,8 @@ export default function OpportunitiesSection() {
         setAppliedCityFilter(tempCityFilter);
         setAppliedModeFilter(tempModeFilter);
         setAppliedExperienceFilter(tempExperienceFilter);
+        setCurrentPage(1);
+
 
         console.log("Filters applied:", {
             country: tempCountryFilter,
@@ -235,6 +252,7 @@ export default function OpportunitiesSection() {
         setTempCityFilter("");
         setTempModeFilter("");
         setTempExperienceFilter("");
+        setCurrentPage(1);
 
         // Also reset applied filters
         setAppliedCountryFilter("");
@@ -268,14 +286,12 @@ export default function OpportunitiesSection() {
     const handleLike = async (jobId) => {
         try {
             const token = localStorage.getItem("token");
-            if (!token) {
-                alert("Please login to like jobs");
-                return;
-            }
+            const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
             const res = await axios.post(
                 "/blogs/like",
                 { id: jobId, type: "job" },
-                { headers: { Authorization: `Bearer ${token}` } }
+                { headers }
             );
 
             if (res.data.totalCount !== undefined) {
@@ -291,7 +307,19 @@ export default function OpportunitiesSection() {
             }
         }
     };
+    const fetchNamesByIds = async (ids = [], apiPath) => {
+        if (!Array.isArray(ids) || ids.length === 0) return [];
 
+        const requests = ids.map(id =>
+            axios
+                .get(`/${apiPath}/${id}`)
+                .then(res => res.data?.data?.name || res.data?.name)
+                .catch(() => null)
+        );
+
+        const results = await Promise.all(requests);
+        return results.filter(Boolean);
+    };
     // Fetch all job data (likes, views, comments)
     useEffect(() => {
         const fetchAllJobData = async () => {
@@ -349,45 +377,31 @@ export default function OpportunitiesSection() {
         const fetchJobs = async () => {
             try {
                 const response = await axios.get("/job-post/active");
-                const jobsData = response.data;
+                // const jobsData = response.data;
+                const jobsData = response.data.data || response.data || [];
+
                 console.log(jobsData);
 
 
-                // For each job, fetch its location names
                 const locationPromises = jobsData.map(async (job) => {
-                    const loc = { city: "", state: "", country: "" };
+                    const [countries, states, cities] = await Promise.all([
+                        fetchNamesByIds(job.country, "country"),
+                        fetchNamesByIds(job.state, "state"),
+                        fetchNamesByIds(job.city, "city"),
+                    ]);
 
-                    if (job.country) {
-                        try {
-                            const countryRes = await axios.get(`/country/${job.country}`);
-                            loc.country = countryRes.data.data?.name || countryRes.data?.name || "Unknown Country";
-                        } catch (error) {
-                            loc.country = "Unknown Country";
-                        }
-                    }
-
-                    if (job.state) {
-                        try {
-                            const stateRes = await axios.get(`/state/${job.state}`);
-                            loc.state = stateRes.data.data?.name || stateRes.data?.name || "Unknown State";
-                        } catch (error) {
-                            loc.state = "Unknown State";
-                        }
-                    }
-
-                    if (job.city) {
-                        try {
-                            const cityRes = await axios.get(`/city/${job.city}`);
-                            loc.city = cityRes.data.data?.name || cityRes.data?.name || "Unknown City";
-                        } catch (error) {
-                            loc.city = "Unknown City";
-                        }
-                    }
-
-                    return { jobId: job._id, location: loc };
+                    return {
+                        jobId: job._id,
+                        location: {
+                            country: countries,
+                            state: states,
+                            city: cities,
+                        },
+                    };
                 });
 
                 const locationsArray = await Promise.all(locationPromises);
+
                 const locationsMap = {};
                 locationsArray.forEach(item => {
                     locationsMap[item.jobId] = item.location;
@@ -395,6 +409,7 @@ export default function OpportunitiesSection() {
 
                 setLocationNamesMap(locationsMap);
                 setJobs(jobsData);
+
 
 
             } catch (error) {
@@ -405,67 +420,31 @@ export default function OpportunitiesSection() {
         };
         fetchJobs();
     }, []);
+    const formatLocationPart = (arr, label) => {
+        if (!arr || arr.length === 0) return "";
 
-    // const handleChange = (e) => {
-    //     const { name, value, files } = e.target;
-    //     if (name === "resume") {
-    //         setFormData(prev => ({ ...prev, resume: files[0] }));
-    //     } else {
-    //         setFormData(prev => ({
-    //             ...prev,
-    //             [name]: value,
-    //             ...(name === "country" ? { state: "", city: "" } : {}),
-    //             ...(name === "state" ? { city: "" } : {})
-    //         }));
-    //     }
-    // };
-
-    // const handleSubmit = async (e) => {
-    //     e.preventDefault();
-
-    //     if (!formData.resume) {
-    //         return Swal.fire({
-    //             icon: "warning",
-    //             title: "Resume Required",
-    //             text: "Please upload your resume before submitting.",
-    //         });
-    //     }
-
-    //     const submissionData = new FormData();
-    //     for (let key in formData) {
-    //         submissionData.append(key, formData[key]);
-    //     }
-    //     submissionData.append("jobId", selectedJob._id);
-
-    //     try {
-    //         const response = await axios.post("/job-register", submissionData, {
-    //             headers: { "Content-Type": "multipart/form-data" },
-    //         });
-
-    //         Swal.fire({
-    //             icon: "success",
-    //             title: "Success",
-    //             text: "Application submitted successfully!",
-    //             confirmButtonColor: "#339ca0",
-    //         });
-
-    //         closeModal();
-    //     } catch (err) {
-    //         console.error(err.response?.data || err);
-    //         Swal.fire({
-    //             icon: "error",
-    //             title: "Submission Failed",
-    //             text: err.response?.data?.message || "Failed to submit application.",
-    //         });
-    //     }
-    // };
+        if (arr.length <= 2) return arr.join(", ");
+        return `${arr[0]}, ${arr[1]} +${arr.length - 2} ${label}`;
+    };
 
     const getLocationString = (jobId) => {
         const loc = locationNamesMap[jobId];
         if (!loc) return "Location not specified";
-        const parts = [loc.city, loc.state, loc.country].filter(Boolean);
-        return parts.length ? parts.join(", ") : "Location not specified";
+
+        const city = formatLocationPart(loc.city, "cities");
+        const state = formatLocationPart(loc.state, "states");
+        const country = formatLocationPart(loc.country, "countries");
+
+        return [city, state, country].filter(Boolean).join(", ");
     };
+
+
+    // const getLocationString = (jobId) => {
+    //     const loc = locationNamesMap[jobId];
+    //     if (!loc) return "Location not specified";
+    //     const parts = [loc.city, loc.state, loc.country].filter(Boolean);
+    //     return parts.length ? parts.join(", ") : "Location not specified";
+    // };
 
     const getCompanyLogo = (job) => {
         if (job.companyId?.company?.employerLogo) {
@@ -481,6 +460,7 @@ export default function OpportunitiesSection() {
 
 
 
+
     return (
         <section className="container mx-auto bg-white">
             <div className="py-20 px-6 w-full">
@@ -491,7 +471,7 @@ export default function OpportunitiesSection() {
                 <div className="border border-gray-200 rounded-2xl shadow-sm bg-white py-6">
                     <div className="flex justify-center flex-wrap gap-3">
 
-                        {/* 🌍 Country Filter */}
+                        {/*  Country Filter */}
                         <div className="flex flex-col min-w-[180px]">
                             <label className="block text-sm font-semibold text-gray-700 mb-2">Country</label>
                             <Select
@@ -518,7 +498,7 @@ export default function OpportunitiesSection() {
                             />
                         </div>
 
-                        {/* 🏙️ State Filter */}
+                        {/*  State Filter */}
                         <div className="flex flex-col min-w-[180px]">
                             <label className="block text-sm font-semibold text-gray-700 mb-2">State</label>
                             <Select
@@ -545,7 +525,7 @@ export default function OpportunitiesSection() {
                             />
                         </div>
 
-                        {/* 🏘️ City Filter */}
+                        {/*  City Filter */}
                         <div className="flex flex-col min-w-[180px]">
                             <label className="block text-sm font-semibold text-gray-700 mb-2">City</label>
                             <Select
@@ -608,8 +588,8 @@ export default function OpportunitiesSection() {
                                     { value: "1-3 years", label: "1-3 Years" },
                                     { value: "3-5 years", label: "3-5 Years" },
                                     { value: "5-10 years", label: "5-10 Years" },
-                                    { value: "10-15 years", label: "10+10 Years" },
-                                    { value: "15-20 years", label: "15+20 Years" },
+                                    { value: "10-15 years", label: "10+15 Years" },
+                                    { value: "15+ years", label: "15+ Years" },
                                 ]}
                                 value={
                                     tempExperienceFilter
@@ -654,67 +634,37 @@ export default function OpportunitiesSection() {
 
                 {/* Show loading or results */}
                 {loading ? (
-                    <div className="text-center text-gray-500 mt-10">Loading jobs...</div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+                        {[...Array(15)].map((_, index) => (
+                            <div key={index} className="p-4 border rounded-lg animate-pulse">
+                                <div className="h-4 bg-gray-300 rounded w-3/4 mb-3"></div>
+                                <div className="h-3 bg-gray-200 rounded w-full mb-2"></div>
+                                <div className="h-3 bg-gray-200 rounded w-5/6"></div>
+                            </div>
+                        ))}
+                    </div>
                 ) : filteredJobs.length === 0 ? (
                     <div className="text-center text-gray-500 mt-10">
                         {jobs.length === 0 ? "No jobs available" : "No matching jobs found. Try different filters."}
                     </div>
                 ) : (
-                    <Swiper
-                        modules={[Navigation, Pagination, Autoplay, Grid]}
-                        navigation
-                        spaceBetween={20}
-                        centerInsufficientSlides={true}
-                        className="mt-10"
-
-                        // Mobile default
-                        slidesPerView={1}
-                        grid={{ rows: 1 }}
-
-                        breakpoints={{
-                            640: {
-                                slidesPerView: 1,
-                                grid: { rows: 1 },
-                            },
-                            768: {
-                                slidesPerView: 2,
-                                grid: { rows: 1 },
-                            },
-                            1024: {
-                                slidesPerView: 4,          // ✅ 4 columns
-                                grid: {
-                                    rows: 3,                // ✅ 2 rows
-                                    fill: "row",            // ⭐ MOST IMPORTANT
-                                },
-                            },
-                        }}
-                    >
-
-
-                        {filteredJobs.map((job) => {
-                            // Yeh variables map function ke andar define karein
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-10">
+                        {paginatedJobs.map((job) => {
                             const companyLogo = getCompanyLogo(job);
                             const companyName = getCompanyName(job);
 
                             return (
-                                <SwiperSlide key={job._id}>
-                                    <div className="bg-white rounded-2xl p-5 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-between relative border border-gray-200 h-[340px]">
+                                <div key={job._id}>
+                                    <div className="bg-white rounded-2xl  p-5 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-between relative border border-gray-200 h-[360px]">
 
                                         {/* Company Logo */}
-                                        <div className="absolute top-2 right-5">
+                                        <div className="absolute top-0 right-2">
                                             {companyLogo ? (
                                                 <img
                                                     src={companyLogo}
                                                     alt={companyName}
                                                     className="w-16 h-16 rounded-xl border-2 border-white shadow-md object-cover bg-white"
-                                                    onError={(e) => {
-                                                        e.target.style.display = 'none';
-                                                        const fallback = document.createElement('div');
-                                                        fallback.className =
-                                                            'w-14 h-14 bg-gradient-to-br from-[#e0f7fa] to-[#b2ebf2] rounded-xl border-2 border-white shadow-md flex items-center justify-center';
-                                                        fallback.innerHTML = `<span class="text-[#00796b] font-bold text-base">${companyName.charAt(0)}</span>`;
-                                                        e.target.parentNode.appendChild(fallback);
-                                                    }}
+
                                                 />
                                             ) : (
                                                 <div className="w-14 h-14 bg-gradient-to-br from-[#e0f7fa] to-[#b2ebf2] rounded-xl border-2 border-white shadow-md flex items-center justify-center">
@@ -726,34 +676,34 @@ export default function OpportunitiesSection() {
                                         </div>
 
                                         {/* Card Content */}
-                                        <div className="flex flex-col h-full justify-between mt-8">
+                                        <div className="flex flex-col h-full  mt-7">
 
                                             {/* Top Section */}
                                             <div>
                                                 {/* Company Name */}
                                                 <div className="flex items-center gap-2 text-sm text-gray-600">
                                                     <FaBuilding className="text-gray-400" />
-                                                    <span className="font-medium truncate">{companyName}</span>
+                                                    <span className="font-medium truncate line-clamp-1">{companyName}</span>
                                                 </div>
 
                                                 {/* Job Title */}
                                                 <h3 className="text-lg font-semibold text-gray-900 line-clamp-1 mt-2">
-                                                    {job.jobTitle || "Untitled Job"}
+                                                    {job.jobTitle}
                                                 </h3>
 
                                                 {/* Job Type / Shift / Location */}
                                                 <div className="mt-2 space-y-1 text-sm text-gray-600">
-                                                    {job.jobType?.name && (
+                                                    {job?.mode && (
                                                         <div className="flex items-center gap-2">
                                                             <FaBriefcase className="text-[#339ca0]" />
-                                                            <span>{job.jobType.name}</span>
+                                                            <span>{job?.mode}</span>
                                                         </div>
                                                     )}
 
-                                                    {job.jobShift?.name && (
+                                                    {job.degreeLevel?.name && (
                                                         <div className="flex items-center gap-2">
                                                             <FaClock className="text-[#339ca0]" />
-                                                            <span>{job.jobShift.name}</span>
+                                                            <span>{job.degreeLevel.name}</span>
                                                         </div>
                                                     )}
 
@@ -761,23 +711,34 @@ export default function OpportunitiesSection() {
                                                         <FaMapMarkerAlt className="text-[#339ca0]" />
                                                         <span className="truncate">{getLocationString(job._id)}</span>
                                                     </div>
+                                                    {job?.experience && (
+                                                        <div className="flex items-center gap-2">
+                                                            <FaBriefcase className="text-[#339ca0]" />
+                                                            <span className="truncate">{job?.experience} Years</span>
+                                                        </div>
+                                                    )}
+
                                                 </div>
 
-                                                {/* Skills */}
+
                                                 {job.skills?.length > 0 && (
                                                     <div className="flex items-start gap-2 text-sm mt-3 text-gray-600">
                                                         <FaWrench className="text-[#339ca0] mt-1" />
                                                         <span className="line-clamp-2">
                                                             {job.skills
-                                                                .map((skill) => (typeof skill === "object" ? skill.name : skill))
+                                                                .slice(0, 3) //  only first 3 skills
+                                                                .map((skill) =>
+                                                                    typeof skill === "object" ? skill.name : skill
+                                                                )
                                                                 .join(", ")}
                                                         </span>
                                                     </div>
                                                 )}
+
                                             </div>
 
                                             {/* Interaction Buttons */}
-                                            <div className="flex justify-end gap-3 mt-4">
+                                            <div className="flex justify-end gap-3 mt-auto pt-4">
                                                 <FavoriteButton jobId={job._id} type="jobs" />
                                                 <LikeButtonSimple
                                                     blogId={job._id}
@@ -815,12 +776,128 @@ export default function OpportunitiesSection() {
                                             </div>
                                         </div>
                                     </div>
-                                </SwiperSlide>
-
+                                </div>
                             );
                         })}
-                    </Swiper>
+
+                    </div>
+
                 )}
+                {totalPages > 1 && (
+                    <nav className="mt-10 flex justify-center">
+                        <ul className="flex items-center gap-1">
+
+                            {/* Prev Button */}
+                            <li>
+                                <button
+                                    className={`px-3 py-2 rounded border ${currentPage === 1
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : "hover:bg-gray-200"
+                                        }`}
+                                    onClick={() =>
+                                        currentPage !== 1 && setCurrentPage(currentPage - 1)
+                                    }
+                                >
+                                    <FaChevronLeft />
+                                </button>
+                            </li>
+
+                            {(() => {
+                                const maxVisiblePages = 5;
+                                const halfVisible = Math.floor(maxVisiblePages / 2);
+
+                                let startPage = Math.max(1, currentPage - halfVisible);
+                                let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+                                if (endPage - startPage + 1 < maxVisiblePages) {
+                                    startPage = Math.max(1, endPage - maxVisiblePages + 1);
+                                }
+
+                                const buttons = [];
+
+                                // First page
+                                if (startPage > 1) {
+                                    buttons.push(
+                                        <li key={1}>
+                                            <button
+                                                className="px-3 py-2 border rounded hover:bg-gray-200"
+                                                onClick={() => setCurrentPage(1)}
+                                            >
+                                                1
+                                            </button>
+                                        </li>
+                                    );
+
+                                    if (startPage > 2) {
+                                        buttons.push(
+                                            <li key="start-ellipsis">
+                                                <span className="px-3 py-2">...</span>
+                                            </li>
+                                        );
+                                    }
+                                }
+
+                                // Middle pages
+                                for (let i = startPage; i <= endPage; i++) {
+                                    buttons.push(
+                                        <li key={i}>
+                                            <button
+                                                className={`px-3 py-2 border rounded ${currentPage === i
+                                                    ? "bg-[#339ca0] text-white"
+                                                    : "hover:bg-gray-200"
+                                                    }`}
+                                                onClick={() => setCurrentPage(i)}
+                                            >
+                                                {i}
+                                            </button>
+                                        </li>
+                                    );
+                                }
+
+                                // Last page
+                                if (endPage < totalPages) {
+                                    if (endPage < totalPages - 1) {
+                                        buttons.push(
+                                            <li key="end-ellipsis">
+                                                <span className="px-3 py-2">...</span>
+                                            </li>
+                                        );
+                                    }
+
+                                    buttons.push(
+                                        <li key={totalPages}>
+                                            <button
+                                                className="px-3 py-2 border rounded hover:bg-gray-200"
+                                                onClick={() => setCurrentPage(totalPages)}
+                                            >
+                                                {totalPages}
+                                            </button>
+                                        </li>
+                                    );
+                                }
+
+                                return buttons;
+                            })()}
+
+                            {/* Next Button */}
+                            <li>
+                                <button
+                                    className={`px-3 py-2 rounded border ${currentPage === totalPages
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : "hover:bg-gray-200"
+                                        }`}
+                                    onClick={() =>
+                                        currentPage !== totalPages &&
+                                        setCurrentPage(currentPage + 1)
+                                    }
+                                >
+                                    <FaChevronRight />
+                                </button>
+                            </li>
+                        </ul>
+                    </nav>
+                )}
+
 
                 {isModalOpen && selectedJob && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">

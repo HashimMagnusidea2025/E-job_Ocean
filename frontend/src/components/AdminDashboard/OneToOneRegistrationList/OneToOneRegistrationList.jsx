@@ -2,17 +2,23 @@
 import { useEffect, useState } from "react";
 import axios from "../../../utils/axios.js";
 import Layout from "../../seekerDashboard/partials/layout.jsx";
-import DataTable from "react-data-table-component";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  flexRender,
+} from "@tanstack/react-table";
 import { FaEye } from "react-icons/fa";
 import { FaEdit, FaTrash, FaToggleOn, FaToggleOff } from "react-icons/fa";
 export default function OneToOneRegistrationList() {
 
     const [registrations, setRegistrations] = useState([]);
-    const [search, setSearch] = useState("");
-    const [filteredData, setFilteredData] = useState([]);
     const [selectedRow, setSelectedRow] = useState(null);
     const [isViewOpen, setIsViewOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
+    const [filteredRegistrations, setFilteredRegistrations] = useState([]);
+    const [searchText, setSearchText] = useState("");
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
@@ -30,7 +36,7 @@ export default function OneToOneRegistrationList() {
             try {
                 const { data } = await axios.get("/registrations/one-to-one");
                 setRegistrations(data);
-                setFilteredData(data);
+                setFilteredRegistrations(data);
             } catch (err) {
                 console.error(err);
             }
@@ -38,19 +44,23 @@ export default function OneToOneRegistrationList() {
         fetchRegistrations();
     }, []);
 
-    // 🔍 Filter logic
-    useEffect(() => {
-        const result = registrations.filter((row) => {
+    const handleSearch = (e) => {
+        const value = e.target.value.toLowerCase();
+        setSearchText(value);
+
+        const filtered = registrations.filter((reg) => {
             return (
-                row.firstName?.toLowerCase().includes(search.toLowerCase()) ||
-                row.lastName?.toLowerCase().includes(search.toLowerCase()) ||
-                row.email?.toLowerCase().includes(search.toLowerCase()) ||
-                row.mobile?.toString().includes(search.toLowerCase()) ||
-                row.type?.toLowerCase().includes(search.toLowerCase())
+                reg.firstName?.toLowerCase().includes(value) ||
+                reg.lastName?.toLowerCase().includes(value) ||
+                reg.email?.toLowerCase().includes(value) ||
+                reg.mobile?.toString().includes(value) ||
+                reg.type?.toLowerCase().includes(value)
             );
         });
-        setFilteredData(result);
-    }, [search, registrations]);
+
+        setFilteredRegistrations(filtered);
+    };
+
     // View modal
     const handleView = (row) => {
         setSelectedRow(row);
@@ -91,7 +101,17 @@ export default function OneToOneRegistrationList() {
                 r._id === selectedRow._id ? data.registration : r
             );
             setRegistrations(updatedRegs);
-            setFilteredData(updatedRegs);
+            const filtered = updatedRegs.filter((reg) => {
+                const value = searchText.toLowerCase();
+                return (
+                    reg.firstName?.toLowerCase().includes(value) ||
+                    reg.lastName?.toLowerCase().includes(value) ||
+                    reg.email?.toLowerCase().includes(value) ||
+                    reg.mobile?.toString().includes(value) ||
+                    reg.type?.toLowerCase().includes(value)
+                );
+            });
+            setFilteredRegistrations(filtered);
             setIsEditOpen(false);
         } catch (err) {
             console.error(err);
@@ -105,31 +125,75 @@ export default function OneToOneRegistrationList() {
                 await axios.delete(`/registrations/one-to-one/delete/${id}`);
                 const updatedRegs = registrations.filter(r => r._id !== id);
                 setRegistrations(updatedRegs);
-                setFilteredData(updatedRegs);
+                const filtered = updatedRegs.filter((reg) => {
+                    const value = searchText.toLowerCase();
+                    return (
+                        reg.firstName?.toLowerCase().includes(value) ||
+                        reg.lastName?.toLowerCase().includes(value) ||
+                        reg.email?.toLowerCase().includes(value) ||
+                        reg.mobile?.toString().includes(value) ||
+                        reg.type?.toLowerCase().includes(value)
+                    );
+                });
+                setFilteredRegistrations(filtered);
             } catch (err) { console.error(err); }
         }
     };
 
     const columns = [
-        { name: "#", cell: (row, index) => index + 1, width: "60px" },
-
-        { name: "First Name", selector: (row) => row.firstName, sortable: true },
-        { name: "Last Name", selector: (row) => row.lastName, sortable: true },
-        { name: "Email", selector: (row) => row.email, sortable: true },
-        { name: "Mobile", selector: (row) => row.mobile, sortable: true },
-        { name: "Type", selector: (row) => row.type, sortable: true },
         {
-            name: "Actions", cell: (row) => (
+            header: "ID",
+            cell: ({ row }) => row.index + 1,
+        },
+        {
+            accessorKey: "firstName",
+            header: "First Name",
+        },
+        {
+            accessorKey: "lastName",
+            header: "Last Name",
+        },
+        {
+            accessorKey: "email",
+            header: "Email",
+        },
+        {
+            accessorKey: "mobile",
+            header: "Mobile",
+        },
+        {
+            accessorKey: "type",
+            header: "Type",
+        },
+        {
+            header: "Actions",
+            cell: ({ row }) => (
                 <div className="flex gap-3">
-                    <button onClick={() => handleView(row)} title="View"><FaEye className="text-blue-500" size={22} /></button>
-                    <button onClick={() => handleEdit(row)} title="Edit"><FaEdit className="text-green-500" size={22} /></button>
-                    <button onClick={() => handleDelete(row._id)} title="Delete"><FaTrash className="text-red-500" size={22} /></button>
+                    <button onClick={() => handleView(row.original)} className="text-blue-600">
+                        <FaEye size={20} />
+                    </button>
+                    <button onClick={() => handleEdit(row.original)} className="text-green-600">
+                        <FaEdit size={20} />
+                    </button>
+                    <button onClick={() => handleDelete(row.original._id)} className="text-red-600">
+                        <FaTrash size={20} />
+                    </button>
                 </div>
-            ), ignoreRowClick: true
-        }
-
-
+            ),
+        },
     ];
+
+    const table = useReactTable({
+        data: filteredRegistrations,
+        columns,
+        state: {
+            globalFilter: searchText,
+        },
+        onGlobalFilterChange: setSearchText,
+        getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+    });
 
     return (
         <Layout>
@@ -140,20 +204,79 @@ export default function OneToOneRegistrationList() {
                         type="text"
                         placeholder="Search Type..."
                         className="w-full md:w-1/3 p-2 border rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
+                        value={searchText}
+                        onChange={handleSearch}
                     />
                 </div>
 
-                <DataTable
-                    columns={columns}
-                    data={filteredData}
-                    pagination
-                    highlightOnHover
-                    responsive
-                    striped
-                    dense
-                />
+                <div className="bg-white rounded-lg shadow overflow-x-auto">
+                    <table className="min-w-full border">
+                        <thead className="bg-gray-100">
+                            {table.getHeaderGroups().map(headerGroup => (
+                                <tr key={headerGroup.id}>
+                                    {headerGroup.headers.map(header => (
+                                        <th
+                                            key={header.id}
+                                            className="px-4 py-3 text-left text-sm font-semibold border"
+                                        >
+                                            {flexRender(
+                                                header.column.columnDef.header,
+                                                header.getContext()
+                                            )}
+                                        </th>
+                                    ))}
+                                </tr>
+                            ))}
+                        </thead>
+
+                        <tbody>
+                            {table.getRowModel().rows.map(row => (
+                                <tr key={row.id} className="hover:bg-gray-50">
+                                    {row.getVisibleCells().map(cell => (
+                                        <td key={cell.id} className="px-4 py-2 border text-sm">
+                                            {flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext()
+                                            )}
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))}
+
+                            {table.getRowModel().rows.length === 0 && (
+                                <tr>
+                                    <td colSpan={columns.length} className="text-center py-6 text-gray-500">
+                                        No registrations found
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+
+                    {/* Pagination */}
+                    <div className="flex justify-between items-center p-4">
+                        <button
+                            onClick={() => table.previousPage()}
+                            disabled={!table.getCanPreviousPage()}
+                            className="px-4 py-2 border rounded disabled:opacity-50"
+                        >
+                            Previous
+                        </button>
+
+                        <span className="text-sm">
+                            Page {table.getState().pagination.pageIndex + 1} of{" "}
+                            {table.getPageCount()}
+                        </span>
+
+                        <button
+                            onClick={() => table.nextPage()}
+                            disabled={!table.getCanNextPage()}
+                            className="px-4 py-2 border rounded disabled:opacity-50"
+                        >
+                            Next
+                        </button>
+                    </div>
+                </div>
 
                 {isViewOpen && selectedRow && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -175,7 +298,7 @@ export default function OneToOneRegistrationList() {
                         </div>
                     </div>
                 )}
-                {/* Edit Modal */}
+             
                 {/* Edit Modal */}
                 {isEditOpen && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

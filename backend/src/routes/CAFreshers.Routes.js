@@ -1,6 +1,6 @@
 import express from 'express'
 
-import { CreateCAFresher,GetAllCAFresher,importcaRegistrations } from '../controllers/CaFresher.controller.js';
+import { CreateCAFresher,GetAllCAFresher,importcaRegistrations ,GetUploadCvList} from '../controllers/CaFresher.controller.js';
 
 
 
@@ -26,6 +26,7 @@ const CaFresherRouter = express.Router();
 CaFresherRouter.post("/ca/import", upload.single("file"), importcaRegistrations);
 CaFresherRouter.post('/',upload.single("document"), CreateCAFresher);
 CaFresherRouter.get('/', GetAllCAFresher)
+CaFresherRouter.get('/upload-cv',GetUploadCvList);
 
 
 export default CaFresherRouter;

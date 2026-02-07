@@ -8,48 +8,13 @@ import banner1 from "../../../../media/png/MASTERCLASS.png";
 import { useState, useEffect } from "react";
 import axios from '../../../../utils/axios.js';
 const baseURL = import.meta.env.VITE_BACKEND_URL;
-const courses = [
-    {
-        title: "Investment Banking MasterClass",
-        image: banner1,
-        trainer: "CA Saurabh Bansal",
-        hours: "15+ Hrs",
-        price: "₹3499/-",
-    },
-    {
-        title: "IND AS & IFRS MasterClass",
-        image: banner1,
-        trainer: "CA Rakshit Mittal",
-        hours: "20+ Hrs",
-        price: "₹3499/-",
-    },
-    {
-        title: "AI & ChatGPT For Finance MasterClass",
-        image: banner1,
-        trainer: "Inderjeet & Archit",
-        hours: "20+ Hrs",
-        price: "₹2499/-",
-    },
-    {
-        title: "Audit Master Class",
-        image: banner1,
-        trainer: "CA Archit Agarwal",
-        hours: "30+ Hrs",
-        price: "₹3499/-",
-    },
-    {
-        title: "Audit Master Class",
-        image: banner1,
-        trainer: "CA Archit Agarwal",
-        hours: "30+ Hrs",
-        price: "₹3499/-",
-    },
-];
+
 
 export default function OurFreeCourses() {
 
     const [jobs, setJobs] = useState([]);
-
+    const [searchTitle, setSearchTitle] = useState("");
+    const [searchLocation, setSearchLocation] = useState("");
     const fetchJobs = async () => {
 
         try {
@@ -67,15 +32,61 @@ export default function OurFreeCourses() {
     }, [])
 
     const navigate = useNavigate();
-    
+    const handleSearch = () => {
+        const params = new URLSearchParams();
+        if (searchTitle) params.append("title", searchTitle);
+        if (searchLocation) params.append("location", searchLocation);
+
+        navigate(`/placement-program?${params.toString()}`);
+    };
     return (
-        <div className="py-12 px-4 bg-white font-[Poppins]">
-            <div className="container mx-auto">
+        <div className="py-12  bg-white font-[Poppins]">
+
+            <div className="container mx-auto px-4">
+                <div className="bg-white rounded-2xl  p-6 mb-12">
+
+                    <div className="flex flex-col md:flex-row items-stretch gap-4 justify-center">
+
+                        {/* Job Title */}
+                        <input
+                            type="text"
+                            placeholder="Job title or keyword"
+                            value={searchTitle}
+                            onChange={(e) => setSearchTitle(e.target.value)}
+                            className="flex-2 px-5 py-3 rounded-xl border border-gray-300
+                   focus:ring-2 focus:ring-[#339ca0] focus:outline-none"
+                        />
+
+                        {/* Location */}
+                        <input
+                            type="text"
+                            placeholder="Location"
+                            value={searchLocation}
+                            onChange={(e) => setSearchLocation(e.target.value)}
+                            className="flex-2 px-5 py-3 rounded-xl border border-gray-300
+                   focus:ring-2 focus:ring-[#339ca0] focus:outline-none"
+                        />
+
+                        {/* Button */}
+                        <button
+                            onClick={handleSearch}
+                            className="px-8 py-3 rounded-xl font-semibold text-white
+                   bg-gradient-to-r from-[#339ca0] to-black
+                   hover:scale-105 transition-transform duration-300"
+                        >
+                            Find Jobs
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+
+            <div className="">
                 <div className="flex sm:flex-row justify-between items-start sm:items-center mb-6 px-4 sm:px-8 gap-4">
-                    <h2 className="text-[23px] sm:text-[40px] font-bold leading-tight">
-                        <span className="text-[#339ca0]">Letest Jobs Updates</span>
+                    <h2 className="text-xl sm:text-[40px] font-bold leading-tight">
+                        <span className="text-[#339ca0]">Latest Jobs Updates</span>
                     </h2>
-                    <button onClick={() => navigate('/placement-program')} className="bg-gradient-to-r from-[#339ca0] to-black text-white px-4 py-2 text-[18px] sm:text-[18px] rounded font-medium transition-all hover:bg-gray-800">
+                    <button onClick={() => navigate('/placement-program')} className="bg-gradient-to-r from-[#339ca0] to-black text-white sm:px-4 sm:py-2 px-2 py-1 text-[18px] sm:text-[18px] rounded font-medium transition-all hover:bg-gray-800">
                         View All
                     </button>
                 </div>
@@ -105,6 +116,10 @@ export default function OurFreeCourses() {
                             }
                             companyname={job?.companyId?.company?.name}
                             date={job?.expiryDate}
+                            createdAt={job?.createdAt}
+                            experience={job?.experience}
+                            mode={job?.mode}  
+
                         />
                     </SwiperSlide>
                 ))}

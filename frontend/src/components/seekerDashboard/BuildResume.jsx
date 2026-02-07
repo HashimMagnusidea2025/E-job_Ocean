@@ -117,7 +117,7 @@ export default function BuildResume() {
         country: "",
         state: "",
         city: "",
-        customDegreeType: "" // 🔹 NEW: Custom degree type field
+        customDegreeType: "" //  NEW: Custom degree type field
     });
 
     const [skillsFormData, setSkillsFormData] = useState({
@@ -130,7 +130,7 @@ export default function BuildResume() {
         proficiency: "",
     });
 
-    // 🔹 NEW: Toggle active status functions
+    //  NEW: Toggle active status functions
     const toggleExperienceStatus = async (id) => {
         try {
             const res = await axios.patch(`/build-Resume/experiences/${id}/toggle-status`);
@@ -175,7 +175,7 @@ export default function BuildResume() {
         }
     };
 
-    // 🔹 NEW: Fetch location names for experiences and educations
+    //  NEW: Fetch location names for experiences and educations
     const fetchLocationNames = async (expData = experiences, eduData = educations) => {
         try {
             console.log("🔄 Starting to fetch location names...");
@@ -281,7 +281,7 @@ export default function BuildResume() {
         }
     };
 
-    // 🔹 NEW: Fetch user skills function
+    //  NEW: Fetch user skills function
     const fetchUserSkills = async () => {
         try {
             console.log("🔄 Fetching user skills...");
@@ -305,7 +305,7 @@ export default function BuildResume() {
         }
     };
 
-    // 🔹 NEW: Fetch user experiences and educations
+    //  NEW: Fetch user experiences and educations
     const fetchUserData = async () => {
         setLoading(true);
         try {
@@ -334,7 +334,7 @@ export default function BuildResume() {
         }
     };
 
-    // 🔹 NEW: Function to get location display string
+    //  NEW: Function to get location display string
     const getLocationString = (item, locationNames = {}) => {
         const locationParts = [
             locationNames.city || item.city || '',
@@ -356,14 +356,14 @@ export default function BuildResume() {
         });
     };
 
-    // 🔹 NEW: Format date for input fields (YYYY-MM-DD)
+    //  NEW: Format date for input fields (YYYY-MM-DD)
     const formatDateForInput = (dateString) => {
         if (!dateString) return '';
         const date = new Date(dateString);
         return date.toISOString().split('T')[0];
     };
 
-    // 🔹 NEW: Handle Skills Form Change
+    //  NEW: Handle Skills Form Change
     const handleSkillsChange = (e) => {
         const { name, value } = e.target;
         setSkillsFormData((prev) => ({ ...prev, [name]: value }));
@@ -450,59 +450,8 @@ export default function BuildResume() {
 
 
 
-    // 🔹 NEW: Handle Edit Education
-    // const handleEditEducation = (education) => {
-    //     setEditingEducation(education);
-    //     setEducationFormData({
-    //         degreeLevel: education.degreeLevel?._id || education.degreeLevel || "",
-    //         degreeType: education.degreeType?._id || education.degreeType || "",
-    //         degreeTitle: education.degreeTitle || "",
-    //         yearOfCompletion: education.yearOfCompletion || "",
-    //         country: education.country || "",
-    //         state: education.state || "",
-    //         city: education.city || "",
-    //     });
-    //     setOpenModal("education");
-    // };
-
-    // 🔹 NEW: When editing education, check if degree type is custom
-    // const handleEditEducation = (education) => {
-    //     setEditingEducation(education);
-
-    //     // Check if degree type exists in predefined list
-    //     const degreeTypeId = education.degreeType?._id || education.degreeType;
-    //     const isCustomDegreeType = !degreeTypes.some(type => type._id === degreeTypeId);
-
-    //     if (isCustomDegreeType && education.degreeType) {
-    //         // If it's a custom degree type
-    //         setShowCustomDegreeType(true);
-    //         setEducationFormData({
-    //             degreeLevel: education.degreeLevel?._id || education.degreeLevel || "",
-    //             degreeType: "other",
-    //             customDegreeType: education.degreeType?.name || education.degreeType || "",
-    //             degreeTitle: education.degreeTitle || "",
-    //             yearOfCompletion: education.yearOfCompletion || "",
-    //             country: education.country || "",
-    //             state: education.state || "",
-    //             city: education.city || "",
-    //         });
-    //     } else {
-    //         // If it's a predefined degree type
-    //         setShowCustomDegreeType(false);
-    //         setEducationFormData({
-    //             degreeLevel: education.degreeLevel?._id || education.degreeLevel || "",
-    //             degreeType: education.degreeType?._id || education.degreeType || "",
-    //             customDegreeType: "",
-    //             degreeTitle: education.degreeTitle || "",
-    //             yearOfCompletion: education.yearOfCompletion || "",
-    //             country: education.country || "",
-    //             state: education.state || "",
-    //             city: education.city || "",
-    //         });
-    //     }
-    //     setOpenModal("education");
-    // };
-    // 🔹 UPDATED: Handle Edit Education with proper custom degree type handling
+    
+    //  UPDATED: Handle Edit Education with proper custom degree type handling
 const handleEditEducation = (education) => {
     setEditingEducation(education);
     
@@ -550,21 +499,9 @@ const handleEditEducation = (education) => {
     setOpenModal("education");
 };
 
-    // 🔹 NEW: Get degree type display name for rendering
-    // const getDegreeTypeDisplayName = (education) => {
-    //     if (education.customDegreeType) {
-    //         return education.customDegreeType;
-    //     }
-    //     if (education.degreeType?.name) {
-    //         return education.degreeType.name;
-    //     }
-    //     if (typeof education.degreeType === 'string' && education.degreeType !== 'other') {
-    //         return education.degreeType;
-    //     }
-    //     return "Other";
-    // };
+    
 
-    // 🔹 UPDATED: Get degree type display name with better fallbacks
+    //  UPDATED: Get degree type display name with better fallbacks
 const getDegreeTypeDisplayName = (education) => {
     // First check for custom degree type
     if (education.customDegreeType && education.customDegreeType !== "") {
@@ -576,12 +513,12 @@ const getDegreeTypeDisplayName = (education) => {
         return education.degreeType.name;
     }
     
-    // Then check if degreeType is a string (could be "other" or custom value)
+    
     if (typeof education.degreeType === 'string' && education.degreeType !== 'other') {
         return education.degreeType;
     }
     
-    // If it's "other" but no custom value, or no degree type at all
+    
     return "Not specified";
 };
 
@@ -627,7 +564,7 @@ const getDegreeTypeDisplayName = (education) => {
         }
     };
 
-    // 🔹 NEW: Handle Languages Submit
+    //  NEW: Handle Languages Submit
     const handleLanguagesSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -659,7 +596,7 @@ const getDegreeTypeDisplayName = (education) => {
         }
     };
 
-    // 🔹 NEW: Handle Skills Submit
+    //  NEW: Handle Skills Submit
     const handleSkillsSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -688,12 +625,12 @@ const getDegreeTypeDisplayName = (education) => {
     };
 
 
-    // 🔹 NEW: Handle degree type change with "Other" option
+  
     const handleDegreeTypeChange = (e) => {
         const { value } = e.target;
 
         if (value === "other") {
-            // If "Other" is selected, show custom input
+          
             setShowCustomDegreeType(true);
             setEducationFormData(prev => ({
                 ...prev,
@@ -701,7 +638,7 @@ const getDegreeTypeDisplayName = (education) => {
                 customDegreeType: ""
             }));
         } else {
-            // If regular degree type is selected
+            
             setShowCustomDegreeType(false);
             setEducationFormData(prev => ({
                 ...prev,
@@ -711,7 +648,7 @@ const getDegreeTypeDisplayName = (education) => {
         }
     };
 
-    // 🔹 NEW: Handle custom degree type input change
+   
     const handleCustomDegreeTypeChange = (e) => {
         const { value } = e.target;
         setCustomDegreeType(value);
@@ -720,64 +657,11 @@ const getDegreeTypeDisplayName = (education) => {
             customDegreeType: value
         }));
     };
-    // const handleEducationSubmit = async (e) => {
-    //     e.preventDefault();
-    //     try {
+   
 
-    //         let degreeTypeToSubmit = educationFormData.degreeType;
-    //         let customDegreeTypeToSubmit = "";
-
-    //         // If "Other" is selected, use the custom degree type
-    //         if (educationFormData.degreeType === "other" && educationFormData.customDegreeType) {
-    //             customDegreeTypeToSubmit = educationFormData.customDegreeType;
-    //             // You can choose to create a new degree type in backend or store as custom
-    //             // For now, we'll send both fields and let backend handle
-    //         }
-
-    //         const submitData = {
-    //             degreeLevel: educationFormData.degreeLevel,
-    //             // degreeType: educationFormData.degreeType,
-    //             degreeType: educationFormData.degreeType === "other" ? "other" : educationFormData.degreeType,
-    //             customDegreeType: customDegreeTypeToSubmit, // 🔹 NEW: Send custom degree type
-
-    //             degreeTitle: educationFormData.degreeTitle,
-    //             country: educationFormData.country,
-    //             state: educationFormData.state,
-    //             city: educationFormData.city,
-    //             yearOfCompletion: educationFormData.yearOfCompletion,
-    //         };
-
-    //         let res;
-    //         if (editingEducation) {
-    //             res = await axios.put(`/build-Resume/educations/${editingEducation._id}`, submitData);
-    //             setEditingEducation(null);
-    //         } else {
-    //             res = await axios.post("/build-Resume/educations", submitData);
-    //         }
-
-    //         setOpenModal(null);
-    //         setEducationFormData({
-    //             degreeLevel: "",
-    //             degreeType: "",
-    //             degreeTitle: "",
-    //             yearOfCompletion: "",
-    //             country: "",
-    //             state: "",
-    //             city: "",
-    //             customDegreeType: "" // 🔹 NEW: Reset custom degree type
-    //         });
-    //          setShowCustomDegreeType(false);
-    //         setCustomDegreeType("");
-
-    //         await fetchUserData();
-    //     } catch (err) {
-    //         console.error("❌ Error saving education:", err.response?.data || err.message);
-    //     }
-    // };
-
-    // 🔹 NEW: Delete experience
     
-    // 🔹 UPDATED: Handle Education Submit with better data handling
+    
+ 
 const handleEducationSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -850,7 +734,7 @@ const handleEducationSubmit = async (e) => {
         }
     };
 
-    // 🔹 NEW: Delete language
+    //  NEW: Delete language
     const handleDeleteLanguage = async (id) => {
         if (window.confirm("Are you sure you want to delete this language?")) {
             try {
@@ -862,7 +746,7 @@ const handleEducationSubmit = async (e) => {
         }
     };
 
-    // 🔹 NEW: Delete skill
+    //  NEW: Delete skill
     const handleDeleteSkill = async (id) => {
         if (window.confirm("Are you sure you want to delete this skill?")) {
             try {
@@ -874,7 +758,7 @@ const handleEducationSubmit = async (e) => {
         }
     };
 
-    // 🔹 NEW: Delete education
+    //  NEW: Delete education
     const handleDeleteEducation = async (id) => {
         if (window.confirm("Are you sure you want to delete this education?")) {
             try {
@@ -930,7 +814,7 @@ const handleEducationSubmit = async (e) => {
         });
     };
 
-    // ✅ Fetch Degree Level & Type on mount
+    //  Fetch Degree Level & Type on mount
     useEffect(() => {
         axios
             .get("/degree-Level-Category/active")
@@ -948,7 +832,7 @@ const handleEducationSubmit = async (e) => {
             })
             .catch((err) => console.error("❌ Error fetching degree types:", err));
 
-        // 🔹 NEW: Fetch user data on component mount
+        //  NEW: Fetch user data on component mount
         fetchUserData();
     }, []);
 
@@ -989,7 +873,7 @@ const handleEducationSubmit = async (e) => {
         }
     }, [experienceFormData.state]);
 
-    // 🔹 NEW: Effect for Education Form States
+    //  NEW: Effect for Education Form States
     useEffect(() => {
         if (educationFormData.country) {
             axios
@@ -1003,7 +887,7 @@ const handleEducationSubmit = async (e) => {
         }
     }, [educationFormData.country]);
 
-    // 🔹 NEW: Effect for Education Form Cities
+    //  NEW: Effect for Education Form Cities
     useEffect(() => {
         if (educationFormData.state) {
             axios
@@ -1017,14 +901,14 @@ const handleEducationSubmit = async (e) => {
         }
     }, [educationFormData.state]);
 
-    // 🔹 NEW: Effect to fetch location names when experiences/educations change
+    //  NEW: Effect to fetch location names when experiences/educations change
     useEffect(() => {
         if (experiences.length > 0 || educations.length > 0) {
             fetchLocationNames();
         }
     }, [experiences, educations]);
 
-    // 🔹 NEW: Render experience item with active/inactive toggle
+    //  NEW: Render experience item with active/inactive toggle
     const renderExperienceItem = (experience, location) => (
         <div key={experience._id} className={`relative pl-6 mb-6 border-l-2 ${experience.isActive ? 'border-gray-200' : 'border-red-200'} ${!experience.isActive ? 'opacity-60' : ''}`}>
             <div className={`absolute left-0 top-2 w-3 h-3 rounded-full ${experience.isActive ? 'bg-gray-300' : 'bg-red-300'}`}></div>
@@ -1098,7 +982,7 @@ const handleEducationSubmit = async (e) => {
         </div>
     );
 
-    // 🔹 NEW: Render education item with active/inactive toggle
+    //  NEW: Render education item with active/inactive toggle
     const renderEducationItem = (education, location) => (
         <div key={education._id} className={`relative pl-6 mb-6 border-l-2 ${education.isActive ? 'border-gray-200' : 'border-red-200'} ${!education.isActive ? 'opacity-60' : ''}`}>
             <div className={`absolute left-0 top-2 w-3 h-3 rounded-full ${education.isActive ? 'bg-gray-300' : 'bg-red-300'}`}></div>
@@ -1167,7 +1051,7 @@ const handleEducationSubmit = async (e) => {
         </div>
     );
 
-    // 🔹 NEW: Render skill item with active/inactive toggle
+    //  NEW: Render skill item with active/inactive toggle
     const renderSkillItem = (skill, index) => (
         <div
             key={skill._id}
@@ -1217,7 +1101,7 @@ const handleEducationSubmit = async (e) => {
         </div>
     );
 
-    // 🔹 NEW: Render language item with active/inactive toggle
+    //  NEW: Render language item with active/inactive toggle
     const renderLanguageItem = (language, index) => (
         <div
             key={language._id}
@@ -1498,11 +1382,11 @@ const handleEducationSubmit = async (e) => {
                                             {type.name}
                                         </option>
                                     ))}
-                                    <option value="other">Other</option> {/* 🔹 NEW: Other option */}
+                                    <option value="other">Other</option> 
                                 </select>
                             </div>
 
-                            {/* 🔹 NEW: Custom Degree Type Input - Show only when "Other" is selected */}
+                            
                             {showCustomDegreeType && (
                                 <div>
                                     <label htmlFor="customDegreeType" className="block text-gray-700 font-medium mb-1">
@@ -1773,11 +1657,11 @@ const handleEducationSubmit = async (e) => {
     return (
         <Layout>
             <div className="w-full bg-[f6f8fd] rounded shadow text-sm sm:text-base">
-                <h2 className="text-xl sm:text-[32px] font-semibold mb-10 text-center">
+                <h2 className="text-xl sm:text-[32px] font-semibold mb-10 mt-10 text-center">
                     Build Your Resume
                 </h2>
 
-                {/* ✅ Attached CV Section */}
+                {/*  Attached CV Section */}
                 <div className="bg-white p-4 rounded-lg shadow-md">
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-lg sm:text-[30px] font-semibold text-gray-800">
@@ -1805,7 +1689,7 @@ const handleEducationSubmit = async (e) => {
                     </div>
                 </div>
 
-                {/* ✅ Experience Section */}
+                {/*  Experience Section */}
                 <div className="pt-10">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-xl sm:text-[32px] font-semibold text-gray-800">
@@ -1833,7 +1717,7 @@ const handleEducationSubmit = async (e) => {
                     )}
                 </div>
 
-                {/* ✅ Education Section */}
+                {/*  Education Section */}
                 <div className="pt-10">
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-xl sm:text-[32px] font-semibold text-gray-800">
@@ -1861,7 +1745,7 @@ const handleEducationSubmit = async (e) => {
                     )}
                 </div>
 
-                {/* ✅ Skills Section */}
+                {/*  Skills Section */}
                 <div className="pt-6">
                     <div className="w-full mx-auto mt-10 border rounded-lg shadow bg-white">
                         <div className="p-4 flex justify-between items-center">
@@ -1888,7 +1772,7 @@ const handleEducationSubmit = async (e) => {
                     </div>
                 </div>
 
-                {/* ✅ Languages Section */}
+                {/*  Languages Section */}
                 <div className="pt-6">
                     <div className="w-full mx-auto mt-10 border rounded-lg shadow bg-white">
                         <div className="p-4 flex justify-between items-center">
@@ -1915,7 +1799,7 @@ const handleEducationSubmit = async (e) => {
                     </div>
                 </div>
 
-                {/* ✅ MODAL SECTION - Fixed */}
+                {/*  MODAL SECTION - Fixed */}
                 {openModal && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
                         <div className={`bg-white rounded-lg p-6 w-full ${getModalSize()} relative max-h-[90vh] overflow-y-auto`}>

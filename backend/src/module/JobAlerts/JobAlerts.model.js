@@ -43,7 +43,7 @@ const JobAlertsSchema = mongoose.Schema({
 
 
 }, {
-    timestamps: true // This will automatically add createdAt and updatedAt fields
+    timestamps: true
 },)
 
 

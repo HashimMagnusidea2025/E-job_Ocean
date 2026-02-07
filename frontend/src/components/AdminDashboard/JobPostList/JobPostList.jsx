@@ -1,15 +1,23 @@
 import React, { useEffect, useState } from "react";
-import DataTable from "react-data-table-component";
 import { FaEdit, FaTrash, FaEye } from "react-icons/fa";
 import axios from "../../../utils/axios.js";
 import Swal from "sweetalert2";
 import Layout from "../../seekerDashboard/partials/layout.jsx";
 import { useNavigate } from "react-router-dom";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  flexRender,
+} from "@tanstack/react-table";
 export default function JobPostList() {
     const [jobPosts, setJobPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedJob, setSelectedJob] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [filteredJobPosts, setFilteredJobPosts] = useState([]);
+    const [searchText, setSearchText] = useState("");
     const navigate = useNavigate();
     useEffect(() => {
         fetchJobPosts();
@@ -19,6 +27,9 @@ export default function JobPostList() {
         try {
             const { data } = await axios.get("/job-post"); // your API endpoint
             setJobPosts(data);
+            setFilteredJobPosts(data);
+            console.log(data);
+
         } catch (err) {
             console.error("Failed to fetch job posts:", err);
         } finally {
@@ -60,61 +71,177 @@ export default function JobPostList() {
         setSelectedJob(null);
     };
 
+    const handleSearch = (e) => {
+        const value = e.target.value.toLowerCase();
+        setSearchText(value);
+
+        const filtered = jobPosts.filter((job) => {
+            return (
+                job.jobTitle.toLowerCase().includes(value) ||
+                (job.postedBy?.name || '').toLowerCase().includes(value) ||
+                (job.mode || '').toLowerCase().includes(value) ||
+                (job.experience || '').toLowerCase().includes(value) ||
+                (job.expiryDate || '').toLowerCase().includes(value) ||
+                job.skills.some(skill => (skill.name || skill).toLowerCase().includes(value))
+            );
+        });
+
+        setFilteredJobPosts(filtered);
+    };
+
     const columns = [
-        { name: "Job Title", selector: row => row.jobTitle, sortable: true },
-        { name: "Description", selector: row => row.description, wrap: true },
-        { name: "Positions", selector: row => row.positions },
-        { name: "Country", selector: row => row.country },
-        { name: "State", selector: row => row.state },
-        { name: "City", selector: row => row.city },
         {
-            name: "Skills",
-            selector: row => row.skills.map(skill => skill.name || skill).join(", "),
-            wrap: true
+            header: "ID",
+            cell: ({ row }) => row.index + 1,
         },
         {
-            name: "Actions",
-            cell: row => (
-                <div className="flex gap-2">
+            accessorKey: "jobTitle",
+            header: "Job Title",
+        },
+        {
+            accessorKey: "postedBy.name",
+            header: "Posted By",
+        },
+        {
+            accessorKey: "mode",
+            header: "Mode",
+        },
+        {
+            accessorKey: "experience",
+            header: "Experience",
+        },
+        {
+            accessorKey: "expiryDate",
+            header: "Expiry Date",
+        },
+        {
+            header: "Skills",
+            cell: ({ row }) => row.original.skills.map(skill => skill.name || skill).join(", "),
+        },
+        {
+            header: "Actions",
+            cell: ({ row }) => (
+                <div className="flex gap-3">
                     <button
-                        className="text-blue-500 hover:text-blue-700"
-                        onClick={() => handleView(row)}
+                        onClick={() => handleView(row.original)}
+                        className="text-blue-600"
                     >
                         <FaEye size={20} />
                     </button>
                     <button
-                        onClick={() => navigate(`/admin-dashboard/post-job/${row._id}`)} // redirect to edit page
-                        className="text-blue-600 hover:text-blue-800">
-                        <FaEdit size={22} />
+                        onClick={() => navigate(`/admin-dashboard/post-job/${row.original._id}`)}
+                        className="text-green-600"
+                    >
+                        <FaEdit size={20} />
                     </button>
                     <button
-                        onClick={() => handleDelete(row._id)}
-                        className="text-red-600 hover:text-red-800"
+                        onClick={() => handleDelete(row.original._id)}
+                        className="text-red-600"
                     >
-                        <FaTrash size={22} />
+                        <FaTrash size={20} />
                     </button>
                 </div>
             ),
-
-        }
-
+        },
     ];
+
+    const table = useReactTable({
+        data: filteredJobPosts,
+        columns,
+        state: {
+            globalFilter: searchText,
+        },
+        onGlobalFilterChange: setSearchText,
+        getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+    });
 
     return (
         <Layout>
-            <div className="p-6">
-                <h2 className="text-2xl font-semibold mb-4">Job Posts List</h2>
-                <DataTable
-                    columns={columns}
-                    data={jobPosts}
-                    progressPending={loading}
-                    pagination
-                    highlightOnHover
-                    responsive
-                />
-            </div>
+            <div className="p-2">
+                {/* Header */}
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-3xl font-bold text-gray-800">Job Posts</h2>
+                    <input
+                        type="text"
+                        placeholder="Search job posts..."
+                        value={searchText}
+                        onChange={handleSearch}
+                        className="border p-2 rounded"
+                    />
+                </div>
 
-            {isModalOpen && selectedJob && (
+                <div className="bg-white rounded-lg shadow overflow-x-auto">
+                    <table className="min-w-full border">
+                        <thead className="bg-gray-100">
+                            {table.getHeaderGroups().map(headerGroup => (
+                                <tr key={headerGroup.id}>
+                                    {headerGroup.headers.map(header => (
+                                        <th
+                                            key={header.id}
+                                            className="px-4 py-3 text-left text-sm font-semibold border"
+                                        >
+                                            {flexRender(
+                                                header.column.columnDef.header,
+                                                header.getContext()
+                                            )}
+                                        </th>
+                                    ))}
+                                </tr>
+                            ))}
+                        </thead>
+
+                        <tbody>
+                            {table.getRowModel().rows.map(row => (
+                                <tr key={row.id} className="hover:bg-gray-50">
+                                    {row.getVisibleCells().map(cell => (
+                                        <td key={cell.id} className="px-4 py-2 border text-sm">
+                                            {flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext()
+                                            )}
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))}
+
+                            {table.getRowModel().rows.length === 0 && (
+                                <tr>
+                                    <td colSpan={columns.length} className="text-center py-6 text-gray-500">
+                                        No job posts found
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+
+                    {/* Pagination */}
+                    <div className="flex justify-between items-center p-4">
+                        <button
+                            onClick={() => table.previousPage()}
+                            disabled={!table.getCanPreviousPage()}
+                            className="px-4 py-2 border rounded disabled:opacity-50"
+                        >
+                            Previous
+                        </button>
+
+                        <span className="text-sm">
+                            Page {table.getState().pagination.pageIndex + 1} of{" "}
+                            {table.getPageCount()}
+                        </span>
+
+                        <button
+                            onClick={() => table.nextPage()}
+                            disabled={!table.getCanNextPage()}
+                            className="px-4 py-2 border rounded disabled:opacity-50"
+                        >
+                            Next
+                        </button>
+                    </div>
+                </div>
+
+                {isModalOpen && selectedJob && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
                     <div className="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 relative">
                         <h3 className="text-xl font-semibold mb-4">Job Details</h3>
@@ -156,6 +283,8 @@ export default function JobPostList() {
                     </div>
                 </div>
             )}
+        </div>
         </Layout>
     );
 }
+

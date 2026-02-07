@@ -4,6 +4,7 @@ import path from "path";
 import {
   createCourse,
   getAllCourses,
+  getCourseById,
   updateCourse,
   deleteCourse,
 } from "./Course.controller.js";
@@ -23,6 +24,7 @@ const CourseRouter = express.Router();
 
 CourseRouter.post("/", upload.fields([{ name: 'image', maxCount: 1 }, { name: 'courseFile', maxCount: 1 }]), createCourse);
 CourseRouter.get("/", getAllCourses);
+CourseRouter.get("/:id", getCourseById);
 CourseRouter.put("/:id", upload.fields([{ name: 'image', maxCount: 1 }, { name: 'courseFile', maxCount: 1 }]), updateCourse);
 CourseRouter.delete("/:id", deleteCourse);
 

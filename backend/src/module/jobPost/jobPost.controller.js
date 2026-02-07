@@ -7,7 +7,7 @@ export const createJobPost = async (req, res) => {
     const filePath = req.file ? req.file.path : null;
 
     const userId = req.user?._id;
-    // ✅ Validate companyId
+    //  Validate companyId
     if (!req.body.companyId) {
       return res.status(400).json({
         success: false,
@@ -32,11 +32,11 @@ export const createJobPost = async (req, res) => {
 };
 
 
-// Get all Job Posts with skill names
+// Get all Job Posts with names
 export const getAllJobPosts = async (req, res) => {
   try {
     const jobs = await JobPostModel.find()
-      .populate("skills", "name")  // populate skills with only the 'name' field
+      .populate("skills", "name") 
        .populate("degreeLevel","name")
       .populate("careerLevel", "name")
       .populate("functionalArea", "name")
@@ -51,7 +51,7 @@ export const getAllJobPosts = async (req, res) => {
   }
 };
 
-// Get single Job Post with skill names
+// Get single Job Post with names
 export const getJobPost = async (req, res) => {
   try {
     const job = await JobPostModel.findById(req.params.id)
@@ -94,6 +94,7 @@ export const getJobPost = async (req, res) => {
 // };
 
 // Update Job Post
+
 export const updateJobPost = async (req, res) => {
   try {
     const filePath = req.file ? req.file.path : undefined;
@@ -145,7 +146,7 @@ export const getAllActiveJobPosts = async (req, res) => {
 // Get jobs by specific employer
 export const getEmployerJobs = async (req, res) => {
   try {
-    const userId = req.user._id; // From auth middleware
+    const userId = req.user._id; 
 
     const jobs = await JobPostModel.find({
       postedBy: userId,

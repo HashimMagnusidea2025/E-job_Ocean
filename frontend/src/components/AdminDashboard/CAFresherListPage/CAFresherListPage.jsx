@@ -1,14 +1,19 @@
 import React, { useEffect, useState } from "react";
-import DataTable from "react-data-table-component";
 import axios from "../../../utils/axios";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import { FaEye } from "react-icons/fa";
 import Layout from '../../seekerDashboard/partials/layout'
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  flexRender,
+} from "@tanstack/react-table";
 const baseURL = import.meta.env.VITE_BACKEND_URL;
 const CAFresherListPage = () => {
   const [caFreshers, setCaFreshers] = useState([]);
-  const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
   const [selectedRow, setSelectedRow] = useState(null);
@@ -17,14 +22,13 @@ const CAFresherListPage = () => {
     try {
       const res = await axios.get("/CA-Fresher");
 
-      // ✅ Persistent Index Number
+
       const dataWithIndex = res.data.data.map((item, index) => ({
         ...item,
         serialNumber: index + 1,
       }));
 
       setCaFreshers(dataWithIndex);
-      setFilteredData(dataWithIndex);
     } catch (error) {
       console.error("Error fetching CA Freshers:", error);
     } finally {
@@ -35,16 +39,6 @@ const CAFresherListPage = () => {
   useEffect(() => {
     fetchCAFreshers();
   }, []);
-
-  useEffect(() => {
-    const filtered = caFreshers.filter((item) =>
-      Object.values(item)
-        .join(" ")
-        .toLowerCase()
-        .includes(searchText.toLowerCase())
-    );
-    setFilteredData(filtered);
-  }, [searchText, caFreshers]);
 
   const exportToExcel = async () => {
     const workbook = new ExcelJS.Workbook();
@@ -64,7 +58,7 @@ const CAFresherListPage = () => {
       { header: "Resume", key: "ResumeUpload", width: 30 },
     ];
 
-    filteredData.forEach((item) => {
+    caFreshers.forEach((item) => {
       worksheet.addRow({
         ...item,
         ResumeUpload: item.ResumeUpload
@@ -82,42 +76,35 @@ const CAFresherListPage = () => {
 
   const columns = [
     {
-      name: "Index",
-      selector: (row) => row.serialNumber,
-      width: "90px",
-      sortable: true,
+      header: "ID",
+      cell: ({ row }) => row.index + 1,
     },
-
     {
-      name: "Name",
-      selector: (row) => row.name,
-      sortable: true,
-      cell: (row) => (
+      accessorKey: "name",
+      header: "Name",
+      cell: ({ row }) => (
         <div
           className="w-[300px] truncate"
-          title={row.name} // Hover par full name
+          title={row.original.name}
         >
-          <div className=" w-[300px]">
-            {row.name}
-          </div>
+          {row.original.name}
         </div>
       ),
     },
-
-    { name: "Email", selector: (row) => row.email, sortable: true },
-    { name: "Phone", selector: (row) => row.phone },
-    { name: "Qualification", selector: (row) => row.qualification },
-    { name: "Experience", selector: (row) => row.experience },
-    { name: "Profile", selector: (row) => row.jobProfile },
-    { name: "Location", selector: (row) => row.jobLocation },
-    { name: "Passing Month", selector: (row) => row.passingMonth },
-    { name: "Passing Year", selector: (row) => row.passingYear },
     {
-      name: "Resume",
-      cell: (row) =>
-        row.ResumeUpload ? (
+      accessorKey: "email",
+      header: "Email",
+    },
+    {
+      accessorKey: "phone",
+      header: "Phone",
+    },
+    {
+      header: "Resume",
+      cell: ({ row }) =>
+        row.original.ResumeUpload ? (
           <a
-            href={`${baseURL}/uploads/resume/${row.ResumeUpload}`}
+            href={`${baseURL}/uploads/resume/${row.original.ResumeUpload}`}
             target="_blank"
             rel="noreferrer"
             className="text-blue-600 underline"
@@ -129,12 +116,12 @@ const CAFresherListPage = () => {
         ),
     },
     {
-      name: "Actions",
-      cell: (row) => (
-        <div className="flex gap-2">
+      header: "Actions",
+      cell: ({ row }) => (
+        <div className="flex gap-3">
           <button
-            onClick={() => setSelectedRow(row)}
-            className="text-blue-500 hover:text-blue-700"
+            onClick={() => setSelectedRow(row.original)}
+            className="text-blue-600"
           >
             <FaEye size={20} />
           </button>
@@ -143,11 +130,33 @@ const CAFresherListPage = () => {
     },
   ];
 
+  const table = useReactTable({
+    data: caFreshers,
+    columns,
+    state: {
+      globalFilter: searchText,
+    },
+    onGlobalFilterChange: setSearchText,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+  });
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="p-6">
+          <div className="text-center py-6">Loading...</div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <>
       <Layout>
         <div className="p-6">
-          {/* Header */}
+
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4">
             <h2 className="text-xl font-semibold">CA Fresher Submissions</h2>
 
@@ -169,26 +178,80 @@ const CAFresherListPage = () => {
             </div>
           </div>
 
-          {/* DataTable */}
-          <div className="bg-white rounded shadow p-4 overflow-x-auto">
-            <DataTable
-              columns={columns}
-              data={filteredData}
-              progressPending={loading}
-              pagination
-              highlightOnHover
-              striped
-              responsive
-              noDataComponent="No CA Freshers found"
-              onRowClicked={(row) => setSelectedRow(row)}
-              pointerOnHover
-            />
+
+          <div className="bg-white rounded-lg shadow overflow-x-auto">
+            <table className="min-w-full border">
+              <thead className="bg-gray-100">
+                {table.getHeaderGroups().map(headerGroup => (
+                  <tr key={headerGroup.id}>
+                    {headerGroup.headers.map(header => (
+                      <th
+                        key={header.id}
+                        className="px-4 py-3 text-left text-sm font-semibold border"
+                      >
+                        {flexRender(
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
+                      </th>
+                    ))}
+                  </tr>
+                ))}
+              </thead>
+
+              <tbody>
+                {table.getRowModel().rows.map(row => (
+                  <tr key={row.id} className="hover:bg-gray-50">
+                    {row.getVisibleCells().map(cell => (
+                      <td key={cell.id} className="px-4 py-2 border text-sm">
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+
+                {table.getRowModel().rows.length === 0 && (
+                  <tr>
+                    <td colSpan={columns.length} className="text-center py-6 text-gray-500">
+                      No CA Freshers found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+
+            {/* Pagination */}
+            <div className="flex justify-between items-center p-4">
+              <button
+                onClick={() => table.previousPage()}
+                disabled={!table.getCanPreviousPage()}
+                className="px-4 py-2 border rounded disabled:opacity-50"
+              >
+                Previous
+              </button>
+
+              <span className="text-sm">
+                Page {table.getState().pagination.pageIndex + 1} of{" "}
+                {table.getPageCount()}
+              </span>
+
+              <button
+                onClick={() => table.nextPage()}
+                disabled={!table.getCanNextPage()}
+                className="px-4 py-2 border rounded disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
           </div>
 
-          {/* Modal */}
+        
           {selectedRow && (
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white rounded-lg p-6 w-80 max-w-lg shadow-lg">
+              <div className="bg-white rounded-lg p-6 w-120 max-w-lg shadow-lg">
                 <h3 className="text-lg font-bold mb-4">Candidate Details</h3>
                 <div className="space-y-2 ">
                   <p><strong>Name:</strong> {selectedRow.name}</p>

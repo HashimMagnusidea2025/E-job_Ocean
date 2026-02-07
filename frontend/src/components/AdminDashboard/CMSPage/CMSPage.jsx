@@ -1,10 +1,17 @@
 import React, { useEffect, useState } from "react";
-import DataTable from "react-data-table-component";
 import { FaEdit, FaTrash, FaEye, FaPlus } from "react-icons/fa";
-import axios from "../../../utils/axios.js"; // adjust your path
-import Swal from "sweetalert2"; // make sure you have this import
+import axios from "../../../utils/axios.js";
+import Swal from "sweetalert2";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  flexRender,
+} from "@tanstack/react-table";
 
 import Layout from "../../seekerDashboard/partials/layout.jsx";
 export default function CMSPage() {
@@ -12,7 +19,7 @@ export default function CMSPage() {
     const [cmsContent, setContent] = useState([]);
     const [modalOpen, setModalOpen] = useState(false);
     const [modelCms, setModelCms] = useState(false)
-    const [formMode, setFormMode] = useState("add"); // add | edit | view
+    const [formMode, setFormMode] = useState("add"); 
     const [selectedPage, setSelectedPage] = useState(null);
     const [formData, setFormData] = useState({ name: "", status: "active" });
     const [cmsContentData, setCmsContentData] = useState({
@@ -24,6 +31,8 @@ export default function CMSPage() {
         page: "",
         status: "active",
     });
+    const [filteredCmsContent, setFilteredCmsContent] = useState([]);
+    const [searchText, setSearchText] = useState("");
 
 
     const handleViewContent = async (row) => {
@@ -48,7 +57,7 @@ export default function CMSPage() {
             console.error("Error viewing content:", err);
         }
     };
-    //  DELETE CMS CONTENT
+ 
     const handleDeleteContent = async (id) => {
         const confirm = await Swal.fire({
             title: "Are you sure?",
@@ -65,12 +74,12 @@ export default function CMSPage() {
         try {
             await axios.delete(`/cms-content/${id}`);
             Swal.fire("Deleted!", "CMS content has been deleted.", "success");
-            fetchCMSContent(); // Refresh table
+            fetchCMSContent(); 
         } catch (err) {
             Swal.fire("Error!", "Failed to delete CMS content.", "error");
         }
     };
-    // 🧩 EDIT CMS CONTENT
+    
     const handleEditContent = (row) => {
         setFormMode("edit");
         setCmsContentData({
@@ -89,53 +98,25 @@ export default function CMSPage() {
     const handleCMSContentChange = (e) => {
         setCmsContentData({ ...cmsContentData, [e.target.name]: e.target.value });
     };
-    //     const handleCMSContentSubmit = async (e) => {
-    //     e.preventDefault();
-    //     try {
-    //         await axios.post("/cms-content", cmsContentData);
 
-    //         // ✅ SweetAlert success message
-    //         Swal.fire({
-    //             icon: "success",
-    //             title: "Success!",
-    //             text: "CMS content added successfully.",
-    //             showConfirmButton: false,
-    //             timer: 1500,
-    //         });
+    const handleSearch = (e) => {
+        const value = e.target.value.toLowerCase();
+        setSearchText(value);
 
-    //         // ✅ Close modal
-    //         setModelCms(false);
+        const filtered = cmsContent.filter((content) => {
+            const pageName = content.page?.name?.toLowerCase() || '';
+            const status = content.status?.toLowerCase() || '';
 
-    //         // ✅ Clear form data
-    //         setCmsContentData({
-    //             line_1: "",
-    //             line_2: "",
-    //             line_3: "",
-    //             line_4: "",
-    //             line_5: "",
-    //             page: "",
-    //             status: "active",
-    //         });
+            return (
+                pageName.includes(value) ||
+                status.includes(value)
+            );
+        });
 
-    //         // ✅ Refresh data immediately (no need to reload page)
-    //         fetchCMSContent();
-
-    //     } catch (err) {
-    //         console.error("Error adding CMS content:", err);
-
-    //         Swal.fire({
-    //             icon: "error",
-    //             title: "Error!",
-    //             text: "Failed to add CMS content. Please try again.",
-    //         });
-    //     }
-    // };
-
-
-    // Fetch CMS Pages
-
-
-    //  Then update your handleCMSContentSubmit:
+        setFilteredCmsContent(filtered);
+    };
+    
+    
     const handleCMSContentSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -167,7 +148,8 @@ export default function CMSPage() {
 
         try {
             const { data } = await axios.get('/cms-content');
-            setContent(data)
+            setContent(data);
+            setFilteredCmsContent(data);
         } catch (err) {
             console.err("Error fetching CMS Content:", err);
         }
@@ -178,12 +160,12 @@ export default function CMSPage() {
         fetchCMSContent();
     }, []);
 
-    // Handle input change
+    
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    // Handle Submit (Add/Edit)
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -199,7 +181,7 @@ export default function CMSPage() {
         }
     };
 
-    // Delete CMS Page
+    
     const handleDelete = async (id) => {
         if (!window.confirm("Are you sure you want to delete this CMS Page?")) return;
         try {
@@ -210,7 +192,7 @@ export default function CMSPage() {
         }
     };
 
-    // Open Modal
+    
     const openModal = (mode, page = null) => {
         setFormMode(mode);
         setSelectedPage(page);
@@ -222,33 +204,95 @@ export default function CMSPage() {
         setModalOpen(true);
     };
 
-    // Table Columns
-    const columns = [
+   
+
+    const cmsColumns = [
         {
-            name: "ID",
-            selector: (row, index) => index + 1,
-            width: "70px",
+            header: "ID",
+            cell: ({ row }) => row.index + 1,
         },
-        { name: "Name", selector: (row) => row.name, sortable: true },
-        { name: "Status", selector: (row) => row.status, sortable: true },
         {
-            name: "Actions",
-            cell: (row) => (
+            accessorKey: "page.name",
+            header: "Page",
+        },
+        {
+            header: "Status",
+            cell: ({ row }) =>
+                row.original.status === "active" ? (
+                    <span className="text-green-600 font-semibold">Active</span>
+                ) : (
+                    <span className="text-red-600 font-semibold">Inactive</span>
+                ),
+        },
+        {
+            header: "Actions",
+            cell: ({ row }) => (
+                <div className="flex gap-3">
+                    <button
+                        onClick={() => handleViewContent(row.original)}
+                        className="text-blue-600"
+                    >
+                        <FaEye size={20} />
+                    </button>
+                    <button
+                        onClick={() => handleEditContent(row.original)}
+                        className="text-green-600"
+                    >
+                        <FaEdit size={20} />
+                    </button>
+                    <button
+                        onClick={() => handleDeleteContent(row.original._id)}
+                        className="text-red-600"
+                    >
+                        <FaTrash size={20} />
+                    </button>
+                </div>
+            ),
+        },
+    ];
+    const cmsTable = useReactTable({
+        data: filteredCmsContent,
+        columns: cmsColumns,
+        state: {
+            globalFilter: searchText,
+        },
+        onGlobalFilterChange: setSearchText,
+        getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+    });
+
+    const cmsPagesColumns = [
+        {
+            header: "ID",
+            cell: ({ row }) => row.index + 1,
+        },
+        {
+            accessorKey: "name",
+            header: "Name",
+        },
+        {
+            accessorKey: "status",
+            header: "Status",
+        },
+        {
+            header: "Actions",
+            cell: ({ row }) => (
                 <div className="flex gap-2">
                     <button
-                        onClick={() => openModal("view", row)}
+                        onClick={() => openModal("view", row.original)}
                         className="text-blue-500 hover:text-blue-700"
                     >
                         <FaEye size={22} />
                     </button>
                     <button
-                        onClick={() => openModal("edit", row)}
+                        onClick={() => openModal("edit", row.original)}
                         className="text-green-500 hover:text-green-700"
                     >
                         <FaEdit size={22} />
                     </button>
                     <button
-                        onClick={() => handleDelete(row._id)}
+                        onClick={() => handleDelete(row.original._id)}
                         className="text-red-500 hover:text-red-700"
                     >
                         <FaTrash size={22} />
@@ -257,6 +301,14 @@ export default function CMSPage() {
             ),
         },
     ];
+
+    const cmsPagesTable = useReactTable({
+        data: cmsPages,
+        columns: cmsPagesColumns,
+        getCoreRowModel: getCoreRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+    });
 
 
 
@@ -275,18 +327,78 @@ export default function CMSPage() {
                     </button>
                 </div>
 
-                {/* DataTable */}
-                <DataTable
-                    columns={columns}
-                    data={cmsPages}
-                    pagination
-                    highlightOnHover
-                    striped
-                    responsive
-                />
+                
+                <div className="bg-white rounded-lg shadow overflow-x-auto">
+                    <table className="min-w-full border">
+                        <thead className="bg-gray-100">
+                            {cmsPagesTable.getHeaderGroups().map(headerGroup => (
+                                <tr key={headerGroup.id}>
+                                    {headerGroup.headers.map(header => (
+                                        <th
+                                            key={header.id}
+                                            className="px-4 py-3 text-left text-sm font-semibold border"
+                                        >
+                                            {flexRender(
+                                                header.column.columnDef.header,
+                                                header.getContext()
+                                            )}
+                                        </th>
+                                    ))}
+                                </tr>
+                            ))}
+                        </thead>
+
+                        <tbody>
+                            {cmsPagesTable.getRowModel().rows.map(row => (
+                                <tr key={row.id} className="hover:bg-gray-50">
+                                    {row.getVisibleCells().map(cell => (
+                                        <td key={cell.id} className="px-4 py-2 border text-sm">
+                                            {flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext()
+                                            )}
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))}
+
+                            {cmsPagesTable.getRowModel().rows.length === 0 && (
+                                <tr>
+                                    <td colSpan={cmsPagesColumns.length} className="text-center py-6 text-gray-500">
+                                        No CMS pages found
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+
+                    {/* Pagination */}
+                    <div className="flex justify-between items-center p-4">
+                        <button
+                            onClick={() => cmsPagesTable.previousPage()}
+                            disabled={!cmsPagesTable.getCanPreviousPage()}
+                            className="px-4 py-2 border rounded disabled:opacity-50"
+                        >
+                            Previous
+                        </button>
+
+                        <span className="text-sm">
+                            Page {cmsPagesTable.getState().pagination.pageIndex + 1} of{" "}
+                            {cmsPagesTable.getPageCount()}
+                        </span>
+
+                        <button
+                            onClick={() => cmsPagesTable.nextPage()}
+                            disabled={!cmsPagesTable.getCanNextPage()}
+                            className="px-4 py-2 border rounded disabled:opacity-50"
+                        >
+                            Next
+                        </button>
+                    </div>
+                </div>
 
 
-                {/* Modal */}
+                
                 {modalOpen && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
                         <div className="bg-white w-full max-w-lg rounded-lg shadow-lg p-6">
@@ -359,74 +471,101 @@ export default function CMSPage() {
 
 
 
-                <div className="flex items-center justify-between mb-6 mt-16">
+                <div className="flex justify-between items-center mb-6 mt-16">
                     <h2 className="text-2xl font-semibold text-gray-800">CMS Page</h2>
+                    <input
+                        type="text"
+                        placeholder="Search CMS pages..."
+                        value={searchText}
+                        onChange={handleSearch}
+                        className="border p-2 rounded"
+                    />
                     <button
                         onClick={() => setModelCms(true)}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-all"
+                        className="bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition"
                     >
-                        Add CMS
+                        + Add CMS
                     </button>
-
                 </div>
 
+                <div className="bg-white rounded-lg shadow overflow-x-auto">
+                    <table className="min-w-full border">
+                        <thead className="bg-gray-100">
+                            {cmsTable.getHeaderGroups().map(headerGroup => (
+                                <tr key={headerGroup.id}>
+                                    {headerGroup.headers.map(header => (
+                                        <th
+                                            key={header.id}
+                                            className="px-4 py-3 text-left text-sm font-semibold border"
+                                        >
+                                            {flexRender(
+                                                header.column.columnDef.header,
+                                                header.getContext()
+                                            )}
+                                        </th>
+                                    ))}
+                                </tr>
+                            ))}
+                        </thead>
 
-                {/* DataTable for CMS Content */}
-                <DataTable
-                    columns={[
-                        {
-                            name: "ID",
-                            selector: (row, index) => index + 1,
-                            width: "70px",
-                        },
-                        { name: "Page", selector: (row) => row.page?.name || "—", sortable: true },
-                        
-                        { name: "Status", selector: (row) => row.status, sortable: true },
-                        {
-                            name: "Actions",
-                            cell: (row) => (
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() => handleViewContent(row)}
-                                        className="text-blue-500 hover:text-blue-700"
-                                        title="View"
-                                    >
-                                        <FaEye size={20} />
-                                    </button>
-                                    <button
-                                        onClick={() => handleEditContent(row)}
-                                        className="text-green-500 hover:text-green-700"
-                                        title="Edit"
-                                    >
-                                        <FaEdit size={20} />
-                                    </button>
-                                    <button
-                                        onClick={() => handleDeleteContent(row._id)}
-                                        className="text-red-500 hover:text-red-700"
-                                        title="Delete"
-                                    >
-                                        <FaTrash size={20} />
-                                    </button>
-                                </div>
-                            ),
-                        },
-                    ]}
-                    data={cmsContent}
-                    pagination
-                    highlightOnHover
-                    striped
-                    responsive
-                />
+                        <tbody>
+                            {cmsTable.getRowModel().rows.map(row => (
+                                <tr key={row.id} className="hover:bg-gray-50">
+                                    {row.getVisibleCells().map(cell => (
+                                        <td key={cell.id} className="px-4 py-2 border text-sm">
+                                            {flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext()
+                                            )}
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))}
+
+                            {cmsTable.getRowModel().rows.length === 0 && (
+                                <tr>
+                                    <td colSpan={cmsColumns.length} className="text-center py-6 text-gray-500">
+                                        No CMS pages found
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+
+                    {/* Pagination */}
+                    <div className="flex justify-between items-center p-4">
+                        <button
+                            onClick={() => cmsTable.previousPage()}
+                            disabled={!cmsTable.getCanPreviousPage()}
+                            className="px-4 py-2 border rounded disabled:opacity-50"
+                        >
+                            Previous
+                        </button>
+
+                        <span className="text-sm">
+                            Page {cmsTable.getState().pagination.pageIndex + 1} of{" "}
+                            {cmsTable.getPageCount()}
+                        </span>
+
+                        <button
+                            onClick={() => cmsTable.nextPage()}
+                            disabled={!cmsTable.getCanNextPage()}
+                            className="px-4 py-2 border rounded disabled:opacity-50"
+                        >
+                            Next
+                        </button>
+                    </div>
+                </div>
 
 
                 {modelCms && (
                     <div
                         className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
-                        onClick={() => setModelCms(false)} // close when clicking outside
+                        onClick={() => setModelCms(false)} 
                     >
                         <div
                             className="bg-white w-full max-w-lg rounded-lg shadow-lg p-6 max-h-[90vh] overflow-y-auto"
-                            onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
+                            onClick={(e) => e.stopPropagation()} 
                         >
                             <h3 className="text-xl font-semibold mb-4 capitalize">Add CMS Page</h3>
 

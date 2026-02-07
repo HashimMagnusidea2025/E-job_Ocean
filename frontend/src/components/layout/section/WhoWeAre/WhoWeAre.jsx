@@ -1,65 +1,108 @@
-import { FaBookOpen, FaTools, FaChalkboardTeacher, FaBriefcase } from "react-icons/fa";
-
+import {
+  FaBookOpen,
+  FaTools,
+  FaChalkboardTeacher,
+  FaBriefcase,
+} from "react-icons/fa";
+import Resumeamico from "../../../../media/png/Resume-amico.svg";
+import { motion } from "framer-motion";
 export default function WhoWeAre() {
-    return (
-        <div className="bg-[#1d1d1d] text-white py-12 px-4 font-[Poppins]">
-            <div className="container mx-auto">
-                <div className="max-w-[1920px] mx-auto flex flex-col lg:flex-row items-start gap-10">
+  return (
+    <section className="relative bg-[#0f0f0f] text-white py-8 px-4 font-[Poppins] overflow-hidden">
 
+      {/* BACKGROUND EFFECT */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-[#339ca0]/20 rounded-full blur-3xl"></div>
 
-                    <div className="flex-1">
-                        <h2 className="text-[40px] font-bold mb-8">
-                            Who <span className="text-[#339ca0]">We Are...</span>
-                        </h2>
+      <div className="max-w-[1300px] mx-auto relative z-10">
 
-                        <div className="relative pl-10">
-                            {/* <div className="absolute top-6 left-5 h-[calc(100%-30px)] border-l-2 border-dotted border-orange-500"></div> */}
-
-                            <div className="mb-8 flex items-center gap-4">
-                                <div className="bg-[#339ca0] rounded-full p-2 text-white text-xl">
-                                    <FaBookOpen />
-                                </div>
-                                <p className="text-white font-medium">One-Stop Learning Platform For Finance</p>
-                            </div>
-
-                            <div className="mb-8 flex items-center gap-4">
-                                <div className="bg-[#339ca0] rounded-full p-2 text-white text-xl">
-                                    <FaTools />
-                                </div>
-                                <p className="text-white font-medium">Hands-on Training for Practical Skills</p>
-                            </div>
-
-                            <div className="mb-8 flex items-center gap-4">
-                                <div className="bg-[#339ca0] rounded-full p-2 text-white text-xl">
-                                    <FaChalkboardTeacher />
-                                </div>
-                                <p className="text-white font-medium">Mentorship from Industry Experts</p>
-                            </div>
-
-                            <div className="flex items-center gap-4">
-                                <div className="bg-[#339ca0] rounded-full p-2 text-white text-xl">
-                                    <FaBriefcase />
-                                </div>
-                                <p className="text-white font-medium">Placement in Leading Firms & MNCs</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="flex-1 flex justify-center">
-                        <div className="w-full aspect-video rounded-lg overflow-hidden border border-white">
-                            <iframe
-                                className="w-full h-full"
-                                src="https://www.youtube.com/embed/YOUR_VIDEO_ID"
-                                title="eJob Ocean"
-
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                            ></iframe>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
+        {/* HEADING */}
+        <div className="text-center ">
+          <h2 className="text-3xl sm:text-4xl font-bold">
+            Who <span className="text-[#339ca0]">We Are</span>
+          </h2>
+          <p className="text-gray-400 mt-4 max-w-2xl mx-auto">
+            A modern finance learning platform focused on skills, mentorship,
+            and real-world career outcomes.
+          </p>
         </div>
-    );
+
+        {/* CONTENT GRID */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-center">
+
+          {/* LEFT CARDS */}
+          <div className="space-y-8">
+            <FeatureCard
+              icon={<FaBookOpen />}
+              title="One-Stop Learning Platform For Finance"
+              
+            />
+            <FeatureCard
+              icon={<FaTools />}
+              title="Hands-on Training for Practical Skills"
+             
+            />
+          </div>
+
+          {/* CENTER IMAGE */}
+          <div className="flex justify-center">
+            <img
+              src={Resumeamico}
+              alt="Resume Illustration"
+              className="w-full max-w-sm drop-shadow-2xl"
+            />
+          </div>
+
+          {/* RIGHT CARDS */}
+          <div className="space-y-8">
+            <FeatureCard
+              icon={<FaChalkboardTeacher />}
+              title="Mentorship from Industry Expert"
+            
+            />
+            <FeatureCard
+              icon={<FaBriefcase />}
+              title="Placement in Leading Firms & MNCs"
+              
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }
+
+/* FEATURE CARD COMPONENT */
+// const FeatureCard = ({ icon, title, desc }) => {
+//   return (
+//     <div className="group bg-[#1a1a1a] border border-white/10 rounded-2xl p-6 hover:border-[#339ca0]/50 hover:-translate-y-1 transition-all duration-300 shadow-lg">
+//       <div className="flex items-start gap-4">
+//         <div className="text-[#339ca0] text-2xl mt-1">
+//           {icon}
+//         </div>
+//         <div>
+//           <h4 className="font-semibold text-lg mb-1">
+//             {title}
+//           </h4>
+        
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+
+const FeatureCard = ({ icon, title }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 40 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    whileHover={{ scale: 1.06 }}
+    transition={{ duration: 0.6 }}
+    className="bg-[#1a1a1a] border border-white/10 rounded-2xl p-6 shadow-lg"
+  >
+    <div className="flex items-center gap-4">
+      <div className="text-[#339ca0] text-2xl">{icon}</div>
+      <h4 className="font-semibold text-lg">{title}</h4>
+    </div>
+  </motion.div>
+);

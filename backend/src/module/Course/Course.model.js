@@ -64,11 +64,11 @@ const CourseSchema = new mongoose.Schema({
     },
     onlineLink: {
         type: String,
-       
+
     },
     address: {
         type: String,
-        
+
     },
     capacity: {
         type: Number,
@@ -78,7 +78,7 @@ const CourseSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
-    
+
     status: {
         type: String,
         enum: ['active', 'inactive'],

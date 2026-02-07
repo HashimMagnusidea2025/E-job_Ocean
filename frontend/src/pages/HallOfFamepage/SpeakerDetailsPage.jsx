@@ -166,10 +166,7 @@ export default function SpeakerDetailsPage() {
                             )}
                         </div>
 
-                        <div>
-
-
-
+                        <div className="sticky top-24">
                             <DateTimeSelection
                                 speakerId={userType === 'speaker' ? speakerId : null}
                                 mentorId={userType === 'mentor' ? speakerId : null}

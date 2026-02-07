@@ -11,7 +11,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { useQuery } from '@tanstack/react-query';
 import hero31 from "../../media/jpg/31.jpg";
 import { FaRegCommentDots } from "react-icons/fa";
-
+import { WhatsAppGroupSection } from "../../components/layout/section/WhatsAppGroupSection/WhatsAppGroupSection.jsx";
 
 
 export default function BlogsPage() {
@@ -174,7 +174,7 @@ export default function BlogsPage() {
 
                     <div className="flex flex-wrap gap-2 mb-6 items-center justify-center">
 
-                        <div className="flex flex-wrap gap-2 mb-6 items-center">
+                        <div className="flex  flex-wrap gap-2 mb-6 items-center">
                             {categories.map((cat) => (
                                 <button
                                     key={cat.id}
@@ -244,6 +244,7 @@ export default function BlogsPage() {
                                     type="blogs"
                                     Commentbtn={true}
                                     Viewbtn={true}
+                                    Likebtn={true}
                                     category={value._embedded?.["wp:term"]?.[0]?.[0]?.name}
                                     slug={value.slug}
                                 />
@@ -273,9 +274,10 @@ export default function BlogsPage() {
                         </div>
                     )}
 
+
                 </section>
             </div>
-
+            <WhatsAppGroupSection />
             <Footer />
         </div>
     );

@@ -294,7 +294,7 @@ export default function Dashboard() {
               </div>
 
               {/* Courses Section */}
-              <div className="bg-white rounded-xl shadow">
+              {/* <div className="bg-white rounded-xl shadow">
                 <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
                   <h2 className="text-2xl font-bold">
                     Our <span className="text-[#339ca0]">Free Courses</span>
@@ -323,7 +323,7 @@ export default function Dashboard() {
                     </SwiperSlide>
                   ))}
                 </Swiper>
-              </div>
+              </div> */}
 
             </div>
           </div>

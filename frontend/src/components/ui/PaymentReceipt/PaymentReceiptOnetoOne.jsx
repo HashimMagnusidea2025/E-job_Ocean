@@ -81,7 +81,7 @@ export default function PaymentReceiptOneToOne() {
                 const promises = [
                     oneToOneId ? axios.get(`/one-to-one/${oneToOneId}`) : Promise.resolve({ data: null }),
                     registrationId ? axios.get(`/registrations/${registrationId}`) : Promise.resolve({ data: null }),
-                    registrationId ? axios.get(`/payments/registration/${registrationId}`) : Promise.resolve({ data: null }),
+                    registrationId ? axios.get(`/payment/registration/${registrationId}`) : Promise.resolve({ data: null }),
                 ];
 
                 const [sessionRes, regRes, payRes] = await Promise.allSettled(promises);

@@ -201,40 +201,6 @@ export const toggleExperienceStatus = async (req, res) => {
     }
 };
 
-// ✅ Get all experiences for a user - UPDATED WITH POPULATION
-// export const getUserExperiences = async (req, res) => {
-//     try {
-//         if (!req.user || !req.user._id) {
-//             return res.status(401).json({
-//                 success: false,
-//                 message: "User not authenticated",
-//             });
-//         }
-
-//         const experiences = await Experience.find({
-//             userId: req.user._id,
-//             isActive: true,
-//         })
-//             .populate('country', 'name')  // ✅ Populate country name
-//             .populate('state', 'name')    // ✅ Populate state name
-//             .populate('city', 'name')     // ✅ Populate city name
-//             .sort({ startDate: -1 });
-
-//         console.log("📤 Sending experiences:", experiences);
-
-//         res.status(200).json({
-//             success: true,
-//             data: experiences,
-//         });
-//     } catch (error) {
-//         console.error("❌ Get Experiences Error:", error);
-//         res.status(500).json({
-//             success: false,
-//             message: "Internal server error",
-//             error: error.message,
-//         });
-//     }
-// };
 
 
 export const getExperienceById = async (req, res) => {
@@ -777,39 +743,6 @@ export const deleteSkill = async (req, res) => {
 };
 
 
-
-// languages controller (backend)
-
-
-
-
-// export const createLanguage = async (req, res) => {
-//     try {
-//         const { languageName, proficiency } = req.body;
-
-
-//         const language = new Language({
-//             userId: req.user.id,
-//             languageName,
-//             proficiency
-//         });
-
-
-//          if (!req.user || !req.user._id) {
-//             return res.status(401).json({
-//                 success: false,
-//                 message: "User not authenticated",
-//             });
-//         }
-//         await language.save();
-//         console.log(language.data);
-        
-
-//         res.status(201).json({ success: true, data: language });
-//     } catch (error) {
-//         res.status(500).json({ success: false, message: error.message });
-//     }
-// };
 
 
 

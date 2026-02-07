@@ -15,7 +15,7 @@ const CompanyRegister = () => {
   const [roleID, setRoleID] = useState(null);
   const navigate = useNavigate();
 
-  // Fetch the employer role ID on component mount
+ 
   useEffect(() => {
     const fetchRoleID = async () => {
       try {
@@ -70,7 +70,7 @@ const CompanyRegister = () => {
       
       
       alert("Company registered successfully!");
-      navigate("/login"); // or navigate("/employer-dashboard")
+      navigate("/login"); 
     } catch (error) {
       alert("Registration failed.");
       console.error(error);

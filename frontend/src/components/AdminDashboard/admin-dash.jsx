@@ -127,18 +127,7 @@ export default function AdminDash() {
                     ))}
                 </div>
 
-              
-                {/* <footer className="text-center text-sm text-gray-600 border-t pt-4 mt-8">
-                    <p>
-                        © Copyright <b>@2025</b>. All Rights Reserved
-                    </p>
-                    <p>
-                        Designed by{" "}
-                        <span className="text-blue-600 font-semibold hover:underline cursor-pointer">
-                            Magnus Ideas Pvt. Ltd.
-                        </span>
-                    </p>
-                </footer> */}
+        
             </div>
         </Layout>
     );

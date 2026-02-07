@@ -20,7 +20,7 @@ export default function EmployerDash() {
                             <div className="bg-white rounded-xl shadow  p-6">
                                 <h2 className="text-2xl font-semibold text-center">Welcome to Employer Dashboard</h2>
                             </div>
-                            <div className="md:pt-8">
+                            {/* <div className="md:pt-8">
                                 <div className="flex flex-wrap gap-4 justify-center">
                                     <StatCard title="Open Job" value="123" icon={<FaEye />} />
                                     <StatCard title="Followers" value="58" icon={<FaUser />} />
@@ -42,7 +42,7 @@ export default function EmployerDash() {
                                 <div className=" pt-10">
                                     <UpgradeJobPackages />
                                 </div>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 </div>

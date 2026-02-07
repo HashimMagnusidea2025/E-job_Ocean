@@ -3,11 +3,12 @@ import axios from "../../utils/axios.js";
 import Navbar from "../../components/layout/navbar/navbar";
 import Footer from "../../components/layout/footer/footer";
 import { HallOfFameCards } from "../../components/ui/cards/cards";
+import { WhatsAppGroupSection } from "../../components/layout/section/WhatsAppGroupSection/WhatsAppGroupSection.jsx";
 
 export default function HallOfFamepage() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState('mentors');
+    const [activeTab, setActiveTab] = useState('speakers');
 
     // useEffect(() => {
     //     const fetchData = async () => {
@@ -62,13 +63,6 @@ export default function HallOfFamepage() {
         const fetchData = async () => {
             try {
                 setLoading(true);
-
-                // 🔹 MENTORS
-                if (activeTab === "mentors") {
-                    const res = await axios.get("/users/mentors/with-sessions");
-                    setData(Array.isArray(res.data) ? res.data : []);
-                }
-
                 // 🔹 SPEAKERS + ONE TO ONE SESSIONS
                 if (activeTab === "speakers") {
                     const res = await axios.get("/one-to-one");
@@ -92,6 +86,13 @@ export default function HallOfFamepage() {
 
                     setData(Object.values(speakerMap));
                 }
+                // 🔹 MENTORS
+                if (activeTab === "mentors") {
+                    const res = await axios.get("/users/mentors/with-sessions");
+                    setData(Array.isArray(res.data) ? res.data : []);
+                }
+
+
 
             } catch (err) {
                 console.error("Error:", err);
@@ -160,6 +161,7 @@ export default function HallOfFamepage() {
                     )}
                 </div>
             </div>
+            <WhatsAppGroupSection />
         </div>
     );
 }

@@ -3,6 +3,7 @@ import CaFresherModel from "../models/CaFresher.model.js";
 export const CreateCAFresher = async (req, res) => {
   try {
     const {
+      type, // 👈 NEW
       name,
       email,
       phone,
@@ -14,6 +15,14 @@ export const CreateCAFresher = async (req, res) => {
       passingYear,
     } = req.body;
 
+    if (!type) {
+      return res.status(400).json({ message: "Type is required" });
+    }
+    // Parse arrays if they are strings
+    const parsedQualification = Array.isArray(qualification) ? qualification : JSON.parse(qualification || '[]');
+    const parsedJobProfile = Array.isArray(jobProfile) ? jobProfile : JSON.parse(jobProfile || '[]');
+    const parsedJobLocation = Array.isArray(jobLocation) ? jobLocation : JSON.parse(jobLocation || '[]');
+
     const ResumeUpload = req.file?.filename;
 
     if (!ResumeUpload) {
@@ -21,13 +30,14 @@ export const CreateCAFresher = async (req, res) => {
     }
 
     const CaFresher = await CaFresherModel.create({
+       type, // 👈 SAVE HERE
       name,
       email,
       phone,
-      qualification,
+      qualification: parsedQualification,
       experience,
-      jobProfile,
-      jobLocation,
+      jobProfile: parsedJobProfile,
+      jobLocation: parsedJobLocation,
       passingMonth,
       passingYear,
       ResumeUpload,
@@ -53,7 +63,7 @@ export const CreateCAFresher = async (req, res) => {
 
 export const GetAllCAFresher = async (req, res) => {
   try {
-    const caFreshers = await CaFresherModel.find().sort({ createdAt: -1 }); 
+    const caFreshers = await CaFresherModel.find().sort({ createdAt: -1 });
 
     res.status(200).json({
       success: true,
@@ -78,9 +88,9 @@ export const importcaRegistrations = async (req, res) => {
       return res.status(400).json({ message: "No file uploaded" });
     }
     const jsonData = JSON.parse(req.file.buffer.toString());
-   
+
     const formattedData = jsonData.map((item) => ({
-      CA_Id: item.id, 
+      CA_Id: item.id,
       name: item.name,
       email: item.email,
       phone: item.phone,
@@ -103,6 +113,28 @@ export const importcaRegistrations = async (req, res) => {
     res.status(500).json({
       message: "Failed to import data",
       error: err.message,
+    });
+  }
+};
+
+
+
+// GET only Upload CV registrations
+export const GetUploadCvList = async (req, res) => {
+  try {
+    const uploadCvList = await CaFresherModel.find({ type: "uploadCv" })
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      message: "Upload CV list fetched successfully",
+      data: uploadCvList,
+    });
+  } catch (error) {
+    console.error("GetUploadCvList error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch Upload CV list",
     });
   }
 };

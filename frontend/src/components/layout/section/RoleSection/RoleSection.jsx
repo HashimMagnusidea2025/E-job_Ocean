@@ -21,7 +21,7 @@ export default function RoleSection() {
     AOS.init({
       duration: 1000,
       once: true,
-      offset: 200, // 👈 triggers animation when 200px before element enters viewport
+      offset: 200, 
     });
   }, []);
   return (

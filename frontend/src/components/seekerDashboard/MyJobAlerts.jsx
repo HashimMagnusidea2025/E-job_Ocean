@@ -13,7 +13,7 @@ export default function MYJobAlerts() {
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [alerts, setAlerts] = useState([]); // Changed from initialAlerts to empty array
+  const [alerts, setAlerts] = useState([]); 
   const [selectedSkills, setSelectedSkills] = useState([]);
   const [formData, setFormData] = useState({
     jobTitle: "",
@@ -28,7 +28,7 @@ export default function MYJobAlerts() {
   });
 
 
-  // Format skills for react-select
+ 
   const skillsOptions = Array.isArray(buildSkills)
     ? buildSkills.map(skill => ({
       value: skill._id,
@@ -36,7 +36,7 @@ export default function MYJobAlerts() {
     }))
     : [];
 
-  // Fetch job alerts from backend
+
   const fetchAlerts = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -56,15 +56,14 @@ export default function MYJobAlerts() {
   };
 
   useEffect(() => {
-    fetchAlerts(); // Fetch alerts when component mounts
+    fetchAlerts(); 
   }, []);
 
   useEffect(() => {
     const fetchBuildSkills = async () => {
       try {
         const { data } = await axios.get('/skills-categories/active');
-        // Ensure data is an array before setting state
-        // console.log(data);
+       
         console.log(data);
 
         if (data && data.success && Array.isArray(data.data)) {
@@ -117,8 +116,7 @@ export default function MYJobAlerts() {
     // Fetch countries
     axios.get("/country")
       .then((res) => {
-        // console.log("Countries response:", res.data);
-        // Handle different possible response structures
+        
         const countriesData = res.data.country || res.data.data || res.data || [];
         setCountries(Array.isArray(countriesData) ? countriesData : []);
       })
@@ -155,11 +153,11 @@ export default function MYJobAlerts() {
     }
   }, [formData.state]);
 
-  // Handle form input changes
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
 
-    // Reset dependent dropdowns properly
+   
     if (name === "country") {
       setFormData((prev) => ({
         ...prev,
@@ -182,7 +180,7 @@ export default function MYJobAlerts() {
   };
 
 
-  // Handle skills selection - FIXED: Now sends array of skills
+
   const handleSkillsChange = (selected) => {
     setSelectedSkills(selected || []);
     const skillIds = selected ? selected.map(skill => skill.value) : [];
@@ -200,14 +198,14 @@ export default function MYJobAlerts() {
     try {
       const token = localStorage.getItem("token");
 
-      // Prepare data for API - convert location fields to numbers as required by backend
+      
       const submitData = {
         ...formData,
         country: Number(formData.country),
         state: Number(formData.state),
         city: Number(formData.city),
-        // If skills should be a single ObjectId (not array), take the first one
-        skills: formData.skills // Now sends the entire array
+       
+        skills: formData.skills 
 
       };
 
@@ -219,7 +217,7 @@ export default function MYJobAlerts() {
 
       console.log("Alert Created:", res.data);
 
-      // Refresh the alerts list
+  
       await fetchAlerts();
       setShowModal(false);
       resetForm();
@@ -253,7 +251,7 @@ export default function MYJobAlerts() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      // Remove from local state
+     
       setAlerts(prev => prev.filter(alert => alert._id !== alertId));
       Swal.fire("Deleted!", "Job alert deleted successfully!", "success");
     } catch (error) {
@@ -262,7 +260,7 @@ export default function MYJobAlerts() {
     }
   };
 
-  // Format date for display
+  
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',

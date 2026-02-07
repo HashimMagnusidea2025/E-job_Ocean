@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-// ==================== Education Schema ====================
+// Education Schema
 const educationSchema = new mongoose.Schema(
   {
     userId: {
@@ -47,7 +47,7 @@ const educationSchema = new mongoose.Schema(
 
 
 
-// ==================== Experience Schema ====================
+// Experience Schema 
 const experienceSchema = new mongoose.Schema(
   {
     userId: {

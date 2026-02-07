@@ -122,6 +122,7 @@ export default function DateTimeSelection({ speakerId, mentorId, userType, onCon
           sessionId: session._id,
           courseTitle: session.courseTitle,
           paymentType: session.paymentType,
+          fees: session.fees,
           sessionData: session // Pure session data
         });
       }
@@ -169,12 +170,12 @@ export default function DateTimeSelection({ speakerId, mentorId, userType, onCon
 
   const timeSlots = getAvailableTimeSlots();
 
-useEffect(() => {
-  if (preselectedSlot) {
-    setSelectedTimeSlot(preselectedSlot);
-    setShowTimeSlots(true);
-  }
-}, [preselectedSlot]);
+  useEffect(() => {
+    if (preselectedSlot) {
+      setSelectedTimeSlot(preselectedSlot);
+      setShowTimeSlots(true);
+    }
+  }, [preselectedSlot]);
 
 
   if (loading) {
@@ -314,6 +315,17 @@ useEffect(() => {
                       {slot.courseTitle}
                     </div>
                   )}
+                  {/* {slot.fees && (
+                    <div className="text-xs text-black mt-1 truncate">
+                      {slot.fees}
+                    </div>
+                  )} */}
+                  {slot.fees && (
+                    <div className="text-xs text-black mt-1 truncate">
+                      ₹ {slot.fees} {slot.includingGST && "(Incl. GST)"}
+                    </div>
+                  )}
+
                 </button>
               ))}
             </div>
@@ -346,6 +358,11 @@ useEffect(() => {
           {selectedTimeSlot.courseTitle && (
             <p className="text-xs text-green-600 mt-1">
               Course: {selectedTimeSlot.courseTitle}
+            </p>
+          )}
+          {selectedTimeSlot.courseTitle && (
+            <p className="text-xs text-green-600 mt-1">
+              Fees: {selectedTimeSlot.fees}
             </p>
           )}
         </div>

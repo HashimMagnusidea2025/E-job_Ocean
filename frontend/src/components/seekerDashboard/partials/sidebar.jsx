@@ -13,15 +13,22 @@ import { FaAngleDown } from "react-icons/fa";
 import { BiSolidCategory } from "react-icons/bi";
 import { IoMdMenu, IoMdSettings } from "react-icons/io";
 import { GoDotFill } from "react-icons/go";
-
+import { FaBriefcase } from "react-icons/fa";
+import { FaBook } from "react-icons/fa";
+import { FaVideo } from "react-icons/fa";
+import { FaUserTie } from "react-icons/fa";
+import { FaClipboardList } from "react-icons/fa";
+import { FaUserFriends } from "react-icons/fa";
 const Sidebar = ({ isOpen, onSidebarToggle }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
-  const role = sessionStorage.getItem("role");
+  // const role = localStorage.getItem("role");
+  const user = JSON.parse(localStorage.getItem("user"));
+  const role = user?.roleID?.name;
 
-  // 👇 object state for multiple open menus
+  //  object state for multiple open menus
   const [openMenus, setOpenMenus] = useState({});
 
   const toggleMenu = (label) => {
@@ -48,7 +55,9 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    sessionStorage.removeItem("role");
+    // sessionStorage.removeItem("role");
+    localStorage.removeItem("role");
+
     navigate("/");
   };
 
@@ -57,14 +66,16 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
     { path: "/", icon: <FaHome />, label: "Home" },
     { path: "/seeker-dashboard", icon: <FaHome />, label: "Dashboard" },
     { path: "/seeker-dashboard/my-profile", icon: <FaPencilAlt />, label: "Edit Profile" },
+    { path: "/seeker-dashboard/my-webinars", icon: <FaVideo />, label: "My Webinars" },
+    { path: "/seeker-dashboard/my-one-to-one-sessions", icon: <FaUserFriends />, label: "My One To One Sessions" },
+    { path: "/seeker-dashboard/my-courses", icon: <FaBookOpen />, label: "My Courses" },
     { path: "/seeker-dashboard/build-resume", icon: <FaFile />, label: "Build Resume" },
     { path: "/seeker-dashboard/resume", icon: <FaPrint />, label: "Download CV" },
     { path: "/seeker-dashboard/view-Public-Profile", icon: <FaEye />, label: "View Public Profile" },
     { path: "/seeker-dashboard/my-job-applications", icon: <FaDesktop />, label: "My Job Applications" },
     { path: "/seeker-dashboard/my-favourite-jobs", icon: <FaHeart />, label: "My Favourite Jobs" },
     { path: "/seeker-dashboard/my-alerts", icon: <FaBullhorn />, label: "My Job Alerts" },
-    // { path: "/seeker-dashboard/my-messages", icon: <FaEnvelope />, label: "My Messages" }, 
-    // { path: "/seeker-dashboard/my-followings", icon: <FaUser />, label: "My Followings" },
+
     { icon: <FaSignOutAlt />, label: "Logout", onClick: handleLogout }
   ];
 
@@ -82,8 +93,7 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
     // { path: "/employer-dashboard/company-packages", icon: <FaDesktop />, label: "CV Search Packages" },
     // { path: "/employer-dashboard/list-payment-history", icon: <RiMoneyDollarCircleLine />, label: "Payment History" },
     // { path: "/employer-dashboard/unloced-seekers", icon: <FaBullhorn />, label: "Unlocked Users" },
-    // { path: "/employer-dashboard/company-messages", icon: <FaUser />, label: "Company Messages" },
-    // { path: "/employer-dashboard/company-followers", icon: <FaUser />, label: "Company Followings" },
+
 
     { icon: <FaSignOutAlt />, label: "Logout", onClick: handleLogout }
 
@@ -104,6 +114,7 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
     { path: "/", icon: <FaHome />, label: "Home" },
     { path: "/admin-dash", icon: <FaHome />, label: "Dashboard" },
     { path: "/admin-dashboard/ca-fresher-list", label: "CA Fresher List", icon: <GoDotFill size={12} className="dot" /> },
+    { path: "/admin-dashboard/upload-cv-list", label: "Upload Cv List", icon: <GoDotFill size={12} className="dot" /> },
 
     {
       icon: <FaUser />, label: "Become-A-Mentor",
@@ -117,7 +128,7 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
       ]
     },
     {
-      icon: <FaUser />, label: "Job Post ",
+      icon: <FaBriefcase />, label: "Job Post ",
       children: [
 
         {
@@ -133,7 +144,7 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
       ]
     },
     {
-      icon: <FaUser />, label: "Knowledge Base ",
+      icon: <FaBook />, label: "Knowledge Base ",
       children: [
 
         {
@@ -153,7 +164,7 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
       ]
     },
     {
-      icon: <FaUser />, label: " Registrations List",
+      icon: <FaClipboardList />, label: " Registrations List",
       children: [
 
 
@@ -179,7 +190,7 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
     },
 
     {
-      icon: <FaUser />, label: "Speakers",
+      icon: <FaUserTie />, label: "Speakers",
       children: [
 
         {
@@ -198,7 +209,7 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
       ]
     },
     {
-      icon: <FaUser />, label: "Webinars",
+      icon: <FaVideo />, label: "Webinars",
       children: [
 
         {
@@ -235,9 +246,9 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
 
       ]
     },
-   
+
     {
-      icon: <FaBookOpen /> , label: "Course Management",
+      icon: <FaBookOpen />, label: "Course Management",
 
       children: [
         { path: '/admin-dashboard/course', icon: <GoDotFill size={12} className=" dot" />, label: "Course List" },
@@ -245,8 +256,9 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
 
       ]
     },
-     { path: "/admin-dashboard/our-founders", label: "Our Founders", icon: <GoDotFill size={12} className="dot" /> },
-    
+    { path: "/admin-dashboard/our-founders", label: "Our Founders", icon: <GoDotFill size={12} className="dot" /> },
+    { path: "/admin-dashboard/meet-our-team", label: "Meet Our Team", icon: <GoDotFill size={12} className="dot" /> },
+
     {
       icon: <IoMdSettings />, label: "Master Settings",
       children: [
@@ -328,11 +340,11 @@ const Sidebar = ({ isOpen, onSidebarToggle }) => {
 
   let menuItems = [];
   if (role === "superadmin") menuItems = AdminItems;
-  else if (role === "Employer") menuItems = EmployerItems;
+  else if (role === "employer") menuItems = EmployerItems;
   else if (role === "seeker") menuItems = SeekerItems;
-  else if (role === "Mentor") menuItems = MentorItems
+  else if (role === "mentor") menuItems = MentorItems
 
-  // auto open menus if child path matches
+  // auto open menus if child path matches210
   useEffect(() => {
     const openParents = (items) => {
       items.forEach(item => {

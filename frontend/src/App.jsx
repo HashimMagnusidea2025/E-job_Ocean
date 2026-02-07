@@ -24,11 +24,12 @@ import BlogDetailsPage from './pages/Blogspage/blogdetailpage.jsx';
 import BlogDetailsPage2 from './pages/Blogspage/blogdetailpage2.jsx';
 import Dashboard from './components/AdminDashboard/Admindashborard';
 import CaFreshersForm from './components/layout/section/CaFreshersForm/CaFreshersForm';
+import UpoloadCvForm from './components/layout/section/uploadCv/uploadCv.jsx';
 import Login from './components/layout/section/login/login';
 
 import KnowledgeBasePage from './pages/KnowledgeBasePage/KnowledgeBasePage.jsx';
 import KnowledgeBaseRegisterList from './components/AdminDashboard/KnowledgeBaseRegisterList/KnowledgeBaseRegisterList.jsx';
-
+import CourseDetilasPage from './pages/CourseDetilasPage/CourseDetilasPage.jsx';
 
 
 
@@ -46,6 +47,9 @@ import MYJobAlerts from './components/seekerDashboard/MyJobAlerts.jsx';
 import MyMessages from './components/seekerDashboard/MyMessages.jsx';
 import MyFevoriteJob from './components/seekerDashboard/myFevoriteJobs.jsx';
 import MyFollowings from './components/seekerDashboard/myFollowings.jsx';
+import MyWebinars from './components/seekerDashboard/myWebinars.jsx';
+import MyOneToOneSession from './components/seekerDashboard/MyOneToOneSession.jsx';
+import MyCourses from './components/seekerDashboard/MyCourses.jsx';
 
 // Employer dashoard inner file //
 import EditAccountDetails from './components/employerDashboard/editAccountDetails.jsx';
@@ -82,11 +86,12 @@ import NoofEmployeescCategoryPage from './components/AdminDashboard/noofemployee
 import EstabilishedInategoryPage from './components/AdminDashboard/EstabilishedInCategory/EstabilishedInCategory.jsx';
 import CAFresherListPage from './components/AdminDashboard/CAFresherListPage/CAFresherListPage.jsx'
 import SpeakerDetailsPage from './pages/HallOfFamepage/SpeakerDetailsPage.jsx';
-
+import UploadCvList from './components/AdminDashboard/uploadcvList/uploadcvList.jsx';
 import RegisterHallOfFame from './pages/HallOfFamepage/RegisterHallOfFame.jsx';
 import WebinarRegistrationList from './components/AdminDashboard/webinarRegistrationList/RegistrationList.jsx';
 import OneToOneRegistrationList from './components/AdminDashboard/OneToOneRegistrationList/OneToOneRegistrationList.jsx';
 import PaymentReceiptOneToOne from './components/ui/PaymentReceipt/PaymentReceiptOnetoOne.jsx';
+import PaymentReceiptCourse from './components/ui/PaymentReceipt/PaymentReceiptCourse.jsx';
 import PostAJobAdmin from './components/AdminDashboard/jobPostadmin/jobPostadmin.jsx'
 // Create Company
 import CreateCompany from './components/AdminDashboard/createCompany/createCompany.jsx';
@@ -115,7 +120,6 @@ import BecomeAMentorRegister from './pages/BecomeAMentorRegister/BecomeAMentorRe
 
 // import SeekerDashboard from './components/seekerDashboard/seekerDashboard';
 
-
 import PaymentReceipt from "./components/ui/PaymentReceipt/PaymentReceipt.jsx";
 import ForgotPassword from './pages/ForgotPassword/ForgotPassword.jsx';
 import ResetPassword from './pages/ResetPassword/ResetPassword.jsx';
@@ -134,12 +138,15 @@ import ContactPage from './pages/contactPage/contactpage.jsx';
 import ContactUserList from './components/AdminDashboard/ContactUserList/ContactUserList.jsx';
 import CourseList from './components/AdminDashboard/Course/course.jsx';
 import OurFounders from './components/AdminDashboard/OurFounders/OurFounders.jsx';
-
 import SocialMediaForm from './components/AdminDashboard/SocialMediaForm/SocialMediaForm.jsx';
+import MeetOurTeamForm from './components/AdminDashboard/MeetOurTeamForm/MeetOurTeamForm.jsx';
 // Course File
 
+
+import FloatingFAB from './components/ui/FloatingFAB.jsx';
 function App() {
   return (
+    
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<><Home /></>} />
@@ -152,11 +159,10 @@ function App() {
 
         <Route path="/webinars/:slug" element={<WebinarDetailsPage />} />
 
-
         <Route path="/hall-of-fame" element={<><Navbar /><HallOfFamepage /><Footer /></>} />
 
-          <Route path="/hall-of-fame/:speakerId" element={<><Navbar /><SpeakerDetailsPage /><Footer /></>} /> 
-        
+        <Route path="/hall-of-fame/:speakerId" element={<><Navbar /><SpeakerDetailsPage /><Footer /></>} />
+
 
         {/* <Route path="/hall-of-fame/:slug" element={<><Navbar /><SpeakerDetailsPage /><Footer /></>}/> */}
 
@@ -175,15 +181,13 @@ function App() {
         {/* <Route path="/blogs/category/:categoryId" element={<BlogDetailsPage2 />} /> */}
         <Route path="/blogs/category/:categorySlug" element={<BlogDetailsPage2 />} />
 
-         <Route path="/privacy-policy" element={<><Navbar/><PrivacyPolicy /><Footer/></>} />
-         <Route path="/terms-conditions" element={<><Navbar/><TermsConditions /><Footer/></>} />
-         <Route path="/contact" element={<><Navbar/><ContactPage /><Footer/></>} />
-
-
-
+        <Route path="/privacy-policy" element={<><Navbar /><PrivacyPolicy /><Footer /></>} />
+        <Route path="/terms-conditions" element={<><Navbar /><TermsConditions /><Footer /></>} />
+        <Route path="/contact" element={<><Navbar /><ContactPage /><Footer /></>} />
 
 
         <Route path='/knowledge-base' element={<><Navbar /><KnowledgeBasePage /><Footer /></>} />
+        <Route path='/course-details/:id' element={<><Navbar /><CourseDetilasPage /><Footer /></>} />
         <Route
           path="/payment-receipt/:webinarId"
           element={
@@ -216,6 +220,9 @@ function App() {
         </>} />
         {/* Seeker-dashboard inner Routes */}
         <Route path='/seeker-dashboard/my-profile' element={<><ProfileForm /></>} />
+        <Route path='/seeker-dashboard/my-webinars' element={<><MyWebinars /></>} />
+        <Route path='/seeker-dashboard/my-one-to-one-sessions' element={<><MyOneToOneSession /></>} />
+        <Route path='/seeker-dashboard/my-courses' element={<><MyCourses /></>} />
         <Route path='/seeker-dashboard/build-resume' element={<><BuildResume /></>} />
         <Route path='/seeker-dashboard/resume' element={<><PrintResume /></>} />
         <Route path='/seeker-dashboard/view-Public-Profile' element={<><ViewPublicProfile /></>} />
@@ -266,9 +273,6 @@ function App() {
         <Route path='/mentor-dashboard/add-mentor-session' element={<><MentorOneToOneForm /></>} />
         <Route path='/mentor-dashboard/mentor-session-list' element={<><MentorSessionsList /></>} />
 
-
-
-
         <Route path='/admin-login' element={<><AdminLogin /></>} />
         <Route
           path="/admin-dashboard"
@@ -282,7 +286,7 @@ function App() {
 
         <Route path='/admin-dash' element={<><AdminDash /></>} />
         <Route path='/admin-dashboard/ca-fresher-list' element={<><CAFresherListPage /></>} />
-
+        <Route path='/admin-dashboard/upload-cv-list' element={<><UploadCvList /></>} />
         <Route path='/admin-dashboard/role-list' element={<><RolesPage /></>} />
         <Route path='/admin-dashboard/user-list' element={<><UsersPage /></>} />
         <Route path='/admin-dashboard/permission-list' element={<><PermissionsPage /></>} />
@@ -310,7 +314,6 @@ function App() {
         <Route path='/admin-dashboard/no-of-employees-category' element={<><NoofEmployeescCategoryPage /></>} />
         <Route path='/admin-dashboard/established-in-category' element={<><EstabilishedInategoryPage /></>} />
 
-
         {/* <Route path='/admin-dashboard/course-management' element={<><UsersPage /></>} /> */}
 
         {/* Founded Year */}
@@ -324,12 +327,14 @@ function App() {
         <Route path='/reset-password/:token' element={<><Navbar /><ResetPassword /><Footer /></>} />
 
         <Route path='/ca-register' element={<><CaFreshersForm /></>} />
+        <Route path='/upload-cv' element={<><UpoloadCvForm /></>} />
 
         <Route path='/admin-dashboard/add-speakers' element={<><Speakerpage /></>} />
         <Route path='/admin-dashboard/add-webinar' element={<><AddWebinarPage /></>} />
         <Route path='/admin-dashboard/webinar-registration-list' element={<><WebinarRegistrationList /></>} />
         <Route path='/admin-dashboard/one-to-one-registration-list' element={<><OneToOneRegistrationList /></>} />
         <Route path="/one-to-one-receipt/:oneToOneId" element={<><Navbar /><PaymentReceiptOneToOne /><Footer /></>} />
+        <Route path="/course-receipt/:courseId" element={<><Navbar /><PaymentReceiptCourse /><Footer /></>} />
         <Route path="/admin-dashboard/post-job/:id" element={<PostAJobAdmin />} />
         <Route path='/admin-dashboard/job-post' element={<><PostAJobAdmin /></>} />
 
@@ -347,16 +352,14 @@ function App() {
         <Route path="/admin-dashboard/contact-list" element={<><ContactUserList /></>} />
         <Route path="/admin-dashboard/course" element={<><CourseList /></>} />
         <Route path="/admin-dashboard/our-founders" element={<><OurFounders /></>} />
-         <Route path="/admin-dashboard/social-media" element={<><SocialMediaForm /></>} />
-
-
-
-
+         <Route path="/admin-dashboard/meet-our-team" element={<><MeetOurTeamForm /></>} />
+        <Route path="/admin-dashboard/social-media" element={<><SocialMediaForm /></>} />
 
 
       </Routes>
-
+      <FloatingFAB />
     </BrowserRouter>
+  
   );
 }
 

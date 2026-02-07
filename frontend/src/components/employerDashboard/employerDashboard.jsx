@@ -25,40 +25,9 @@ import ManageJobs from './ManageJobs';
 import PurchasedCvsPackage from "./CvsSearchPackages";
 import PaymentHistory from "./paymentHistory";
 import UnlockedUsers from "./unlockedUsers";
-// import MyMessages from "../seekerDashboard/MyMessages";
+
 import CompanyFollowers from "./companyFollowers";
 
-
-const courses = [
-  {
-    title: "Investment Banking MasterClass",
-    image: banner1,
-    trainer: "CA Saurabh Bansal",
-    hours: "15+ Hrs",
-    price: "₹3499/-",
-  },
-  {
-    title: "IND AS & IFRS MasterClass",
-    image: banner1,
-    trainer: "CA Rakshit Mittal",
-    hours: "20+ Hrs",
-    price: "₹3499/-",
-  },
-  {
-    title: "AI & ChatGPT For Finance MasterClass",
-    image: banner1,
-    trainer: "Inderjeet & Archit",
-    hours: "20+ Hrs",
-    price: "₹2499/-",
-  },
-  {
-    title: "Audit Master Class",
-    image: banner1,
-    trainer: "CA Archit Agarwal",
-    hours: "30+ Hrs",
-    price: "₹3499/-",
-  },
-];
 
 export default function EmployerDashboard() {
   const [isOpen, setIsOpen] = useState(false);
@@ -81,7 +50,7 @@ export default function EmployerDashboard() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     sessionStorage.removeItem("role");
-    navigate("/"); // ✅ redirect to home
+    navigate("/"); 
   };
 
 
@@ -92,15 +61,7 @@ export default function EmployerDashboard() {
 
 
         <div className={`fixed top-0 left-0 h-full bg-white  shadow-md w-64 z-30 transform transition-transform duration-300 md:static md:translate-x-0 ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
-          {/* <div className="flex justify-between">
-          <div className="p-4 font-bold text-lg border-b">
-            <a href="/">
-              <img src={logo} alt="" className="w-[130px]" />
-            </a>
-          </div>
           
-        </div> */}
-
           <nav className="py-6 text-sm font-medium text-gray-700 h-screen">
             <ul className="space-y-2">
               <div className="flex justify-end">
@@ -125,8 +86,7 @@ export default function EmployerDashboard() {
                 onClick={() => handleSectionChange('Payment-History')} active={activeSection === "Payment-History"} />
               <SidebarItem icon={<FaUser />} label="Unloked Users"
                 onClick={() => handleSectionChange("Unloked-Users")} active={activeSection === "Unloked-Users"} />
-              {/* <SidebarItem icon={<FaEnvelope />} label="Company Messages"
-                onClick={() => handleSectionChange("Company-Messages")} active={activeSection === "Company-Messages"} /> */}
+              
               <SidebarItem icon={<FaUsers />} label="Company Followers"
                 onClick={() => handleSectionChange('Company-Followers')} active={activeSection === "Company-Followers"} />
               <SidebarItem
@@ -141,7 +101,6 @@ export default function EmployerDashboard() {
         {isOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-40 z-20 md:hidden" onClick={toggleSidebar}></div>
         )}
-
 
         <div className="flex-1 flex flex-col overflow-y-auto">
 
@@ -166,20 +125,7 @@ export default function EmployerDashboard() {
                   className="block md:hidden border py-3 px-2 rounded-md text-sm absolute right-10 top-20 bg-white shadow z-20 w-80 transition-all duration-300"
                 />
               )}
-              {/* <div className="relative">
-              <button className="flex items-center gap-2 font-semibold focus:outline-none" onClick={() => setShowProfile((prev) => !prev)}>
-                <img src="https://i.pravatar.cc/40" alt="Admin" className="w-10 h-10 rounded-full" />
-                <span className="hidden md:inline">Super Admin</span>
-              </button>
-              {showProfile && (
-                <div className="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-md md:hidden z-10">
-                  <div className="flex items-center gap-3 p-3">
-                    <img src="https://i.pravatar.cc/40" alt="Admin" className="w-10 h-10 rounded-full" />
-                    <span className="font-medium text-sm">Super Admin</span>
-                  </div>
-                </div>
-              )}
-            </div> */}
+             
             </div>
           </div>
 

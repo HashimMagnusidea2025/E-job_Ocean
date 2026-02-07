@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from '../../utils/axios.js';
 import Swal from "sweetalert2";
+import { WhatsAppGroupSection } from "../../components/layout/section/WhatsAppGroupSection/WhatsAppGroupSection.jsx";
 
 const baseURL = import.meta.env.VITE_BACKEND_URL;
 
 export default function KnowledgeBasePage() {
+  const navigate = useNavigate();
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -134,16 +137,25 @@ export default function KnowledgeBasePage() {
 
   return (
     <div className="max-w-6xl mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">Knowledge Base</h2>
+      <div className="flex flex-col gap-4 mb-6 
+                sm:flex-row sm:items-center sm:justify-between">
+
+        <h2 className="text-xl sm:text-3xl font-bold text-gray-800 text-center sm:text-left">
+          Learning Center
+        </h2>
+
         <input
           type="text"
           placeholder="Search by title..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="border border-gray-300 rounded-lg px-4 py-2 w-64 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+          className="w-full sm:w-64 
+               border border-gray-300 rounded-lg 
+               px-4 py-2 
+               focus:ring-2 focus:ring-blue-400 focus:outline-none"
         />
       </div>
+
 
       {/* Tab Navigation */}
       <div className="flex mb-6">
@@ -210,12 +222,12 @@ export default function KnowledgeBasePage() {
               {course.map((item) => (
                 <div
                   key={item._id}
-                  className="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-xl transition duration-300"
+                  className="h-[480px] relative bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-xl transition duration-300"
                 >
                   {/* IMAGE */}
                   <div className="h-36 bg-gray-100">
                     <img
-                      src={`${baseURL}/${item.image}`}  
+                      src={`${baseURL}/${item.image}`}
                       alt={item.courseTitle}
                       className="w-full h-full object-cover"
                     />
@@ -266,8 +278,11 @@ export default function KnowledgeBasePage() {
                   </div>
 
                   {/* ACTION */}
-                  <div className="px-5 pb-5">
-                    <button className="w-full py-2 rounded-md bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition">
+                  <div className="px-5 pb-5 flex items-end absolute bottom-0">
+                    <button style={{ width: "300px" }}
+                      onClick={() => navigate(`/course-details/${item._id}`)}
+                      className="w-full py-2 rounded-md bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition"
+                    >
                       View Course
                     </button>
                   </div>
@@ -347,7 +362,7 @@ export default function KnowledgeBasePage() {
           </div>
         </div>
       )}
-
+      <WhatsAppGroupSection />
     </div>
   );
 }

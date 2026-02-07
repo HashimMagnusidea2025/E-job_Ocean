@@ -1,13 +1,19 @@
 import React, { useEffect, useState } from "react";
-import DataTable from "react-data-table-component";
 import { FaEdit, FaTrash, FaPlus, FaToggleOn, FaToggleOff } from "react-icons/fa";
 import axios from "../../../utils/axios.js";
 import Swal from "sweetalert2";
 import Layout from "../../seekerDashboard/partials/layout.jsx";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  flexRender,
+} from "@tanstack/react-table";
 
 export default function EstabilishedInategoryPage() {
   const [categories, setCategories] = useState([]);
-  const [search, setSearch] = useState("");
+  const [searchText, setSearchText] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [formData, setFormData] = useState({ id: null, name: "", status: "active" });
 
@@ -92,31 +98,28 @@ export default function EstabilishedInategoryPage() {
     }
   };
 
-  // DataTable columns
   const columns = [
-     {
-      name: "ID",
-      selector: (row, index) => index + 1,
-      width: "70px",
+    {
+      header: "ID",
+      cell: ({ row }) => row.index + 1,
     },
     {
-      name: "Name",
-      selector: (row) => row.name,
-      sortable: true
+      accessorKey: "name",
+      header: "Name",
     },
     {
-      name: "Status",
-      cell: (row) => (
+      header: "Status",
+      cell: ({ row }) => (
         <div className="flex items-center gap-2">
           <span
             className={`px-2 py-1 text-xs rounded text-white ${
-              row.status === "active" ? "bg-green-500" : "bg-red-500"
+              row.original.status === "active" ? "bg-green-500" : "bg-red-500"
             }`}
           >
-            {row.status}
+            {row.original.status}
           </span>
-          <button onClick={() => handleToggleStatus(row._id, row.status)}>
-            {row.status === "active" ? (
+          <button onClick={() => handleToggleStatus(row.original._id, row.original.status)}>
+            {row.original.status === "active" ? (
               <FaToggleOn size={24} className="text-green-500" />
             ) : (
               <FaToggleOff size={24} className="text-red-500" />
@@ -124,15 +127,14 @@ export default function EstabilishedInategoryPage() {
           </button>
         </div>
       ),
-      sortable: true
     },
     {
-      name: "Actions",
-      cell: (row) => (
+      header: "Actions",
+      cell: ({ row }) => (
         <div className="flex gap-2">
           <button
             onClick={() => {
-              setFormData({ id: row._id, name: row.name, status: row.status });
+              setFormData({ id: row.original._id, name: row.original.name, status: row.original.status });
               setModalOpen(true);
             }}
             className="text-blue-500 hover:text-blue-700"
@@ -140,22 +142,27 @@ export default function EstabilishedInategoryPage() {
             <FaEdit size={20} />
           </button>
           <button
-            onClick={() => handleDelete(row._id)}
+            onClick={() => handleDelete(row.original._id)}
             className="text-red-500 hover:text-red-700"
           >
             <FaTrash size={20} />
           </button>
         </div>
-      )
-    }
+      ),
+    },
   ];
 
-  // Filter data
-  const filteredData = categories.filter(
-    (item) =>
-      item.name.toLowerCase().includes(search.toLowerCase()) ||
-      item.status.toLowerCase().includes(search.toLowerCase())
-  );
+  const table = useReactTable({
+    data: categories,
+    columns,
+    state: {
+      globalFilter: searchText,
+    },
+    onGlobalFilterChange: setSearchText,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+  });
 
   return (
     <Layout>
@@ -166,8 +173,8 @@ export default function EstabilishedInategoryPage() {
           type="text"
           placeholder="Search..."
           className="border px-3 py-2 rounded mb-4 "
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
         />
         <button
           onClick={() => {
@@ -180,14 +187,74 @@ export default function EstabilishedInategoryPage() {
         </button>
       </div>
 
-      <DataTable
-        columns={columns}
-        data={filteredData}
-        pagination
-        highlightOnHover
-        striped
-        className="bg-white rounded shadow"
-      />
+      <div className="bg-white rounded-lg shadow overflow-x-auto">
+        <table className="min-w-full border">
+          <thead className="bg-gray-100">
+            {table.getHeaderGroups().map(headerGroup => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map(header => (
+                  <th
+                    key={header.id}
+                    className="px-4 py-3 text-left text-sm font-semibold border"
+                  >
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+
+          <tbody>
+            {table.getRowModel().rows.map(row => (
+              <tr key={row.id} className="hover:bg-gray-50">
+                {row.getVisibleCells().map(cell => (
+                  <td key={cell.id} className="px-4 py-2 border text-sm">
+                    {flexRender(
+                      cell.column.columnDef.cell,
+                      cell.getContext()
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))}
+
+            {table.getRowModel().rows.length === 0 && (
+              <tr>
+                <td colSpan={columns.length} className="text-center py-6 text-gray-500">
+                  No categories found
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+
+        {/* Pagination */}
+        <div className="flex justify-between items-center p-4">
+          <button
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            className="px-4 py-2 border rounded disabled:opacity-50"
+          >
+            Previous
+          </button>
+
+          <span className="text-sm">
+            Page {table.getState().pagination.pageIndex + 1} of{" "}
+            {table.getPageCount()}
+          </span>
+
+          <button
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            className="px-4 py-2 border rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+      </div>
 
       {modalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center">

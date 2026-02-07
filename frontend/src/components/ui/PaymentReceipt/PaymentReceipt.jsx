@@ -76,7 +76,7 @@ export default function PaymentReceipt() {
         const promises = [
           webinarId ? axios.get(`/webinars/${webinarId}`) : Promise.resolve({ data: null }),
           registrationId ? axios.get(`/registrations/${registrationId}`) : Promise.resolve({ data: null }),
-          registrationId ? axios.get(`/payments/registration/${registrationId}`) : Promise.resolve({ data: null }),
+          registrationId ? axios.get(`/payment/registration/${registrationId}`) : Promise.resolve({ data: null }),
         ];
 
         const [webRes, regRes, payRes] = await Promise.allSettled(promises);
@@ -243,7 +243,7 @@ export default function PaymentReceipt() {
             });
 
             // Refresh payment info
-            const pay = await axios.get(`/payments/registration/${registrationId}`).catch(() => null);
+            const pay = await axios.get(`/payment/registration/${registrationId}`).catch(() => null);
             if (pay) setPayment(pay.data);
 
           } catch (err) {
@@ -413,8 +413,8 @@ export default function PaymentReceipt() {
                 onClick={handlePaymentSuccess}
                 disabled={isPaying}
                 className={`px-8 py-3 rounded-lg font-semibold shadow-lg transition transform hover:scale-105 ${isPaying
-                    ? "bg-gray-400 cursor-not-allowed text-white"
-                    : "bg-green-600 hover:bg-green-700 text-white"
+                  ? "bg-gray-400 cursor-not-allowed text-white"
+                  : "bg-green-600 hover:bg-green-700 text-white"
                   }`}
               >
                 {isPaying ? (

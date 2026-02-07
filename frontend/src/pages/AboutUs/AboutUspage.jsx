@@ -8,7 +8,8 @@ import OurFounders from "../../components/layout/section/OurFounders/OurFounders
 import IndustryExperts from "../../components/layout/section/IndustryExperts/IndustryExperts";
 import AlumniCompanies from "../../components/layout/section/AlumniCompanies/AlumniCompanies";
 import { FollowSocialsRow, } from "../../components/ui/cards/cards.jsx";
-
+import { WhatsAppGroupSection } from "../../components/layout/section/WhatsAppGroupSection/WhatsAppGroupSection.jsx";
+import MeetourTeam from "../../components/layout/section/meetourTeam/meetourTeam.jsx";
 export default function AboutUs() {
 
     return (
@@ -35,18 +36,24 @@ export default function AboutUs() {
                     <OurFounders />
 
                 </div>
+                <div>
+                    <MeetourTeam />
+                </div>
                 {/* <div className="">
                     <IndustryExperts/>
                 </div> */}
                 {/* <div className="container mx-auto">
                     <AlumniCompanies/>
                 </div> */}
+
                 <div className="container mx-auto">
                     <div className="max-w-lg mx-auto text-center">
                         <FollowSocialsRow />
                     </div>
                 </div>
-
+                <div>
+                    <WhatsAppGroupSection />
+                </div>
             </div>
 
         </>

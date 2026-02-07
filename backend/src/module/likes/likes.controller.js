@@ -4,20 +4,31 @@ import LikeModel from "./likes.model.js";
 export const LikeCreate = async (req, res) => {
     try {
         const { id, type } = req.body;
-        const userId = req.user._id;
+        const userId = req.user ? req.user._id : null;
+        const ipAddress = req.ip || req.connection.remoteAddress || req.socket.remoteAddress || (req.connection.socket ? req.connection.socket.remoteAddress : null);
 
-        // Check if user already liked
-        const alreadyLiked = await LikeModel.findOne({ id: id, user: userId, type });
+        // Check if already liked
+        let alreadyLiked;
+        if (userId) {
+            // Logged-in user
+            alreadyLiked = await LikeModel.findOne({ id: id, user: userId, type });
+        } else {
+            // Non-logged-in user, check by IP
+            alreadyLiked = await LikeModel.findOne({ id: id, ipAddress: ipAddress, type });
+        }
+
         if (alreadyLiked) {
             return res.json({ message: "Already liked" });
         }
+
         const existingDoc = await LikeModel.findOne({ id: id });
         const oldViewCount = existingDoc?.viewCount || 0;
 
-        // Create new like (Count fix = 1)
+        // Create new like
         await LikeModel.create({
             id: id,
             user: userId,
+            ipAddress: userId ? null : ipAddress, // Only set IP for non-logged-in users
             type,
             viewCount: oldViewCount,
         });

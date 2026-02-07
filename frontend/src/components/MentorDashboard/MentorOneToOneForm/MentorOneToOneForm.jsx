@@ -124,37 +124,7 @@ export default function MentorOneToOneForm() {
         return newErrors.every(formErrors => Object.keys(formErrors).length === 0);
     };
 
-    //   const handleSubmit = async (e) => {
-    //     e.preventDefault();
 
-    //     if (!validateForm()) {
-    //         alert("Please fix the errors before submitting");
-    //         return;
-    //     }
-
-    //     setLoading(true);
-
-    //     try {
-    //         if (editId) {
-    //             await axios.put(`/one-to-one/${editId}`, forms[0]);
-    //             alert("Session updated successfully!");
-    //         } else {
-    //             // Multiple sessions create करने के लिए
-    //             const promises = forms.map(formData => 
-    //                 axios.post("/one-to-one", formData)
-    //             );
-    //             await Promise.all(promises);
-    //             alert("Sessions created successfully!");
-    //         }
-    //         navigate("/mentor-dashboard/my-sessions");
-    //     } catch (err) {
-    //         console.error("Submit Error:", err);
-    //         const errorMessage = err.response?.data?.message || "Error saving session";
-    //         alert(errorMessage);
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
     // Same as your MentorOneToOneForm but with improved error handling
     const handleSubmit = async (e) => {
         e.preventDefault();

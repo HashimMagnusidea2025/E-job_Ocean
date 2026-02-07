@@ -98,116 +98,6 @@ export const MarqueeTagCards = () => {
 };
 
 
-// 2. Student Cards Marquee (now Blog Cards Marquee)
-
-// export const StudentCardMarquee = () => {
-//     const [blogs, setBlogs] = useState([]);
-
-//     useEffect(() => {
-//         const fetchBlogs = async () => {
-//             try {
-//                 const { data } = await axiosExternal.get("https://blog.ejobocean.com/wp-json/wp/v2/posts?_embed");
-//                 setBlogs(data || []);
-//             } catch (error) {
-//                 console.error("Error fetching blogs:", error);
-//             }
-//         };
-//         fetchBlogs();
-//     }, []);
-
-//     const repeatedBlogs = [...blogs, ...blogs];
-
-//     return (
-//         <div className="w-full py-10 bg-[#f9fafb]">
-//             <Splide
-//                 options={{
-//                     type: "loop",
-//                     drag: false,
-//                     arrows: false,
-//                     pagination: false,
-//                     perPage: 3,
-//                     gap: "1rem",
-//                     autoScroll: {
-//                         speed: -1,
-//                         pauseOnHover: true,
-//                         pauseOnFocus: false,
-//                     },
-//                 }}
-//                 extensions={{ AutoScroll }}
-//                 className="student-marquee"
-//             >
-//                 {repeatedBlogs.map((blog, index) => {
-//                     const featuredImage = blog._embedded && blog._embedded['wp:featuredmedia'] && blog._embedded['wp:featuredmedia'][0] ? blog._embedded['wp:featuredmedia'][0].source_url : noImage;
-//                     const authorName = blog._embedded && blog._embedded.author && blog._embedded.author[0] ? blog._embedded.author[0].name : "E-Job Ocean";
-
-//                     return (
-//                         <SplideSlide key={index} className="!w-[280px] sm:!w-[340px] py-6">
-//                             <div className="px-3 h-full">
-//                                 <div
-//                                     className="
-//         relative
-//         h-[280px]
-//         sm:h-[320px]
-//         rounded-3xl
-//         overflow-hidden
-
-//         bg-black
-//         group
-//       "
-//                                 >
-//                                     {/* Background Image */}
-//                                     <img
-//                                         src={featuredImage}
-//                                         alt={blog.title.rendered}
-//                                         className="
-//           absolute
-//           inset-0
-//           w-full
-//           h-full
-//           object-cover
-//           scale-105
-//           transition-transform
-//           duration-700
-//           group-hover:scale-110
-//         "
-//                                     />
-
-//                                     {/* Gradient Overlay */}
-//                                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
-
-//                                     {/* Content */}
-//                                     <div className="relative z-10 h-full flex flex-col justify-end p-5 text-left">
-//                                         <h3
-//                                             className="
-//             text-white
-//             text-base
-//             sm:text-lg
-//             font-bold
-//             leading-snug
-//             line-clamp-2
-//           "
-//                                             dangerouslySetInnerHTML={{
-//                                                 __html: blog.title.rendered,
-//                                             }}
-//                                         />
-
-//                                         <div className="mt-3 flex items-center justify-between text-xs sm:text-sm text-gray-300">
-//                                             <span>{authorName}</span>
-//                                             {/* <span className="bg-white/20 px-3 py-1 rounded-full backdrop-blur">
-//                                                 Blog
-//                                             </span> */}
-//                                         </div>
-//                                     </div>
-//                                 </div>
-//                             </div>
-//                         </SplideSlide>
-
-//                     );
-//                 })}
-//             </Splide>
-//         </div>
-//     );
-// }
 
 export const StudentCardMarquee = () => {
     const [blogs, setBlogs] = useState([]);
@@ -256,6 +146,7 @@ export const StudentCardMarquee = () => {
 
     return (
         <div className="w-full py-10 bg-[#f9fafb]">
+
             <Splide
                 options={{
                     type: "loop",
@@ -318,63 +209,12 @@ export const StudentCardMarquee = () => {
 
 
 
-
-
 import banner1 from "../../media/png/MASTERCLASS.png";
 import banner2 from "../../media/png/MASTERCLASS.png";
 import banner3 from "../../media/png/MASTERCLASS.png";
 import banner4 from "../../media/png/MASTERCLASS.png";
 
-const tabs = [
-    "Flagship MasterClasses",
-    "Finance Tools",
-    "Interview Preparation & Soft Skills",
-    "Combos Courses",
-    "Free Courses",
-];
 
-const courses = [
-    {
-        title: "Investment Banking MasterClass",
-        image: banner1,
-        trainer: "CA Saurabh Bansal",
-        hours: "15+ Hrs",
-        price: "₹3499/-",
-
-    },
-    {
-        title: "IND AS & IFRS MasterClass",
-        image: banner2,
-        trainer: "CA Rakshit Mittal",
-        hours: "20+ Hrs",
-        price: "₹3499/-",
-
-    },
-    {
-        title: "AI & ChatGPT For Finance MasterClass",
-        image: banner3,
-        trainer: "Inderjeet & Archit",
-        hours: "20+ Hrs",
-        price: "₹2499/-",
-
-    },
-    {
-        title: "Audit Master Class",
-        image: banner4,
-        trainer: "CA Archit Agarwal",
-        hours: "30+ Hrs",
-        price: "₹3499/-",
-
-    },
-    {
-        title: "Audit Master Class",
-        image: banner4,
-        trainer: "CA Archit Agarwal",
-        hours: "30+ Hrs",
-        price: "₹3499/-",
-
-    },
-];
 
 export const OurCourses = () => {
     const [webinars, setWebinars] = useState([]);
@@ -400,23 +240,23 @@ export const OurCourses = () => {
 
     const now = new Date();
 
-    // ✅ Split webinars into categories
+    //  Split webinars into categories
     const upcomingWebinars = webinars.filter((w) => w.WebinarStartDateTime >= now);
     const pastWebinars = webinars.filter((w) => w.WebinarEndDateTime < now);
 
-    // ✅ Define available tabs dynamically
+    //  Define available tabs dynamically
     const availableTabs = [
         { key: "all", label: "All", visible: webinars.length > 0 },
         { key: "upcoming", label: "Upcoming", visible: upcomingWebinars.length > 0 },
         { key: "past", label: "Past", visible: pastWebinars.length > 0 },
     ].filter((tab) => tab.visible); // hide empty categories
 
-    // ✅ Filtered list based on tab
+    //  Filtered list based on tab
     let filteredWebinars = webinars;
     if (activeTab === "upcoming") filteredWebinars = upcomingWebinars;
     else if (activeTab === "past") filteredWebinars = pastWebinars;
 
-    // ✅ Sort “all” list so upcoming appear first
+    //  Sort “all” list so upcoming appear first
     if (activeTab === "all") {
         filteredWebinars.sort((a, b) => {
             const aEnd = new Date(a.WebinarEndDateTime);
@@ -431,12 +271,12 @@ export const OurCourses = () => {
 
 
     const getWebinarImage = (webinar) => {
-        // ✅ Multiple speakers → WebinarImage
+        //  Multiple speakers → WebinarImage
         if (webinar.Speakers && webinar.Speakers.length > 1 && webinar.WebinarImage) {
             return `${baseURL}${webinar.WebinarImage}`;
         }
 
-        // ✅ Single speaker → Speaker profilePic
+        //  Single speaker → Speaker profilePic
         if (
             webinar.Speakers &&
             webinar.Speakers.length === 1 &&
@@ -444,7 +284,6 @@ export const OurCourses = () => {
         ) {
             return `${baseURL}/${webinar.Speakers[0].profilePic}`;
         }
-
 
     };
     return (
@@ -456,7 +295,7 @@ export const OurCourses = () => {
                     </h2>
                 </div>
 
-                {/* ✅ Dynamically show only non-empty tabs */}
+                {/*  Dynamically show only non-empty tabs */}
                 <div className="flex justify-center flex-wrap gap-4 mb-8 px-5">
                     {availableTabs.map((tab) => (
                         <button
@@ -473,7 +312,7 @@ export const OurCourses = () => {
                 </div>
             </div>
 
-            {/* ✅ Swiper Slider */}
+            {/*  Swiper Slider */}
             <Swiper
                 className="max-w-[1920px]"
                 spaceBetween={30}
@@ -492,47 +331,53 @@ export const OurCourses = () => {
                     filteredWebinars.map((webinar, index) => (
                         <SwiperSlide key={index}>
                             <Link to={`/webinars/${webinar.WebinarSlug}`}>
-                                <div className="h-[420px] mx-auto bg-white w-[300px] sm:w-[290px] rounded-lg shadow hover:shadow-xl transition-all overflow-hidden border border-black">
-                                    <div className="h-[250px] w-full overflow-hidden">
-                                        {/* <img
-                                            src={
-                                                webinar.Speaker?.profilePic
-                                                    ? `${baseURL}/${webinar.Speaker.profilePic}`
-                                                    : "/default-speaker.png"
-                                            }
-                                            alt={webinar.WebinarTitle}
-                                            className="w-full h-full object-cover object-center"
-                                        /> */}
+                                <div className="group relative h-[430px] mx-auto w-[300px] sm:w-[290px] rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-md hover:shadow-2xl transition-all duration-300">
+
+                                    {/* IMAGE */}
+                                    <div className="relative h-[240px] overflow-hidden">
                                         <img
                                             src={getWebinarImage(webinar)}
                                             alt={webinar.WebinarTitle}
-                                            className="w-full h-full object-cover object-center"
+                                            className="w-full h-full object-cover transition-transform duration-500 "
                                         />
 
+                                        {/* IMAGE OVERLAY */}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+
+                                        {/* TYPE BADGE */}
+                                        <span className="absolute top-4 right-4 bg-[#339ca0] text-white text-xs font-semibold px-3 py-1 rounded-full shadow">
+                                            {webinar.WebinarType}
+                                        </span>
                                     </div>
-                                    <div className="p-4 h-[120px]">
-                                        <h3 className="font-bold text-md mb-2 line-clamp-2">
+
+                                    {/* CONTENT */}
+                                    <div className="p-4 flex flex-col justify-between h-[190px]">
+
+                                        <h3 className="font-bold text-[15px] text-gray-900 leading-snug line-clamp-2">
                                             {webinar.WebinarTitle}
                                         </h3>
-                                        <div className="flex justify-between items-center text-sm text-gray-500 mb-2">
-                                            <span className="flex items-center gap-1">
-                                                <IoIosTime size={22} className="text-[#339ca0]" />
-                                                {webinar.WebinarStartDateTime.toLocaleString()} -{" "}
+
+                                        {/* TIME */}
+                                        <div className="flex items-start gap-2 text-sm text-gray-600 mt-2">
+                                            <IoIosTime size={18} className="text-[#339ca0] mt-[2px]" />
+                                            <span className="leading-tight">
+                                                {webinar.WebinarStartDateTime.toLocaleString()}
+                                                <br />
                                                 {webinar.WebinarEndDateTime.toLocaleString()}
                                             </span>
                                         </div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-lg font-semibold">{webinar.WebinarType}</span>
 
-                                            <button
-                                                onClick={() => navigate(`/webinars/${webinar.WebinarSlug}`)}
-                                                className="bg-gradient-to-r from-[#339ca0] to-black text-white px-3 py-1 rounded text-sm transition-all hover:bg-gray-800"
-                                            >
-                                                Read More
-                                            </button>
-                                        </div>
+                                        {/* BUTTON */}
+                                        <button
+                                            onClick={() => navigate(`/webinars/${webinar.WebinarSlug}`)}
+                                            className="mt-4 w-full py-2 rounded-lg bg-gradient-to-r from-[#339ca0] to-[#1d1d1d] text-white text-sm font-semibold tracking-wide hover:opacity-90 transition-all"
+                                        >
+                                            Read More →
+                                        </button>
+
                                     </div>
                                 </div>
+
                             </Link>
                         </SwiperSlide>
                     ))
@@ -555,80 +400,121 @@ export const OurCourses = () => {
     );
 };
 
+// OurFreeCoursesCrds
 
-// export const OurFreeCoursesCrds = ({ image, title, trainer }) => {
-//     return (
-//         <div className="mx-auto h-[330px] bg-white w-[300px] sm:w-[310px] rounded-lg shadow hover:shadow-xl transition-all overflow-hidden border border-black">
-//             <img
-//                 src={image}
-//                 alt={title}
-//                 className="w-full h-50 object-cover"
-//             />
-
-//             <div className="p-4">
-//                 <h3 className="font-bold text-md mb-2">{title}</h3>
-//                 <hr className="border-t border-gray-300 my-3" />
-//                 <p className="text-xs text-gray-600 mb-1">
-//                     BY {trainer.toUpperCase()}
-//                 </p>
-
-//                 <div className="flex justify-between items-center">
-//                     <span className="text-lg font-semibold">Free</span>
-//                     <button className="bg-gradient-to-r from-[#339ca0] to-black text-white px-3 py-1 rounded text-sm transition-all hover:bg-gray-800">
-//                         Learn More
-//                     </button>
-//                 </div>
-//             </div>
-//         </div>
-//     );
-// };
-
-
-
-export const OurFreeCoursesCrds = ({ id, image, title, companyname, date }) => {
+export const OurFreeCoursesCrds = ({ id, image, title, companyname, date, createdAt, experience, mode }) => {
     const formatDate = (isoDate) => {
         if (!isoDate) return "N/A";
-
         const date = new Date(isoDate);
-
         return date.toLocaleDateString("en-IN", {
             day: "2-digit",
             month: "short",
             year: "numeric",
         });
     };
+    const timeAgo = (dateString) => {
+        if (!dateString) return "";
+
+        const now = new Date();
+        const past = new Date(dateString);
+        const diffInSeconds = Math.floor((now - past) / 1000);
+
+        const minutes = Math.floor(diffInSeconds / 60);
+        const hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
+
+        if (diffInSeconds < 60) return "Just now";
+        if (minutes < 60) return `${minutes} min ago`;
+        if (hours < 24) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+        return `${days} day${days > 1 ? "s" : ""} ago`;
+    };
 
     const navigate = useNavigate();
 
     return (
-        <div className="mx-auto h-[330px] bg-white w-[300px] sm:w-[310px] rounded-lg shadow hover:shadow-xl transition-all overflow-hidden border">
+        <div className="mx-auto w-[300px] min-h-[370px] bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col relative group">
 
-            <div className='h-[120px]'>
+            {/* Decoration */}
+            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#339ca0]/20 to-transparent rounded-bl-full" />
 
-                <img
-                    src={image}
-                    alt={title}
-                    className="w-full h-auto object-cover"
-                />
+            {/* Logo */}
+            
+            <div className="p-6 flex justify-center">
+                <div className="w-20 h-20 rounded-2xl bg-white border shadow-sm flex items-center justify-center p-3">
+                    <img
+                        src={image}
+                        alt={title}
+                        className="w-full h-full object-contain"
+                    />
+                </div>
             </div>
-            <div className="p-4">
-                <h3 className="font-bold text-md mb-2 line-clamp-2">
+
+            {/* CONTENT AREA */}
+            <div className="px-6 pb-6 flex flex-col flex-1">
+
+                {/* Title – fixed height */}
+                <h3 className="font-bold text-lg text-center text-gray-900 line-clamp-2 min-h-[52px]">
                     {title}
                 </h3>
 
-                <hr className="border-t border-gray-300 my-3" />
-
-                <p className="text-xs text-gray-600 mb-2">
-                    BY {companyname}
-                </p>
-
-                <div className="flex justify-between items-center">
-                    <span className="text-sm font-semibold text-green-600">
-                        {formatDate(date)}
+                {/* Company */}
+                <div className="flex justify-center mt-3 min-h-[32px]">
+                    <span className="inline-flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-700 truncate max-w-[200px]">
+                        🏢 {companyname}
                     </span>
+                </div>
 
-                    <button onClick={(e) => { e.stopPropagation(); navigate(`/job-details/${id}`); }} className="bg-gradient-to-r from-[#339ca0] to-black text-white px-3 py-1 rounded text-sm">
-                        View Job
+                {/* Tags Section – fixed height */}
+                <div className="flex flex-wrap justify-center gap-2 mt-4 min-h-[30px]">
+                    {experience && (
+                        <span className="px-3 py-1 text-xs font-medium bg-blue-50  rounded-full">
+                            💼 {experience} Years
+                        </span>
+                    )}
+
+                    {mode && (
+                        <span className="px-3 py-1 text-xs font-medium bg-purple-50  rounded-full">
+                            🏢 {mode}
+                        </span>
+                    )}
+
+                    {/* {createdAt && (
+                        <span className="px-3 py-1 text-xs font-medium bg-green-50 text-green-700 rounded-full">
+                            ⏱ {timeAgo(createdAt)}
+                        </span>
+                    )} */}
+                </div>
+
+                {/* PUSH BUTTON TO BOTTOM */}
+                <div className="mt-auto">
+
+                    {date && (
+                        <div className="flex items-center gap-2 mb-4 text-sm text-gray-700">
+                            <svg
+                                className="w-5 h-5 text-[#339ca0]"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                />
+                            </svg>
+                            {formatDate(date)}
+                        </div>
+                    )}
+
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/job-details/${id}`);
+                        }}
+                        className="w-full bg-gradient-to-r from-[#339ca0] via-[#2a8c91] to-black text-white py-3 rounded-xl font-semibold text-sm hover:scale-[1.02] transition-all"
+                    >
+                        View & Apply
                     </button>
                 </div>
             </div>
@@ -655,10 +541,6 @@ export default function MasterclassCard({ title, instructor, price, image }) {
         </div>
     );
 }
-
-
-
-
 
 
 export const CartView = ({ onClose }) => {
@@ -717,10 +599,6 @@ export const CartView = ({ onClose }) => {
         </div>
     );
 };
-
-
-// components/WebinarCard.jsx
-
 
 
 export const ActiveCoursesCard = ({ image, tag, title, date, isUpcoming }) => {

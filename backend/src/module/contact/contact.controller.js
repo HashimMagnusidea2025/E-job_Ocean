@@ -18,11 +18,6 @@ export const createContact = async (req, res) => {
             return res.status(400).json({ message: "Captcha verification required" });
         }
 
-        
-        if (!captchaToken) {
-            return res.status(400).json({ message: "Captcha verification required" });
-        }
-
       
         const verifyUrl = `https://www.google.com/recaptcha/api/siteverify`;
         const { data: captchaRes } = await axios.post(

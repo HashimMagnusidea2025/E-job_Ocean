@@ -10,73 +10,6 @@ import { FaArrowRightLong } from "react-icons/fa6";
 const baseURL = import.meta.env.VITE_BACKEND_URL;
 
 
-const experts = [
-    {
-        name: "CA Sanat Goyal",
-        experience: "10+ Years Of Experience",
-        role: "Transfer Pricing Expert | Direct Taxes | FCA",
-        image: shubhangijain,
-        logos: [
-            "https://upload.wikimedia.org/wikipedia/commons/0/0b/EY_logo_2019.svg",
-        ],
-    },
-    {
-        name: "CA Shubhangi Jain",
-        experience: "10+ Years Of Experience",
-        role: "Strategy and Operations Manager",
-        image: shubhangijain,
-        logos: [
-            "https://upload.wikimedia.org/wikipedia/commons/0/04/Mastercard-logo.png",
-            "https://upload.wikimedia.org/wikipedia/commons/1/1c/Deloitte_Logo.png",
-        ],
-    },
-    {
-        name: "CA Gaurav Malik",
-        experience: "10+ Years Of Experience",
-        role: "FP&A | Automation | PE Deal Management",
-        image: shubhangijain,
-        logos: [
-            "https://upload.wikimedia.org/wikipedia/commons/0/0b/EY_logo_2019.svg",
-        ],
-    },
-    {
-        name: "CA Sameeha Mehta",
-        experience: "10+ Years Of Experience",
-        role: "Tax Analyst | Assistant Manager",
-        image: shubhangijain,
-        logos: [
-            "https://upload.wikimedia.org/wikipedia/commons/e/e1/Pwc_logo.svg",
-        ],
-    },
-    {
-        name: "CA Sameeha Mehta",
-        experience: "10+ Years Of Experience",
-        role: "Tax Analyst | Assistant Manager",
-        image: shubhangijain,
-        logos: [
-            "https://upload.wikimedia.org/wikipedia/commons/e/e1/Pwc_logo.svg",
-        ],
-    },
-    {
-        name: "CA Sameeha Mehta",
-        experience: "10+ Years Of Experience",
-        role: "Tax Analyst | Assistant Manager",
-        image: shubhangijain,
-        logos: [
-            "https://upload.wikimedia.org/wikipedia/commons/e/e1/Pwc_logo.svg",
-        ],
-    },
-    {
-        name: "CA Sameeha Mehta",
-        experience: "10+ Years Of Experience",
-        role: "Tax Analyst | Assistant Manager",
-        image: shubhangijain,
-        logos: [
-            "https://upload.wikimedia.org/wikipedia/commons/e/e1/Pwc_logo.svg",
-        ],
-    },
-];
-
 export default function IndustryExperts() {
 
     const [speakers, setSpeakers] = useState([]);
@@ -104,16 +37,7 @@ export default function IndustryExperts() {
                 <h2 className="text-[32px] font-bold mb-8">
                     Our <span className="text-[#339ca0]">Speakers</span>
                 </h2>
-                {/* <h2 className="text-[22px] font-semibold mb-8 flex items-center gap-2">
-                    <span>
-                        View All
-                    </span>
-                    <span>
-                        <FaArrowRightLong />
-                    </span>
-
-
-                </h2> */}
+                
 
 
             </div>
@@ -121,8 +45,8 @@ export default function IndustryExperts() {
                 slidesPerView={1}
                 navigation={true}
                 autoplay={{
-                    delay: 3000, // 3 second baad slide change hoga
-                    disableOnInteraction: false, // user click kare to bhi autoplay continue rahega
+                    delay: 3000, 
+                    disableOnInteraction: false, 
                 }}
                 breakpoints={{
                     640: { slidesPerView: 1.2 },
@@ -146,21 +70,24 @@ export default function IndustryExperts() {
                             <SwiperSlide key={index}>
                                 <div
                                     onClick={() => navigate(`/hall-of-fame/${speaker._id}`)}
-                                    className="cursor-pointer bg-[#339ca0] text-white border border-white rounded-xl overflow-hidden text-center pb-5 relative hover:scale-105 transition-transform duration-300"
+                                    className="cursor-pointer bg-gray-900 text-white rounded-xl overflow-hidden text-center pb-5 relative  transition-transform duration-300"
                                 >
                                     <img
                                         src={imageUrl}
                                         alt={fullName}
-                                        className="w-full h-[320px] object-cover"
+                                        className="w-full h-[310px]  object-cover"
                                     />
                                     <div className="h-[120px] p-4">
                                         <h3 className="text-lg font-bold">{fullName}</h3>
-                                        <p className="text-sm mt-1">
-                                            {/* {speaker.qualification || "N/A"} */}
-                                        </p>
-                                        <p className="text-sm line-clamp-2">
-                                            {speaker.description || "No expertise mentioned"}
-                                        </p>
+                                       
+                                        
+                                        <p 
+                                            className="text-sm line-clamp-2 text-white bg-transparent [&_*]:!text-white [&_*]:!bg-transparent"
+                                            dangerouslySetInnerHTML={{
+                                                __html: speaker.description || "No expertise mentioned",
+                                            }}
+                                        ></p>
+
                                     </div>
                                 </div>
                             </SwiperSlide>

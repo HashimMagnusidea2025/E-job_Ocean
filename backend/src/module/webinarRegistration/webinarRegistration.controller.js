@@ -13,7 +13,7 @@ dotenv.config();
 import { google } from "googleapis";
 import { log } from "console";
 
-// ✅ Transporter config
+
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -28,13 +28,7 @@ export const CreateWebinarRegistration = async (req, res) => {
   try {
     const { email, mobile, webinarId, firstName } = req.body;
 
-    // Step 1: Check for existing registration
-    // const existing = await webinarRegistrationModel.findOne({
-    //   email,
-    //   mobile,
-    //   webinarId,
-    //   type: "webinar",
-    // });
+   
 
     const existing = await webinarRegistrationModel.findOne({
       webinarId,
@@ -54,7 +48,7 @@ export const CreateWebinarRegistration = async (req, res) => {
     }
 
 
-    // Step 2: Create new registration
+
 
     const webinars = await WebinarModel.findById(webinarId);
     const Registration = new webinarRegistrationModel({
@@ -66,7 +60,7 @@ export const CreateWebinarRegistration = async (req, res) => {
     });
     await Registration.save();
 
-    // Webinar fetch
+ 
 
     const webinar = await WebinarModel.findById(Registration.webinarId);
     const webinarTitle = webinar?.WebinarTitle || "Upcoming Webinar";
@@ -77,20 +71,20 @@ export const CreateWebinarRegistration = async (req, res) => {
       ? `${BASE_URL}${webinar.WebinarImage}`
       : `${BASE_URL}/uploads/default.png`;
 
-    // Helper function to format date in "MMM D, YYYY, hh:mm A" format
+    
     function formatDateTime(dateString) {
       if (!dateString) return "";
       const date = new Date(dateString);
 
-      // Options for toLocaleString
+     
       const options = {
         year: "numeric",
         month: "short",
         day: "numeric",
         hour: "numeric",
         minute: "2-digit",
-        hour12: true,       // ✅ AM/PM
-        timeZone: "Asia/Kolkata" // IST
+        hour12: true,       
+        timeZone: "Asia/Kolkata" 
       };
 
       return date.toLocaleString("en-US", options);
@@ -100,14 +94,14 @@ export const CreateWebinarRegistration = async (req, res) => {
     const settings = await generalSettingModel.findOne();
     const companyName = settings?.companyName || "Your Company";
     const companyEmail = settings?.companyEmail || "your email"
-    // Usage
+
     const formattedStart = formatDateTime(webinarStart);
     const formattedEnd = formatDateTime(webinarEnd);
 
-    // ✅ Send email to user
+    
     const mailOptions = {
       from: process.env.SMTP_EMAIL,
-      to: Registration.email, // email from the saved registration
+      to: Registration.email, 
       subject: `Webinar Registration Successful - ${webinarTitle}`,
       html: `
 <body style="margin:0; padding:0; background-color:#E3F2FD; font-family: Arial, sans-serif;">
@@ -190,10 +184,10 @@ export const CreateWebinarRegistration = async (req, res) => {
       console.log("✅ Registration email sent to", email);
     } catch (mailErr) {
       console.error("❌ Email sending error:", mailErr.message);
-      // Email fail होने पर भी registration को fail मत करो
+     
     }
 
-    // Attach to Google Calendar (only webinars)
+    
     if (!webinar || !webinar.googleEventId) {
       return res.status(201).json({
         success: true,
@@ -202,7 +196,7 @@ export const CreateWebinarRegistration = async (req, res) => {
       });
     }
 
-    // Google Calendar API (unchanged)
+    
     const calendar = google.calendar({ version: "v3", auth: oauth2Client });
     const event = await calendar.events.get({
       calendarId: webinar.googleCalendarId || "primary",
@@ -216,7 +210,7 @@ export const CreateWebinarRegistration = async (req, res) => {
       calendarId: webinar.googleCalendarId || "primary",
       eventId: webinar.googleEventId,
       resource: { attendees },
-      sendUpdates: "all", // notify the new attendee
+      sendUpdates: "all", 
     });
 
     res
@@ -235,14 +229,14 @@ export const CreateWebinarRegistration = async (req, res) => {
 
 export const updateWebinarRegistration = async (req, res) => {
   try {
-    const { id } = req.params; // Registration ID
-    const updateData = req.body; // Updated fields
+    const { id } = req.params; 
+    const updateData = req.body; 
 
-    // ✅ Find and update
+   
     const updatedRegistration = await webinarRegistrationModel.findByIdAndUpdate(
       id,
       updateData,
-      { new: true } // return updated document
+      { new: true }
     ).populate("webinarId");
 
     if (!updatedRegistration) {
@@ -271,7 +265,7 @@ export const deleteWebinarRegistration = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Find and delete
+    
     const deleted = await webinarRegistrationModel.findByIdAndDelete(id);
 
     if (!deleted) {
@@ -819,7 +813,7 @@ export const CreateOneToOneRegistration = async (req, res) => {
       lastName
     });
 
-    // ✅ Step 1: Check for existing registration
+    
     const existing = await webinarRegistrationModel.findOne({
       email,
       mobile,
@@ -1201,7 +1195,7 @@ export const getWebinarRegistration = async (req, res) => {
 
   try {
 
-    const Registration = await webinarRegistrationModel.find().populate("webinarId");
+    const Registration = await webinarRegistrationModel.find().populate({ path: 'webinarId', populate: { path: 'Speakers' } });
     res.json(Registration);
     console.log(Registration);
 
@@ -1218,7 +1212,7 @@ export const getWebinarRegistrationById = async (req, res) => {
     const { id } = req.params;
     console.log("Fetching registration ID:", id);
 
-    const registration = await webinarRegistrationModel.findById(id).populate("webinarId");
+    const registration = await webinarRegistrationModel.findById(id).populate({ path: 'webinarId', populate: { path: 'Speakers' } });
     console.log("Registration found:", registration);
 
     if (!registration) {

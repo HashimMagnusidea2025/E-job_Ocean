@@ -5,7 +5,7 @@ import Swal from "sweetalert2";
 import noImg from "../../media/png/no-image.png";
 import Layout from '../seekerDashboard/partials/layout';
 
-const baseURL = import.meta.env.VITE_BACKEND_URL; // Vite
+const baseURL = import.meta.env.VITE_BACKEND_URL; 
 export default function MyFavoriteJobs() {
   const [favorites, setFavorites] = useState([]);
 
@@ -44,7 +44,7 @@ export default function MyFavoriteJobs() {
     }
   };
 
-  // 🔹 Function to fetch city/state/country names for each job
+  
   const getLocationNames = async (job) => {
     const address = job;
     const newLocationNames = { city: "", state: "", country: "" };
@@ -118,12 +118,17 @@ const FavoriteCard = ({ favorite, getLocationNames, getLocationString, handleRem
         {favorite?.jobId?.jobTitle || "Untitled Job"}
       </h3>
 
-      <p className="text-gray-700">
+      {/* <p className="text-gray-700">
         <strong>Salary:</strong>{" "}
         <span className="font-bold text-black">
           {favorite?.jobId?.salaryFrom || 0} - {favorite?.jobId?.salaryTo || 0}
         </span>
-      </p>
+      </p> */}
+      <div>
+        <span>{favorite?.jobId?.mode}</span>
+        
+      </div>
+      
 
       <div className="flex items-center text-blue-600 gap-1">
         <FaMapMarkerAlt className="text-blue-500" />
@@ -132,9 +137,9 @@ const FavoriteCard = ({ favorite, getLocationNames, getLocationString, handleRem
 
       <div className="bg-gray-100 p-3 rounded-lg flex items-center justify-between">
         <div>
-          <p className="text-gray-500 text-xs">
-            {new Date(favorite?.jobId.companyId.createdAt).toDateString()}
-          </p>
+          {/* <p className="text-gray-500 text-xs">
+            {new Date(favorite?.jobId.companyId?.createdAt).toDateString()}
+          </p> */}
           <p className="text-gray-700 font-medium">
             {favorite?.jobId?.companyId.company.name || "Unknown Company"}
           </p>

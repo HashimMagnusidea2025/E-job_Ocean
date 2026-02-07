@@ -1,36 +1,141 @@
 import { useState, useEffect } from "react";
+import {
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult
+} from "firebase/auth";
+
 import { auth, googleProvider } from "../../../../firebase.js";
-import { signInWithPopup } from "firebase/auth";
+
+import { GoogleLogin } from "@react-oauth/google";
+import { jwtDecode } from "jwt-decode";
 import { useNavigate, useLocation } from "react-router-dom";
 import axios from "../../../../utils/axios.js";
 import Navbar from "../../navbar/navbar.jsx";
 import Footer from "../../footer/footer.jsx";
 import Swal from "sweetalert2";
-import { FaEye, FaEyeSlash } from "react-icons/fa"; // 👈 add this import
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+
+
 export default function Login() {
   const [activeTab, setActiveTab] = useState("email");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // 👈 new state
-  const [contact, setContact] = useState(""); // can be email or phone
+  const [showPassword, setShowPassword] = useState(false);
+  const [contact, setContact] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [role, setRole] = useState("");
+  const [googleHandled, setGoogleHandled] = useState(false);
 
 
   const navigate = useNavigate();
   const location = useLocation();
 
+  const isMobile = () =>
+    /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const r = params.get("role");
-    if (r === "Employer" || r === "seeker" || r === "Mentor") setRole(r);
+    if (r === "employer" || r === "seeker" || r === "mentor") setRole(r);
   }, [location]);
 
-  // 🔍 Helper: check if input is email or phone
+
   const isEmail = (value) => /\S+@\S+\.\S+/.test(value);
   const isPhone = (value) => /^[0-9]{10}$/.test(value);
 
+  // useEffect(() => {
+  //   const checkRedirectLogin = async () => {
+  //     try {
+  //       const result = await getRedirectResult(auth);
+
+  //       if (!result?.user) return;
+
+  //       const savedRole = sessionStorage.getItem("loginRole");
+  //       localStorage.setItem("role", user.roleID.name);
+
+  //       if (savedRole) {
+  //         await handleFirebaseGoogleUser(result.user, savedRole);
+  //       }
+
+  //     } catch (err) {
+  //       console.error(err);
+  //     }
+  //   };
+
+  //   checkRedirectLogin();
+  // }, []);
+
+  useEffect(() => {
+  const checkRedirectLogin = async () => {
+    try {
+      const result = await getRedirectResult(auth);
+
+      if (!result?.user) return;
+
+      const savedRole = sessionStorage.getItem("loginRole");
+
+      if (savedRole) {
+        await handleFirebaseGoogleUser(result.user, savedRole);
+        sessionStorage.removeItem("loginRole"); // cleanup
+      }
+
+    } catch (err) {
+      console.error("Redirect login error:", err);
+    }
+  };
+
+  checkRedirectLogin();
+}, []);
+
+  const handleFirebaseGoogleUser = async (firebaseUser, loginRole) => {
+    try {
+      const res = await axios.post("/auth/login", {
+        email: firebaseUser.email,
+        password: "google_oauth",
+        role: loginRole,
+      });
+
+      const user = res.data.user;
+
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("role", user.roleID.name); // ⭐ ADD THIS
+      if (user.roleID.name === "superadmin") navigate("/admin-dash");
+      else if (user.roleID.name === "seeker") navigate("/seeker-dashboard");
+      else if (user.roleID.name === "employer") navigate("/employer-dashboard");
+      else if (user.roleID.name === "mentor") navigate("/mentor-dashboard");
+
+    } catch (err) {
+      Swal.fire("Login failed", err.response?.data?.message || err.message, "error");
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    if (!role) {
+      Swal.fire("Select Role", "Please select login role first", "warning");
+      return;
+    }
+
+    try {
+      sessionStorage.setItem("loginRole", role);
+
+      const isMobile =
+        /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+      if (isMobile) {
+        await signInWithRedirect(auth, googleProvider);
+      } else {
+        const result = await signInWithPopup(auth, googleProvider);
+        await handleFirebaseGoogleUser(result.user, role);
+      }
+
+    } catch (err) {
+      console.error(err);
+      Swal.fire("Error", err.message, "error");
+    }
+  };
 
   const handleResendOtp = async () => {
     try {
@@ -48,7 +153,7 @@ export default function Login() {
   };
 
 
-  // 📩 Send OTP intelligently (email or phone)
+  //  Send OTP intelligently (email or phone)
   const handleSendOTP = async (e) => {
     e.preventDefault();
 
@@ -75,7 +180,7 @@ export default function Login() {
     }
   };
 
-  // ✅ Verify OTP
+  //  Verify OTP
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     try {
@@ -88,8 +193,8 @@ export default function Login() {
 
       if (
         (role === "seeker" && user.roleID.name !== "seeker") ||
-        (role === "Employer" && user.roleID.name !== "employer") ||
-        (role === "Mentor" && user.roleID.name !== "Mentor")
+        (role === "employer" && user.roleID.name !== "employer") ||
+        (role === "mentor" && user.roleID.name !== "mentor")
       ) {
         Swal.fire({
           icon: "warning",
@@ -106,56 +211,148 @@ export default function Login() {
 
       if (user.roleID.name === "superadmin") navigate("/admin-dash");
       else if (user.roleID.name === "seeker") navigate("/seeker-dashboard");
-      else if (user.roleID.name === "Employer") navigate("/employer-dashboard");
-      else if (user.roleID.name === "Mentor") navigate("/mentor-dashboard");
+      else if (user.roleID.name === "employer") navigate("/employer-dashboard");
+      else if (user.roleID.name === "mentor") navigate("/mentor-dashboard");
     } catch (err) {
       Swal.fire("Error", err.response?.data?.message || "Invalid OTP", "error");
     }
   };
 
-  // ✉️ Email/Password OR Google Login
-  const handleSubmit = async (e, isGoogleLogin = false) => {
-    e.preventDefault();
+  // const handleGoogleUser = async (firebaseUser, loginRole = role) => {
+  //   try {
+  //     const res = await axios.post("/auth/login", {
+  //       email: firebaseUser.email,
+  //       password: "google_oauth",
+  //       role: loginRole,
+  //     });
+
+  //     const user = res.data.user;
+
+  //     localStorage.setItem("token", res.data.token);
+  //     localStorage.setItem("user", JSON.stringify(user));
+  //     sessionStorage.setItem("role", user.roleID.name);
+
+  //     if (user.roleID.name === "superadmin") navigate("/admin-dash");
+  //     else if (user.roleID.name === "seeker") navigate("/seeker-dashboard");
+  //     else if (user.roleID.name === "employer") navigate("/employer-dashboard");
+  //     else if (user.roleID.name === "mentor") navigate("/mentor-dashboard");
+
+  //   } catch (err) {
+  //     Swal.fire("Login failed", err.response?.data?.message || err.message, "error");
+  //   }
+  // };
+
+  //  Email/Password OR Google Login
+
+  const handleGoogleUser = async (credentialResponse) => {
     try {
-      let res, user;
-      if (isGoogleLogin) {
-        const result = await signInWithPopup(auth, googleProvider);
-        const firebaseUser = result.user;
-
-        res = await axios.post("/auth/login", {
-          email: firebaseUser.email,
-          password: "google_oauth",
-          role,
-        });
-
-        user = res.data.user;
-      } else {
-        res = await axios.post("/auth/login", { email, password });
-        user = res.data.user;
+      if (!role) {
+        Swal.fire("Select Role", "Please select login role first", "warning");
+        return;
       }
+
+      const decoded = jwtDecode(credentialResponse.credential);
+
+      const res = await axios.post("/auth/login", {
+        email: decoded.email,
+        password: "google_oauth",
+        role,
+      });
+
+      const user = res.data.user;
+
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("role", user.roleID.name);
+
+      if (user.roleID.name === "superadmin") navigate("/admin-dash");
+      else if (user.roleID.name === "seeker") navigate("/seeker-dashboard");
+      else if (user.roleID.name === "employer") navigate("/employer-dashboard");
+      else if (user.roleID.name === "mentor") navigate("/mentor-dashboard");
+
+    } catch (err) {
+      Swal.fire("Login failed", err.response?.data?.message || err.message, "error");
+    }
+  };
+
+
+  // const handleSubmit = async (e, isGoogleLogin = false) => {
+  //   e.preventDefault();
+  //   try {
+  //     let res, user;
+  //     if (isGoogleLogin) {
+
+
+  //       sessionStorage.setItem("loginRole", role); // ✅ ADD THIS
+  //       if (isMobile()) {
+  //         await signInWithRedirect(auth, googleProvider);
+  //         return;
+  //       }
+
+  //       const result = await signInWithPopup(auth, googleProvider);
+  //       await handleGoogleUser(result.user);
+  //       return;
+  //     }
+  //     else {
+  //       res = await axios.post("/auth/login", { email, password });
+  //       user = res.data.user;
+  //     }
+
+  //     if (
+  //       (role === "seeker" && user.roleID.name !== "seeker") ||
+  //       (role === "employer" && user.roleID.name !== "employer") ||
+  //       (role === "mentor" && user.roleID.name !== "mentor")
+  //     ) {
+  //       Swal.fire({
+  //         icon: "warning",
+  //         title: "Wrong Login Portal!",
+  //         text: `You cannot login here. Please use the ${user.roleID.name} login.`,
+  //         confirmButtonColor: "#3085d6",
+  //       });
+  //       return;
+  //     }
+
+  //     localStorage.setItem("token", res.data.token);
+  //     localStorage.setItem("user", JSON.stringify(user));
+  //     sessionStorage.setItem("role", user.roleID.name);
+
+  //     if (user.roleID.name === "superadmin") navigate("/admin-dash");
+  //     else if (user.roleID.name === "seeker") navigate("/seeker-dashboard");
+  //     else if (user.roleID.name === "employer") navigate("/employer-dashboard");
+  //     else if (user.roleID.name === "mentor") navigate("/mentor-dashboard");
+  //   } catch (err) {
+  //     Swal.fire("Login failed", err.response?.data?.message || err.message, "error");
+  //   }
+  // };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const res = await axios.post("/auth/login", { email, password });
+      const user = res.data.user;
 
       if (
         (role === "seeker" && user.roleID.name !== "seeker") ||
-        (role === "Employer" && user.roleID.name !== "employer") ||
-        (role === "Mentor" && user.roleID.name !== "Mentor")
+        (role === "employer" && user.roleID.name !== "employer") ||
+        (role === "mentor" && user.roleID.name !== "mentor")
       ) {
         Swal.fire({
           icon: "warning",
           title: "Wrong Login Portal!",
           text: `You cannot login here. Please use the ${user.roleID.name} login.`,
-          confirmButtonColor: "#3085d6",
         });
         return;
       }
 
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(user));
-      sessionStorage.setItem("role", user.roleID.name);
+      localStorage.setItem("role", user.roleID.name);
 
       if (user.roleID.name === "superadmin") navigate("/admin-dash");
       else if (user.roleID.name === "seeker") navigate("/seeker-dashboard");
-      else if (user.roleID.name === "Employer") navigate("/employer-dashboard");
-      else if (user.roleID.name === "Mentor") navigate("/mentor-dashboard");
+      else if (user.roleID.name === "employer") navigate("/employer-dashboard");
+      else if (user.roleID.name === "mentor") navigate("/mentor-dashboard");
+
     } catch (err) {
       Swal.fire("Login failed", err.response?.data?.message || err.message, "error");
     }
@@ -169,9 +366,9 @@ export default function Login() {
           <h2 className="text-2xl font-bold text-center text-gray-700">
             {role === "seeker"
               ? "Job Seeker Login"
-              : role === "Employer"
+              : role === "employer"
                 ? "Employer Login"
-                : role === "Mentor"
+                : role === "mentor"
                   ? "Mentor Login"
                   : "Login"}
           </h2>
@@ -214,7 +411,7 @@ export default function Login() {
               </div>
 
               {/* Password Field with Eye */}
-              <div className="flex flex-col relative">
+              <div className="flex flex-col ">
                 <label className="text-sm text-gray-600 mb-1">Password</label>
                 <input
                   type={showPassword ? "text" : "password"}
@@ -224,15 +421,16 @@ export default function Login() {
                   required
                   className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 pr-10"
                 />
-
-                {/* Eye Icon */}
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-[35px] text-gray-500 hover:text-gray-700"
-                >
-                  {showPassword ? <FaEyeSlash /> : <FaEye />}
-                </button>
+                <div className="relative">
+                  {/* Eye Icon */}
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 bottom-[10px] text-gray-500 hover:text-gray-700"
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
               </div>
 
               <div className="text-right">
@@ -245,9 +443,21 @@ export default function Login() {
                 Login
               </button>
 
-              <button
+              {/* <button
                 type="button"
                 onClick={(e) => handleSubmit(e, true)}
+                className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg flex items-center justify-center gap-2"
+              >
+                <img
+                  src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                  alt="Google"
+                  className="w-5 h-5"
+                />
+                Continue with Google
+              </button> */}
+              <button
+                type="button"
+                onClick={handleGoogleLogin}
                 className="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg flex items-center justify-center gap-2"
               >
                 <img

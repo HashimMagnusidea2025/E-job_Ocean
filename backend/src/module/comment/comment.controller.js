@@ -4,9 +4,6 @@ import { sendOTP } from "../../utils/mailer.js";
 import mongoose from 'mongoose';
 
 
-
-
-
 export const RequestOtp = async (req, res) => {
 
 
@@ -165,17 +162,17 @@ export const LikeComment = async (req, res) => {
 
         let identifier;
 
-        // ✅ Case 1: Logged-in user
+        //  Case 1: Logged-in user
         if (req.user) {
             identifier = req.user._id.toString();
         }
-        // ✅ Case 2: Guest user (IP based)
+        // Case 2: Guest user (IP based)
         else {
             identifier = req.ip;
         }
       
 
-        // ❌ Already liked → block
+        //  Already liked → block
         if (comment.likes.includes(identifier)) {
             return res.status(400).json({
                 msg: "Already liked",
@@ -184,7 +181,7 @@ export const LikeComment = async (req, res) => {
             });
         }
 
-        // ✅ First time like
+        //  First time like
         comment.likes.push(identifier);
         await comment.save();
 

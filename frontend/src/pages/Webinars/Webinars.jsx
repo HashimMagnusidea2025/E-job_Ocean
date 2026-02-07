@@ -3,6 +3,9 @@ import { FaRegCalendarAlt } from "react-icons/fa";
 import Navbar from "../../components/layout/navbar/navbar";
 import Footer from "../../components/layout/footer/footer";
 import { WebinarCardsList, HallOfFameCards } from "../../components/ui/cards/cards";
+import { WhatsAppGroupSection } from "../../components/layout/section/WhatsAppGroupSection/WhatsAppGroupSection.jsx";
+
+
 import axios from "../../utils/axios.js";
 const baseURL = import.meta.env.VITE_BACKEND_URL;
 export default function WebinarspageList({ webinar }) {
@@ -10,11 +13,11 @@ export default function WebinarspageList({ webinar }) {
   const [activeTab, setActiveTab] = useState("all");
   const [speakers, setSpeakers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState("");
 
   const handleRegisterClick = (webinar) => {
     console.log("User clicked register for webinar:", webinar);
   };
-
 
   //  Fetch Active Speakers
   useEffect(() => {
@@ -84,12 +87,12 @@ export default function WebinarspageList({ webinar }) {
   // };
 
   const getWebinarImage = (webinar) => {
-    // ✅ CASE 1: Multiple speakers → WebinarImage
+    //  CASE 1: Multiple speakers → WebinarImage
     if (webinar.Speakers && webinar.Speakers.length > 1 && webinar.WebinarImage) {
       return `${baseURL}${webinar.WebinarImage}`;
     }
 
-    // ✅ CASE 2: Single speaker (NEW structure)
+    //  CASE 2: Single speaker (NEW structure)
     if (
       webinar.Speakers &&
       webinar.Speakers.length === 1 &&
@@ -98,13 +101,11 @@ export default function WebinarspageList({ webinar }) {
       return `${baseURL}/${webinar.Speakers[0].profilePic}`;
     }
 
-    // ✅ CASE 3: Single speaker (OLD structure)
+    //  CASE 3: Single speaker (OLD structure)
     if (webinar.Speaker?.profilePic) {
       return `${baseURL}/${webinar.Speaker.profilePic}`;
     }
 
-    // ✅ FALLBACK
-    return "/default-webinar.png";
   };
 
 
@@ -125,8 +126,9 @@ export default function WebinarspageList({ webinar }) {
   //   }
   // });
 
-  // ✅ Filter webinars only if not in Speaker tab
+  //  Filter webinars only if not in Speaker tab
   let filteredWebinars = webinars.filter((webinar) => {
+
     if (activeTab === "upcoming") {
       return new Date(webinar.WebinarStartDateTime) >= now;
     } else if (activeTab === "past") {
@@ -146,6 +148,17 @@ export default function WebinarspageList({ webinar }) {
     return title.includes(searchTerm.toLowerCase()) || speakers.includes(searchTerm.toLowerCase());
   });
 
+  // Apply date filter
+  if (sortBy) {
+    const now = new Date();
+    let days = 0;
+    if (sortBy === "1month") days = 30;
+    else if (sortBy === "3month") days = 90;
+    else if (sortBy === "6month") days = 180;
+    const cutoff = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+    filteredWebinars = filteredWebinars.filter(webinar => new Date(webinar.WebinarStartDateTime) >= cutoff);
+  }
+
   // Filter speakers based on search
   const filteredSpeakers = speakers.filter((speaker) => {
     if (!searchTerm) return true;
@@ -153,19 +166,45 @@ export default function WebinarspageList({ webinar }) {
     return name.includes(searchTerm.toLowerCase());
   });
 
-  // Sort only for "all" tab
+  // Sorting logic
+  if (activeTab === "past") {
+    filteredWebinars.sort(
+      (a, b) =>
+        new Date(b.WebinarStartDateTime) -
+        new Date(a.WebinarStartDateTime)
+    );
+  }
+
+  if (activeTab === "upcoming") {
+    filteredWebinars.sort(
+      (a, b) =>
+        new Date(a.WebinarStartDateTime) -
+        new Date(b.WebinarStartDateTime)
+    );
+  }
+
   if (activeTab === "all") {
     filteredWebinars.sort((a, b) => {
       const aEnd = new Date(a.WebinarEndDateTime);
       const bEnd = new Date(b.WebinarEndDateTime);
 
-      // Upcoming webinars first (end > now)
       const aIsUpcoming = aEnd >= now;
       const bIsUpcoming = bEnd >= now;
 
-      if (aIsUpcoming && !bIsUpcoming) return -1; // a comes first
-      if (!aIsUpcoming && bIsUpcoming) return 1;  // b comes first
-      return new Date(a.WebinarStartDateTime) - new Date(b.WebinarStartDateTime); // then sort by start time
+      if (aIsUpcoming && !bIsUpcoming) return -1;
+      if (!aIsUpcoming && bIsUpcoming) return 1;
+
+      if (!aIsUpcoming && !bIsUpcoming) {
+        return (
+          new Date(b.WebinarStartDateTime) -
+          new Date(a.WebinarStartDateTime)
+        );
+      }
+
+      return (
+        new Date(a.WebinarStartDateTime) -
+        new Date(b.WebinarStartDateTime)
+      );
     });
   }
 
@@ -178,6 +217,14 @@ export default function WebinarspageList({ webinar }) {
         <div className="px-4 sm:px-6 md:px-10 py-10">
 
           <div className="flex justify-end">
+            <div className="px-4 py-2 border rounded-lg">
+              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} name="" id="">
+                <option value="">All</option>
+                <option value="1month">1 Month</option>
+                <option value="3month">3 Months</option>
+                <option value="6month">6 Months</option>
+              </select>
+            </div>
             <input
               type="text"
               placeholder={activeTab === "Speaker" ? "Search speakers..." : "Search webinars..."}
@@ -226,7 +273,7 @@ export default function WebinarspageList({ webinar }) {
                 >
                   Past
                 </button>
-                
+
                 <button
                   onClick={() => setActiveTab("Speaker")}
                   className={`text-left transition ${activeTab === "Speaker"
@@ -289,6 +336,7 @@ export default function WebinarspageList({ webinar }) {
           </div>
         </div>
       </div>
+      <WhatsAppGroupSection />
       <Footer />
     </div>
   );

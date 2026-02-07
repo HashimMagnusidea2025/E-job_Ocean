@@ -18,7 +18,7 @@ const ProfileForm = () => {
     const [imageFile, setImageFile] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    // ✅ COMPLETE formData with all fields - FIXED INITIAL VALUES
+    //  COMPLETE formData with all fields - FIXED INITIAL VALUES
     const [formData, setFormData] = useState({
         // Account Info
         firstName: "",
@@ -64,13 +64,13 @@ const ProfileForm = () => {
                 setLoading(true);
                 const token = localStorage.getItem("token");
 
-                // 1️⃣ Fetch user
+                //  Fetch user
                 const userRes = await axios.get("/auth/me", {
                     headers: { Authorization: `Bearer ${token}` },
                 });
 
-                // 2️⃣ Fetch Seeker info - FIXED ENDPOINT
-                const seekerRes = await axios.get("/seeker/me", { // ✅ Changed from "/seeker/me"
+                // Fetch Seeker info - FIXED ENDPOINT
+                const seekerRes = await axios.get("/seeker/me", { 
                     headers: { Authorization: `Bearer ${token}` },
                 });
 
@@ -79,7 +79,7 @@ const ProfileForm = () => {
                     setFormData((prev) => ({
                         ...prev,
                         firstName: userRes.data.firstName || "",
-                        middleName: userRes.data.lastName || "", // ✅ Fixed field name
+                        middleName: userRes.data.lastName || "", 
                         email: userRes.data.email || "",
                         nickName: s.nickName || "",
                         gender: s.gender || "",
@@ -87,11 +87,9 @@ const ProfileForm = () => {
                         phone: s.phone || "",
                         mobile: s.mobile || "",
                         streetAddress: s.streetAddress || "",
-                        youTubeVideoLink: s.youTubeVideoLink || "", // ✅ Fixed field name mapping
+                        youTubeVideoLink: s.youTubeVideoLink || "", // 
                         jobExperience: s.jobExperience || "",
-                        // careerLevel: s.careerLevel || "",
-                        // industry: s.industry || "",
-                        // functionalArea: s.functionalArea || "",
+                       
                         careerLevel: s.careerLevel?._id || s.careerLevel || "",
                         industry: s.industry?._id || s.industry || "",
                         functionalArea: s.functionalArea?._id || s.functionalArea || "",
@@ -99,8 +97,8 @@ const ProfileForm = () => {
                         salaryCurrency: s.salaryCurrency || "",
                         currentSalary: s.currentSalary || "",
                         expectedSalary: s.expectedSalary || "",
-                        subscribeToNewsletter: s.subscribetoNewsletter || false, // ✅ Fixed field name
-                        dateOfBirth: s.dateofBirth ? s.dateofBirth.split("T")[0] : "", // ✅ Fixed field name
+                        subscribeToNewsletter: s.subscribetoNewsletter || false, 
+                        dateOfBirth: s.dateofBirth ? s.dateofBirth.split("T")[0] : "", 
                         address: {
                             country: s.country || "",
                             state: s.state || "",
@@ -110,13 +108,13 @@ const ProfileForm = () => {
                     }));
 
                     if (s.profileImage) {
-                        const cleanBase = baseURL.replace(/\/+$/, ""); // remove trailing slashes
-                        const cleanPath = s.profileImage.replace(/^\/+/, ""); // remove leading slashes
+                        const cleanBase = baseURL.replace(/\/+$/, ""); 
+                        const cleanPath = s.profileImage.replace(/^\/+/, ""); 
                         setPreviewImage(`${cleanBase}/${cleanPath}`);
                     }
 
                 } else {
-                    // If no seeker data exists, still set user data
+                  
                     setFormData(prev => ({
                         ...prev,
                         firstName: userRes.data.firstName || "",
@@ -126,7 +124,7 @@ const ProfileForm = () => {
                 }
             } catch (err) {
                 console.error("❌ Error fetching user/seeker data:", err);
-                // Still try to set user data even if seeker fails
+                
                 try {
                     const token = localStorage.getItem("token");
                     const userRes = await axios.get("/auth/me", {
@@ -150,12 +148,12 @@ const ProfileForm = () => {
     }, []);
 
     useEffect(() => {
-        // Fetch company categories - FIXED ENDPOINT
-        axios.get("/company-category/active/:id") //  Removed :id
+        
+        axios.get("/company-category/active/:id") 
             .then((res) => setCompanyCategories(res.data || []))
             .catch(err => console.error("Failed to fetch company categories:", err));
 
-        // Fetch countries
+       
         axios.get("/country")
             .then((res) => {
                 console.log("Countries response:", res.data);
@@ -218,11 +216,11 @@ const ProfileForm = () => {
         fetchCareerLevels();
     }, []);
 
-    // ✅ SINGLE handleChange function for all inputs
+    
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
 
-        // For nested address fields
+        
         if (["country", "state", "city"].includes(name)) {
             setFormData((prev) => ({
                 ...prev,
@@ -234,8 +232,7 @@ const ProfileForm = () => {
                 },
             }));
         }
-        // For checkbox inputs
-
+       
         else if (type === "checkbox") {
             setFormData((prev) => ({
                 ...prev,
@@ -259,77 +256,7 @@ const ProfileForm = () => {
         }
     };
 
-    // const handleSubmit = async (e) => {
-    //     e.preventDefault();
-    //     setLoading(true);
-
-    //     try {
-    //         const token = localStorage.getItem("token");
-    //         const form = new FormData();
-
-    //         // ✅ Map frontend field names to backend expected names
-    //         form.append("firstName", formData.firstName);
-    //         form.append("MiddletName", formData.middleName); //  Backend expects "MiddletName"
-    //         form.append("nickName", formData.nickName);
-    //         form.append("gender", formData.gender);
-    //         form.append("maritalStatus", formData.maritalStatus);
-    //         form.append("phone", formData.phone);
-    //         form.append("mobile", formData.mobile);
-    //         form.append("streetAddress", formData.streetAddress);
-    //         form.append("youTubeVideoLink", formData.youTubeVideoLink); //  Backend expects "youTubeVideoLink"
-    //         form.append("jobExperience", formData.jobExperience);
-    //         form.append("careerLevel", formData.careerLevel);
-    //         form.append("industry", formData.industry);
-    //         form.append("functionalArea", formData.functionalArea);
-
-    //         form.append('salaryCurrency', formData.salaryCurrency)
-    //         form.append("currentSalary", formData.currentSalary);
-    //         form.append("expectedSalary", formData.expectedSalary);
-    //         form.append("subscribetoNewsletter", formData.subscribeToNewsletter); // ✅ Backend expects "subscribetoNewsletter"
-    //         form.append("dateofBirth", formData.dateOfBirth); //  Backend expects "dateofBirth"
-
-    //         // Address fields
-    //         form.append("country", formData.address.country);
-    //         form.append("state", formData.address.state);
-    //         form.append("city", formData.address.city);
-
-    //         if (imageFile) {
-    //             form.append("profileImage", imageFile);
-    //         }
-
-    //         const res = await axios.post("/seeker/update", form, { // ✅ Fixed endpoint
-    //             headers: {
-    //                 Authorization: `Bearer ${token}`,
-    //                 "Content-Type": "multipart/form-data",
-    //             },
-    //         });
-
-    //          if (res.data.success) {
-    //          // ✅ IMPORTANT: Update localStorage and trigger event for navbar
-    //          const updatedUserData = res.data.data || res.data.user;
-    //          if (updatedUserData) {
-    //              // Update localStorage
-    //              const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
-    //              const updatedUser = {
-    //                  ...currentUser,
-    //                  ...updatedUserData,
-    //                  profilePicture: updatedUserData.profileImage || updatedUserData.profilePicture
-    //              };
-    //              localStorage.setItem("user", JSON.stringify(updatedUser));
-
-    //              // Trigger custom event to notify navbar about update
-    //              window.dispatchEvent(new Event("userUpdated"));
-    //          }
-
-    //          Swal.fire("Success", "Profile updated successfully", "success");
-    //      }
-    //     } catch (err) {
-    //         console.error("❌ Update Error:", err);
-    //         Swal.fire("Error", err.response?.data?.message || "Something went wrong", "error");
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
+   
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -338,9 +265,9 @@ const ProfileForm = () => {
             const token = localStorage.getItem("token");
             const form = new FormData();
 
-            // ✅ Map frontend field names to backend expected names
+            
             form.append("firstName", formData.firstName);
-            form.append("middletName", formData.middleName); // ✅ Fixed spelling: MiddletName -> middletName
+            form.append("middletName", formData.middleName);
             form.append("nickName", formData.nickName);
             form.append("gender", formData.gender);
             form.append("maritalStatus", formData.maritalStatus);
@@ -376,40 +303,39 @@ const ProfileForm = () => {
             });
 
             if (res.data.success) {
-                console.log("Profile update successful:", res.data); // Debug log
-
-                // ✅ IMPORTANT: Refresh seeker data after update
+                console.log("Profile update successful:", res.data);
+               
                 const seekerRes = await axios.get("/seeker/me", {
                     headers: { Authorization: `Bearer ${token}` },
                 });
 
                 if (seekerRes.data.success && seekerRes.data.data) {
                     const updatedSeeker = seekerRes.data.data;
-                    console.log("Updated seeker data:", updatedSeeker); // Debug log
+                    console.log("Updated seeker data:", updatedSeeker); 
 
-                    // Update preview image immediately
+                  
                     if (updatedSeeker.profileImage) {
                         const cleanBase = baseURL.replace(/\/+$/, "");
                         const cleanPath = updatedSeeker.profileImage.replace(/^\/+/, "");
                         const imageUrl = `${cleanBase}/${cleanPath}`;
-                        console.log("Setting preview image:", imageUrl); // Debug log
+                        console.log("Setting preview image:", imageUrl); 
                         setPreviewImage(imageUrl);
                     }
 
-                    // Update localStorage with fresh data
+                    
                     const userRes = await axios.get("/auth/me", {
                         headers: { Authorization: `Bearer ${token}` },
                     });
 
                     const updatedUser = {
                         ...userRes.data,
-                        profilePicture: updatedSeeker.profileImage // Use profileImage from seeker
+                        profilePicture: updatedSeeker.profileImage 
                     };
 
                     localStorage.setItem("user", JSON.stringify(updatedUser));
-                    console.log("Updated user in localStorage:", updatedUser); // Debug log
+                    console.log("Updated user in localStorage:", updatedUser); 
 
-                    // Trigger custom event with detailed data
+                    
                     window.dispatchEvent(new CustomEvent("userUpdated", {
                         detail: {
                             user: updatedUser,
@@ -422,7 +348,7 @@ const ProfileForm = () => {
             }
         } catch (err) {
             console.error("❌ Update Error:", err);
-            console.error("Error response:", err.response); // Detailed error log
+            console.error("Error response:", err.response); 
             Swal.fire("Error", err.response?.data?.message || "Something went wrong", "error");
         } finally {
             setLoading(false);
@@ -449,7 +375,7 @@ const ProfileForm = () => {
             <form onSubmit={handleSubmit} className="w-full bg-[#f6f8fd] p-6 sm:p-10 rounded shadow text-sm sm:text-base">
 
 
-                {/* Account Info */}
+                
                 <h2 className="text-xl sm:text-[32px] font-semibold mb-10 text-center">Account Information</h2>
                 <div className="grid sm:grid-cols-2 gap-4 mb-6">
                     <div>
@@ -478,7 +404,7 @@ const ProfileForm = () => {
 
                 <hr className="border-2 border-black mb-6" />
 
-                {/* Personal Info */}
+               
                 <h2 className="text-xl font-semibold mb-4">Personal Information</h2>
                 <div className="flex flex-col sm:flex-row justify-center items-center gap-6 mb-6">
                     <div className="bg-white w-full sm:w-[400px]">
@@ -793,7 +719,7 @@ const ProfileForm = () => {
                     </div>
                 </div>
 
-                {/* Newsletter & Submit */}
+                
                 <div className="flex items-center mb-4">
                     <input
                         type="checkbox"

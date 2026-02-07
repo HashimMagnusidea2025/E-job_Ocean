@@ -1,12 +1,7 @@
 
 import WebinarModel from "./webinar.model.js";
-// import { google } from "googleapis";
-// import { v4 as uuidv4 } from "uuid";
 import { createCalendarEvent } from "../../utils/googleCalendar.js";
 import webinarRegistrationModel from "../webinarRegistration/webinarRegistration.model.js";
-
-
-// import moment from "moment-timezone";
 export const CreateWebinar = async (req, res) => {
     try {
         let data = req.body;
@@ -46,6 +41,7 @@ export const CreateWebinar = async (req, res) => {
         } catch (calendarErr) {
             console.error("Google Calendar error:", calendarErr.message);
         }
+        
         // Populate speakers for response - FIXED: 'Speakers' instead of 'Speaker'
         const populatedWebinar = await WebinarModel.findById(webinar._id)
             .populate('Speakers');

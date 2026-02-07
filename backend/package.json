@@ -2,10 +2,12 @@
   "name": "backend",
   "version": "1.0.0",
   "main": "index.js",
+
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon server.js"
   },
+    
   "author": "",
   "license": "ISC",
   "description": "",
@@ -26,6 +28,7 @@
     "moment-timezone": "^0.6.0",
     "mongoose": "^7.0.3",
     "multer": "^2.0.2",
+    "node-cron": "^4.2.1",
     "nodemailer": "^7.0.6",
     "nodemon": "^3.1.10",
     "path": "^0.12.7",

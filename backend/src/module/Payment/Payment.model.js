@@ -26,7 +26,7 @@ const PaymentSchema = mongoose.Schema({
     json_response: {
         type: Object
     },
-    registration_id: { type: mongoose.Schema.Types.ObjectId, ref: "WebinarRegistration", },
+    registration_id: { type: mongoose.Schema.Types.ObjectId },
 
     course_id: { type: mongoose.Schema.Types.ObjectId, ref: "one_to_one", },
 

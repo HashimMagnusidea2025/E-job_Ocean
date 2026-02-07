@@ -9,7 +9,7 @@ export default function MyJobApplications() {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
 
-  // Fetch user data and applications
+ 
   useEffect(() => {
     const fetchUserAndApplications = async () => {
       try {
@@ -22,14 +22,14 @@ export default function MyJobApplications() {
           return;
         }
 
-        // Fetch user data
+       
         const userRes = await axios.get("/auth/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
         setUser(userRes.data);
 
-        // Fetch user's job applications using email
+       
         const applicationsRes = await axios.get(`/job-register/user/applications?email=${userRes.data.email}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -39,7 +39,7 @@ export default function MyJobApplications() {
         if (applicationsRes.data.success) {
           setApplications(applicationsRes.data.registrations);
 
-          // Debug: Check skills data
+          
           applicationsRes.data.registrations.forEach((app, index) => {
             console.log(`Application ${index} skills:`, app.jobId?.skills);
           });
@@ -69,12 +69,12 @@ export default function MyJobApplications() {
     return application.jobId?.companyId?.company?.name || "Company";
   };
 
-  // Get job title
+ 
   const getJobTitle = (application) => {
     return application.jobId?.jobTitle || "Job Title Not Available";
   };
 
-  // Format date
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -88,7 +88,7 @@ export default function MyJobApplications() {
     return "Under Review";
   };
 
-  // ✅ FIXED: Get skills with proper handling
+
   const getSkills = (application) => {
     const skills = application.jobId?.skills || [];
     console.log("Processing skills for application:", skills);
@@ -104,7 +104,7 @@ export default function MyJobApplications() {
       }
       // Agar skill object hai but name nahi hai
       else if (typeof skill === 'object') {
-        return JSON.stringify(skill); // Fallback
+        return JSON.stringify(skill); 
       }
       return "Unknown Skill";
     });
@@ -154,9 +154,9 @@ export default function MyJobApplications() {
 
             return (
               <div key={application._id} className="w-full mx-auto bg-white shadow-sm border rounded-xl p-4 sm:p-6 md:p-6 flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
-                {/* Left Section */}
+                
                 <div className="flex flex-col sm:flex-row gap-4 flex-1">
-                  {/* Company Logo */}
+                  
                   <div className="flex-shrink-0">
                     {getCompanyLogo(application) ? (
                       <img
@@ -215,14 +215,12 @@ export default function MyJobApplications() {
                       )}
                     </div>
 
-                    {/* Application Details */}
+                    
                     <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-600">
                       <div>
                         <span className="font-medium">Applied on:</span> {formatDate(application.createdAt)}
                       </div>
-                      {/* <div>
-                        <span className="font-medium">Application ID:</span> {application._id.slice(-8)}
-                      </div> */}
+                     
                       <div>
                         <span className="font-medium">Email:</span> {application.email}
                       </div>
@@ -231,7 +229,7 @@ export default function MyJobApplications() {
                       </div>
                     </div>
 
-                    {/* ✅ FIXED: Skills Section */}
+                 
                     {skills.length > 0 && (
                       <div className="mt-3">
                         <span className="text-sm font-medium text-gray-700">Required Skills:</span>
@@ -255,7 +253,7 @@ export default function MyJobApplications() {
                   </div>
                 </div>
 
-                {/* Right Section - Action Buttons */}
+              
                 <div className="sm:self-start flex sm:flex-col gap-2">
                   <button
                     onClick={() => {
@@ -278,7 +276,7 @@ export default function MyJobApplications() {
                         confirmButtonText: "Yes, withdraw it!"
                       }).then((result) => {
                         if (result.isConfirmed) {
-                          // Implement withdrawal logic here
+                         
                           Swal.fire("Withdrawn!", "Your application has been withdrawn.", "success");
                         }
                       });

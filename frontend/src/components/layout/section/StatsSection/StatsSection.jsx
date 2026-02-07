@@ -14,9 +14,9 @@ export default function StatsSection() {
   const [data, setData] = useState()
   const fetchCompanydata = async () => {
     try {
-      const response = await axios.get('/general-settings'); // backend endpoint
-      console.log("✅ Full Response:", response);              // logs full Axios response object
-      console.log("✅ Data Received:", response.data);          // logs only your actual data
+      const response = await axios.get('/general-settings'); 
+      console.log("✅ Full Response:", response);   
+      console.log("✅ Data Received:", response.data);          
 
       setData(response.data);
     } catch (error) {
@@ -59,17 +59,12 @@ export default function StatsSection() {
 
   return (
     <div className="w-full bg-white">
-      {/* Top Heading */}
-      {/* <div className="container mx-auto py-20">
-        <h2 className="text-center text-3xl sm:text-4xl font-semibold text-[#339ca0] mb-10">
-          Become Industry-Ready With Applied Learning.
-        </h2>
-      </div> */}
+     
 
-      {/* Background Section */}
+      
       <div className="font-[Poppins] overflow-hidden relative bg-[linear-gradient(to_right,_#090A47,_#20AEB2)]">
         <section className="container mx-auto py-28">
-          {/* Background Circles */}
+         
           <ul className="circles">
             {Array.from({ length: 100 }).map((_, i) => (
               <li key={i}></li>
@@ -83,38 +78,10 @@ export default function StatsSection() {
               <h3 className="text-[34px] sm:text-[50px] font-semibold  mb-2">
                 About {data?.name}
               </h3>
-              {/* <p className="text-sm sm:text-base text-white">
-                We believe in the power of learning & are committed to offering
-                training courses that are thorough, practical and aligned to
-                industry dynamics.
-              </p> */}
+              
             </div>
 
-            {/* Stats */}
-            {/* <div className="flex flex-wrap justify-center gap-6 max-w-5xl mx-auto">
-              {stats.map((item, index) => (
-                <div
-                  key={index}
-                  className="flex flex-col items-center text-white w-36 sm:w-40 md:w-48"
-                >
-                  <div className="mb-2">{item.icon}</div>
-                  <h3 className="text-2xl font-bold">
-                    {inView ? (
-                      <CountUp
-                        start={0}
-                        end={item.count}
-                        duration={2}
-                        separator=","
-                        suffix={item.suffix}
-                      />
-                    ) : (
-                      "0" + item.suffix
-                    )}
-                  </h3>
-                  <p className="text-sm font-medium">{item.label}</p>
-                </div>
-              ))}
-            </div> */}
+           
           </div>
         </section>
       </div>

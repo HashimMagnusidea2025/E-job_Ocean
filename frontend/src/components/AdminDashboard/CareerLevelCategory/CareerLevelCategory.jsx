@@ -1,30 +1,36 @@
 import React, { useEffect, useState } from "react";
 import axios from "../../../utils/axios"; // adjust relative path as needed
 import Swal from "sweetalert2";
-import DataTable from "react-data-table-component";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  flexRender,
+} from "@tanstack/react-table";
 import {
   FaEdit,
   FaTrash,
   FaPlus,
-  FaToggleOn,
-  FaToggleOff,
 } from "react-icons/fa";
 import Layout from "../../seekerDashboard/partials/layout";
 
 export default function CareerCategoryPage() {
   const [categories, setCategories] = useState([]);
-  const [filterText, setFilterText] = useState("");
+  const [filteredCategories, setFilteredCategories] = useState([]);
+  const [searchText, setSearchText] = useState("");
   const [formData, setFormData] = useState({ name: "", status: "active" });
   const [editingId, setEditingId] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // fetch categories
+  
   const fetchCategories = async () => {
     try {
       setLoading(true);
       const res = await axios.get("/career-level-category");
       setCategories(res.data);
+      setFilteredCategories(filterCategories(res.data, searchText));
     } catch (err) {
       console.error(err);
       Swal.fire("Error", "Failed to fetch categories", "error");
@@ -37,24 +43,25 @@ export default function CareerCategoryPage() {
     fetchCategories();
   }, []);
 
-  // form input change
+  
   const handleChange = (e) =>
     setFormData((p) => ({ ...p, [e.target.name]: e.target.value }));
 
-  // submit add/update
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       if (editingId) {
         const res = await axios.put(`/career-level-category/${editingId}`, formData);
-        // update locally
-        setCategories((prev) =>
-          prev.map((c) => (c._id === editingId ? res.data : c))
-        );
+        const updated = categories.map((c) => (c._id === editingId ? res.data : c));
+        setCategories(updated);
+        setFilteredCategories(filterCategories(updated, searchText));
         Swal.fire("Updated!", "Category updated successfully", "success");
       } else {
         const res = await axios.post("/career-level-category", formData);
-        setCategories((prev) => [res.data, ...prev]);
+        const updated = [res.data, ...categories];
+        setCategories(updated);
+        setFilteredCategories(filterCategories(updated, searchText));
         Swal.fire("Added!", "Category created successfully", "success");
       }
       setFormData({ name: "", status: "active" });
@@ -65,14 +72,14 @@ export default function CareerCategoryPage() {
     }
   };
 
-  // open edit
+  
   const handleEdit = (cat) => {
     setFormData({ name: cat.name, status: cat.status });
     setEditingId(cat._id);
     setShowForm(true);
   };
 
-  // delete
+
   const handleDelete = (id) => {
     Swal.fire({
       title: "Are you sure?",
@@ -86,7 +93,9 @@ export default function CareerCategoryPage() {
       if (result.isConfirmed) {
         try {
           await axios.delete(`/career-level-category/${id}`);
-          setCategories((prev) => prev.filter((c) => c._id !== id));
+          const updated = categories.filter((c) => c._id !== id);
+          setCategories(updated);
+          setFilteredCategories(filterCategories(updated, searchText));
           Swal.fire("Deleted!", "Category deleted successfully", "success");
         } catch (err) {
           Swal.fire("Error", err.response?.data?.message || "Something went wrong", "error");
@@ -95,95 +104,86 @@ export default function CareerCategoryPage() {
     });
   };
 
-  // toggle status (icon button next to badge)
+  
   const handleToggleStatus = async (id, currentStatus) => {
     try {
       const newStatus = currentStatus === "active" ? "inactive" : "active";
       const res = await axios.put(`/career-level-category/${id}`, { status: newStatus });
       Swal.fire("Success!", `Status changed to ${newStatus}`, "success");
-      setCategories((prev) => prev.map((c) => (c._id === id ? res.data : c)));
+      const updated = categories.map((c) => (c._id === id ? res.data : c));
+      setCategories(updated);
+      setFilteredCategories(filterCategories(updated, searchText));
     } catch (err) {
       Swal.fire("Error", err.response?.data?.message || "Something went wrong", "error");
     }
   };
 
-  // columns for react-data-table-component
+  const filterCategories = (cats, query) => {
+    if (!query) return cats;
+    return cats.filter(cat =>
+      cat.name.toLowerCase().includes(query) ||
+      cat.status.toLowerCase().includes(query)
+    );
+  };
+
+  const handleSearch = (e) => {
+    const value = e.target.value;
+    setSearchText(value);
+    setFilteredCategories(filterCategories(categories, value.toLowerCase()));
+  };
+
+  
   const columns = [
     {
-      name: "#",
-      selector: (row, idx) => idx + 1,
-      width: "70px",
-      sortable: true,
+      header: "ID",
+      cell: ({ row }) => row.index + 1,
     },
     {
-      name: "Name",
-      selector: (row) => row.name,
-      sortable: true,
-      wrap: true,
+      accessorKey: "name",
+      header: "Name",
     },
     {
-      name: "Status",
-      // show badge and icon toggle next to it
-      cell: (row) => (
-        <div className="flex items-center gap-2">
-          <span
-            className={`px-2 py-1 rounded text-white text-xs ${row.status === "active" ? "bg-green-500" : "bg-red-500"
-              }`}
-          >
-            {row.status}
-          </span>
-
+      header: "Status",
+      cell: ({ row }) =>
+        row.original.status === "active" ? (
+          <span className="text-green-600 font-semibold">Active</span>
+        ) : (
+          <span className="text-red-600 font-semibold">Inactive</span>
+        ),
+    },
+    {
+      header: "Actions",
+      cell: ({ row }) => (
+        <div className="flex gap-3">
           <button
-            onClick={() => handleToggleStatus(row._id, row.status)}
-            className="p-0.5 rounded hover:bg-gray-100"
-            title="Toggle status"
-          >
-            {row.status === "active" ? (
-              <FaToggleOn size={26} className="text-green-500" />
-            ) : (
-              <FaToggleOff size={26} className="text-red-500" />
-            )}
-          </button>
-        </div>
-      ),
-      sortable: true,
-    },
-    {
-      name: "Actions",
-      cell: (row) => (
-        <div className="flex gap-3 items-center">
-          <button
-            onClick={() => handleEdit(row)}
-            className="text-yellow-500 hover:text-yellow-600"
-            title="Edit"
+            onClick={() => handleEdit(row.original)}
+            className="text-green-600"
           >
             <FaEdit size={20} />
           </button>
           <button
-            onClick={() => handleDelete(row._id)}
-            className="text-red-500 hover:text-red-600"
-            title="Delete"
+            onClick={() => handleDelete(row.original._id)}
+            className="text-red-600"
           >
             <FaTrash size={20} />
           </button>
         </div>
       ),
-      ignoreRowClick: true,
-      allowOverflow: true,
-      button: true,
     },
   ];
 
-  // filter by index(#), name, status
-  const filteredItems = categories.filter((item, index) => {
-    const q = filterText.trim().toLowerCase();
-    if (!q) return true;
-    return (
-      (index + 1).toString().includes(q) ||
-      (item.name && item.name.toLowerCase().includes(q)) ||
-      (item.status && item.status.toLowerCase().includes(q))
-    );
+  const table = useReactTable({
+    data: filteredCategories,
+    columns,
+    state: {
+      globalFilter: searchText,
+    },
+    onGlobalFilterChange: setSearchText,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
   });
+
 
   return (
     <Layout>
@@ -195,8 +195,8 @@ export default function CareerCategoryPage() {
           <input
             type="text"
             placeholder="Search by #, name or status..."
-            value={filterText}
-            onChange={(e) => setFilterText(e.target.value)}
+            value={searchText}
+            onChange={handleSearch}
             className="border rounded px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200"
           />
           <button
@@ -212,19 +212,76 @@ export default function CareerCategoryPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <DataTable
-          columns={columns}
-          data={filteredItems}
-          pagination
-          highlightOnHover
-          responsive
-          progressPending={loading}
-          persistTableHead
-        />
+      <div className="bg-white rounded-lg shadow overflow-x-auto">
+        <table className="min-w-full border">
+          <thead className="bg-gray-100">
+            {table.getHeaderGroups().map(headerGroup => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map(header => (
+                  <th
+                    key={header.id}
+                    className="px-4 py-3 text-left text-sm font-semibold border"
+                  >
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext()
+                    )}
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+
+          <tbody>
+            {table.getRowModel().rows.map(row => (
+              <tr key={row.id} className="hover:bg-gray-50">
+                {row.getVisibleCells().map(cell => (
+                  <td key={cell.id} className="px-4 py-2 border text-sm">
+                    {flexRender(
+                      cell.column.columnDef.cell,
+                      cell.getContext()
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))}
+
+            {table.getRowModel().rows.length === 0 && (
+              <tr>
+                <td colSpan={columns.length} className="text-center py-6 text-gray-500">
+                  No categories found
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+
+        {/* Pagination */}
+        <div className="flex justify-between items-center p-4">
+          <button
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+            className="px-4 py-2 border rounded disabled:opacity-50"
+          >
+            Previous
+          </button>
+
+          <span className="text-sm">
+            Page {table.getState().pagination.pageIndex + 1} of{" "}
+            {table.getPageCount()}
+          </span>
+
+          <button
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+            className="px-4 py-2 border rounded disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
       </div>
 
-      {/* Modal popup form */}
+      
       {showForm && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 px-4">
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">

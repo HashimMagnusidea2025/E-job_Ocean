@@ -17,18 +17,18 @@ export default function AdminLogin() {
       const user = res.data.user;
       const roleName = user.roleID?.name?.toLowerCase();
 
-      // ✅ Allow only superadmin
+      
       if (roleName !== "superadmin") {
         alert("Access denied. Only Super Admins can log in here.");
         return;
       }
 
-      // ✅ Store tokens
+   
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(user));
       sessionStorage.setItem("role", roleName);
 
-      // ✅ Navigate to admin dashboard
+     
       navigate("/admin-dash");
     } catch (err) {
       alert("Login failed: " + (err.response?.data?.message || err.message));

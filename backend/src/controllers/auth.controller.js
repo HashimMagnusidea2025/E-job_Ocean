@@ -33,10 +33,10 @@ class AuthController {
         return res.status(400).json({ message: "User already exists" });
       }
 
- 
+
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      
+    
       const user = await UserModel.create({
         firstName,
         lastName,
@@ -223,7 +223,7 @@ class AuthController {
             firstName: "Google",
             lastName: "User",
             email,
-            phone,
+            phone: null, // ? FIXED
             password: "",
             status: "active",
             roleID: defaultRole?._id || null,
@@ -430,8 +430,6 @@ class AuthController {
 
 
 
-
- 
   static async sendOtpEmail(req, res) {
     try {
       const { email } = req.body;

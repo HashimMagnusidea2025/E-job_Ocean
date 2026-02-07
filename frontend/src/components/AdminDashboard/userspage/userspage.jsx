@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import axios from "../../../utils/axios.js";
-import DataTable from "react-data-table-component";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  flexRender,
+} from "@tanstack/react-table";
 import { FaEdit, FaTrash, FaToggleOn, FaToggleOff } from "react-icons/fa";
 import Swal from "sweetalert2";
 import Layout from "../../seekerDashboard/partials/layout.jsx";
@@ -10,7 +16,7 @@ export default function UsersPage() {
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [roles, setRoles] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [filterText, setFilterText] = useState("");
+  const [searchText, setSearchText] = useState("");
   const [loading, setLoading] = useState(false);
 
   const [isEditMode, setIsEditMode] = useState(false);
@@ -29,7 +35,7 @@ export default function UsersPage() {
 
   const [errors, setErrors] = useState({});
 
-  // ✅ Fetch Users
+  //  Fetch Users
   const fetchUsers = async () => {
     try {
       const res = await axios.get("/users");
@@ -40,7 +46,7 @@ export default function UsersPage() {
     }
   };
 
-  // ✅ Fetch Roles
+  //  Fetch Roles
   const fetchRoles = async () => {
     try {
       const res = await axios.get("/roles");
@@ -55,19 +61,23 @@ export default function UsersPage() {
     fetchRoles();
   }, []);
 
-  // ✅ Search Filter
-  useEffect(() => {
-    const lower = filterText.toLowerCase();
-    const filtered = users.filter(
-      (user) =>
-        user.firstName.toLowerCase().includes(lower) ||
-        user.lastName.toLowerCase().includes(lower) ||
-        user.email.toLowerCase().includes(lower) ||
-        user.roleID?.name?.toLowerCase().includes(lower) ||
-        user.status.toLowerCase().includes(lower)
-    );
+  const handleSearch = (e) => {
+    const value = e.target.value.toLowerCase();
+    setSearchText(value);
+
+    const filtered = users.filter((user) => {
+      const fullName = `${user.firstName} ${user.lastName}`.toLowerCase();
+      return (
+        fullName.includes(value) ||
+        user.email.toLowerCase().includes(value) ||
+        (user.roleID?.name || '').toLowerCase().includes(value) ||
+        user.status.toLowerCase().includes(value)
+      );
+    });
+
     setFilteredUsers(filtered);
-  }, [filterText, users]);
+  };
+
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -81,7 +91,7 @@ export default function UsersPage() {
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
 
-  // ✅ Validate form
+  //  Validate form
   const validateForm = () => {
     const newErrors = {};
     const passwordRegex =
@@ -93,7 +103,7 @@ export default function UsersPage() {
     if (!form.roleID) newErrors.roleID = "Role is required";
 
     if (!isEditMode) {
-      // Create Mode → password required
+     
       if (!form.newPassword) {
         newErrors.newPassword = "Password is required";
       } else if (!passwordRegex.test(form.newPassword)) {
@@ -107,7 +117,7 @@ export default function UsersPage() {
     } else {
       // Edit Mode
       if (form.currentPassword) {
-        // ✅ If currentPassword is provided → new & confirm required
+      
         if (!form.newPassword) {
           newErrors.newPassword = "New password is required";
         } else if (!passwordRegex.test(form.newPassword)) {
@@ -127,7 +137,7 @@ export default function UsersPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  // ✅ Create / Update User
+  //  Create / Update User
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -162,7 +172,7 @@ export default function UsersPage() {
       resetForm();
       fetchUsers();
     } catch (err) {
-      // 🔴 Show error under Current Password field
+      //  Show error under Current Password field
       const message = err.response?.data?.message || err.message;
 
       if (message.includes("Current password is incorrect")) {
@@ -171,14 +181,14 @@ export default function UsersPage() {
           currentPassword: "Current password is incorrect",
         }));
       } else {
-        Swal.fire("Error", message, "error"); // fallback
+        Swal.fire("Error", message, "error");
       }
     } finally {
       setLoading(false);
     }
   };
 
-  // ✅ Reset Form
+  //  Reset Form
   const resetForm = () => {
     setForm({
       firstName: "",
@@ -196,7 +206,7 @@ export default function UsersPage() {
     setEditingUserId(null);
   };
 
-  // ✅ Edit User
+  //  Edit User
   const handleEdit = (user) => {
     setForm({
       firstName: user.firstName,
@@ -213,7 +223,7 @@ export default function UsersPage() {
     setShowModal(true);
   };
 
-  // ✅ Delete User
+  //  Delete User
   const handleDelete = async (id) => {
     const result = await Swal.fire({
       title: "Are you sure?",
@@ -236,7 +246,7 @@ export default function UsersPage() {
     }
   };
 
-  // ✅ Toggle Status
+  //  Toggle Status
   const handleToggleStatus = async (id, currentStatus) => {
     const newStatus = currentStatus === "active" ? "inactive" : "active";
 
@@ -253,29 +263,36 @@ export default function UsersPage() {
     }
   };
 
-  // ✅ DataTable columns
   const columns = [
     {
-      name: "Name",
-      selector: (row) =>
-        `${toCamelCase(row.firstName)} ${toCamelCase(row.lastName)}`,
-      sortable: true,
+      header: "ID",
+      cell: ({ row }) => row.index + 1,
     },
-    { name: "Email", selector: (row) => row.email },
-    { name: "Role", selector: (row) => row.roleID?.name || "N/A" },
     {
-      name: "Status",
-      cell: (row) => (
+      header: "Name",
+      accessorFn: (row) => `${toCamelCase(row.firstName)} ${toCamelCase(row.lastName)}`,
+    },
+    {
+      accessorKey: "email",
+      header: "Email",
+    },
+    {
+      header: "Role",
+      accessorFn: (row) => row.roleID?.name || "N/A",
+    },
+    {
+      header: "Status",
+      cell: ({ row }) => (
         <div className="flex items-center gap-2">
           <span
             className={`px-2 py-1 text-xs rounded text-white ${
-              row.status === "active" ? "bg-green-500" : "bg-red-500"
+              row.original.status === "active" ? "bg-green-500" : "bg-red-500"
             }`}
           >
-            {row.status}
+            {row.original.status}
           </span>
-          <button onClick={() => handleToggleStatus(row._id, row.status)}>
-            {row.status === "active" ? (
+          <button onClick={() => handleToggleStatus(row.original._id, row.original.status)}>
+            {row.original.status === "active" ? (
               <FaToggleOn size={22} className="text-green-500" />
             ) : (
               <FaToggleOff size={22} className="text-red-500" />
@@ -283,21 +300,20 @@ export default function UsersPage() {
           </button>
         </div>
       ),
-      sortable: true,
     },
     {
-      name: "Actions",
-      cell: (row) => (
+      header: "Actions",
+      cell: ({ row }) => (
         <div className="flex gap-3">
           <button
             className="text-blue-500 hover:text-blue-700"
-            onClick={() => handleEdit(row)}
+            onClick={() => handleEdit(row.original)}
           >
             <FaEdit size={20} />
           </button>
           <button
             className="text-red-500 hover:text-red-700"
-            onClick={() => handleDelete(row._id)}
+            onClick={() => handleDelete(row.original._id)}
           >
             <FaTrash size={20} />
           </button>
@@ -306,10 +322,22 @@ export default function UsersPage() {
     },
   ];
 
+  const table = useReactTable({
+    data: filteredUsers,
+    columns,
+    state: {
+      globalFilter: searchText,
+    },
+    onGlobalFilterChange: setSearchText,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+  });
+
   return (
     <Layout>
       <div className="px-4 py-8">
-        {/* ✅ Modal */}
+        {/*  Modal */}
         {showModal && (
           <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             <form
@@ -509,35 +537,90 @@ export default function UsersPage() {
         )}
 
         {/* Header */}
-        <div className="flex justify-between items-center pb-6">
-          <h2 className="text-2xl font-bold text-gray-700">Users List</h2>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-3xl font-bold text-gray-800">Users</h2>
+          <input
+            type="text"
+            placeholder="Search users..."
+            value={searchText}
+            onChange={handleSearch}
+            className="border p-2 rounded"
+          />
           <button
             onClick={() => setShowModal(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+            className="bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition"
           >
-            Create User
+            + Create User
           </button>
         </div>
 
-        {/* Search */}
-        <input
-          type="text"
-          placeholder="Search users..."
-          value={filterText}
-          onChange={(e) => setFilterText(e.target.value)}
-          className="px-4 py-2 border rounded-lg w-full max-w-sm mb-4"
-        />
+        <div className="bg-white rounded-lg shadow overflow-x-auto">
+          <table className="min-w-full border">
+            <thead className="bg-gray-100">
+              {table.getHeaderGroups().map(headerGroup => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map(header => (
+                    <th
+                      key={header.id}
+                      className="px-4 py-3 text-left text-sm font-semibold border"
+                    >
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
 
-        {/* Table */}
-        <div className="bg-white shadow-md rounded-xl p-6">
-          <DataTable
-            columns={columns}
-            data={filteredUsers}
-            pagination
-            responsive
-            highlightOnHover
-            striped
-          />
+            <tbody>
+              {table.getRowModel().rows.map(row => (
+                <tr key={row.id} className="hover:bg-gray-50">
+                  {row.getVisibleCells().map(cell => (
+                    <td key={cell.id} className="px-4 py-2 border text-sm">
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+
+              {table.getRowModel().rows.length === 0 && (
+                <tr>
+                  <td colSpan={columns.length} className="text-center py-6 text-gray-500">
+                    No users found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+
+          {/* Pagination */}
+          <div className="flex justify-between items-center p-4">
+            <button
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+              className="px-4 py-2 border rounded disabled:opacity-50"
+            >
+              Previous
+            </button>
+
+            <span className="text-sm">
+              Page {table.getState().pagination.pageIndex + 1} of{" "}
+              {table.getPageCount()}
+            </span>
+
+            <button
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+              className="px-4 py-2 border rounded disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
     </Layout>

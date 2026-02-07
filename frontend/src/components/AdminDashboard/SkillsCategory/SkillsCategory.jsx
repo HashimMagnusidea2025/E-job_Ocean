@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from "react";
 import axios from "../../../utils/axios";
 import Swal from "sweetalert2";
-import DataTable from "react-data-table-component";
 import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
 import { FaToggleOn, FaToggleOff } from "react-icons/fa";
 import Layout from "../../seekerDashboard/partials/layout";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  flexRender,
+} from "@tanstack/react-table";
 export default function SkillsCategoryPage() {
     const [categories, setCategories] = useState([]);
     const [filterText, setFilterText] = useState("");
@@ -102,82 +108,62 @@ export default function SkillsCategoryPage() {
     };
 
 
-    // DataTable Columns
     const columns = [
         {
-            name: "#",
-            selector: (row, index) => index + 1,
-            width: "70px"
+            header: "ID",
+            cell: ({ row }) => row.index + 1,
         },
         {
-            name: "Name",
-            selector: (row) => row.name,
-            sortable: true
+            accessorKey: "name",
+            header: "Name",
         },
-
         {
-            name: "Status",
-            cell: (row) => (
-                <div className="flex items-center gap-2">
-                    <span
-                        className={`px-2 py-1 rounded text-white text-xs ${row.status === "active" ? "bg-green-500" : "bg-red-500"
-                            }`}
-                    >
-                        {row.status}
-                    </span>
+            header: "Status",
+            cell: ({ row }) =>
+                row.original.status === "active" ? (
+                    <span className="text-green-600 font-semibold">Active</span>
+                ) : (
+                    <span className="text-red-600 font-semibold">Inactive</span>
+                ),
+        },
+        {
+            header: "Actions",
+            cell: ({ row }) => (
+                <div className="flex gap-3">
                     <button
-                        onClick={() => handleToggleStatus(row._id, row.status)}
-                        className="p-1 rounded hover:bg-gray-200"
-                        title="Toggle Status"
-                    >
-                        {row.status === "active" ? (
-                            <FaToggleOn size={26} className="text-green-500" />
-                        ) : (
-                            <FaToggleOff size={26} className="text-red-500" />
-                        )}
-                    </button>
-                </div>
-            ),
-            sortable: true
-        },
-
-        {
-            name: "Actions",
-            cell: (row) => (
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => handleEdit(row)}
-                        className="text-yellow-500 hover:text-yellow-600"
+                        onClick={() => handleEdit(row.original)}
+                        className="text-green-600"
                     >
                         <FaEdit size={20} />
                     </button>
                     <button
-                        onClick={() => handleDelete(row._id)}
-                        className="text-red-500 hover:text-red-600"
+                        onClick={() => handleToggleStatus(row.original._id, row.original.status)}
+                        className="text-blue-600"
+                    >
+                        {row.original.status === "active" ? <FaToggleOff size={20} /> : <FaToggleOn size={20} />}
+                    </button>
+                    <button
+                        onClick={() => handleDelete(row.original._id)}
+                        className="text-red-600"
                     >
                         <FaTrash size={20} />
                     </button>
                 </div>
             ),
-            ignoreRowClick: true,
-            allowOverflow: true,
-            button: true
-        }
+        },
     ];
 
-    // Filtered Data
-    const filteredItems = categories.filter((item, index) => {
-        const searchLower = filterText.toLowerCase();
-
-        return (
-            // Match by #
-            (index + 1).toString().includes(searchLower) ||
-            // Match by Name
-            (item.name && item.name.toLowerCase().includes(searchLower)) ||
-            // Match by Status
-            (item.status && item.status.toLowerCase().includes(searchLower))
-        );
-    })
+    const table = useReactTable({
+        data: categories,
+        columns,
+        state: {
+            globalFilter: filterText,
+        },
+        onGlobalFilterChange: setFilterText,
+        getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+    });
 
     return (
         <Layout>
@@ -207,14 +193,74 @@ export default function SkillsCategoryPage() {
                     </button>
                 </div>
 
-                {/* DataTable */}
-                <DataTable
-                    columns={columns}
-                    data={filteredItems}
-                    pagination
-                    highlightOnHover
-                    responsive
-                />
+                <div className="bg-white rounded-lg shadow overflow-x-auto">
+                  <table className="min-w-full border">
+                    <thead className="bg-gray-100">
+                      {table.getHeaderGroups().map(headerGroup => (
+                        <tr key={headerGroup.id}>
+                          {headerGroup.headers.map(header => (
+                            <th
+                              key={header.id}
+                              className="px-4 py-3 text-left text-sm font-semibold border"
+                            >
+                              {flexRender(
+                                header.column.columnDef.header,
+                                header.getContext()
+                              )}
+                            </th>
+                          ))}
+                        </tr>
+                      ))}
+                    </thead>
+
+                    <tbody>
+                      {table.getRowModel().rows.map(row => (
+                        <tr key={row.id} className="hover:bg-gray-50">
+                          {row.getVisibleCells().map(cell => (
+                            <td key={cell.id} className="px-4 py-2 border text-sm">
+                              {flexRender(
+                                cell.column.columnDef.cell,
+                                cell.getContext()
+                              )}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+
+                      {table.getRowModel().rows.length === 0 && (
+                        <tr>
+                          <td colSpan={columns.length} className="text-center py-6 text-gray-500">
+                            No categories found
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+
+                  {/* Pagination */}
+                  <div className="flex justify-between items-center p-4">
+                    <button
+                      onClick={() => table.previousPage()}
+                      disabled={!table.getCanPreviousPage()}
+                      className="px-4 py-2 border rounded disabled:opacity-50"
+                    >
+                      Previous
+                    </button>
+
+                    <span className="text-sm">
+                      Page {table.getState().pagination.pageIndex + 1} of{" "}
+                      {table.getPageCount()}
+                    </span>
+
+                    <button
+                      onClick={() => table.nextPage()}
+                      disabled={!table.getCanNextPage()}
+                      className="px-4 py-2 border rounded disabled:opacity-50"
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
 
                 {/* Popup Form */}
                 {showForm && (

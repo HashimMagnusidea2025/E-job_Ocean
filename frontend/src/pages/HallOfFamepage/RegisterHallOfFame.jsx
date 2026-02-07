@@ -310,6 +310,12 @@ export default function RegisterHallOfFame({ isOpen, onClose, webinarId, webinar
                                 {selectedSlot.paymentType} Session
                             </p>
                         )}
+                        {selectedSlot.fees && (
+                            <p className='text-sm font-bold mt-1'
+                            >
+                                Fees : ₹ {selectedSlot.fees}
+                            </p>
+                        )}
                     </div>
                 )}
 

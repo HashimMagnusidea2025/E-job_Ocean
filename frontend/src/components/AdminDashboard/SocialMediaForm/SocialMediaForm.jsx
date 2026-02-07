@@ -2,22 +2,35 @@ import React, { useState, useEffect } from "react";
 import axios from "../../../utils/axios.js"; // axios instance with baseURL
 import Layout from '../../seekerDashboard/partials/layout.jsx'
 import { FaEdit, FaTrash, FaPlus } from "react-icons/fa";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  flexRender,
+} from "@tanstack/react-table";
+
 export default function SocialMediaForm() {
     const [icons, setIcons] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingIcon, setEditingIcon] = useState(null);
     const [formData, setFormData] = useState({ name: '', link: '', status: 'active' });
+    const [filteredIcons, setFilteredIcons] = useState([]);
+    const [searchText, setSearchText] = useState("");
 
     useEffect(() => {
+        
         fetchIcons();
+        
     }, []);
 
     const fetchIcons = async () => {
         try {
-            const res = await axios.get('/social-media-icons');
-            setIcons(res.data);
+          const res = await axios.get('/social-media-icons');
+          setIcons(res.data);
+          setFilteredIcons(res.data);
         } catch (err) {
-            console.error(err);
+          console.error(err);
         }
     };
 
@@ -75,10 +88,93 @@ export default function SocialMediaForm() {
         }
     };
 
+    const handleSearch = (e) => {
+        const value = e.target.value.toLowerCase();
+        setSearchText(value);
+
+        const filtered = icons.filter((icon) => {
+            return (
+                icon.name.toLowerCase().includes(value) ||
+                icon.link.toLowerCase().includes(value) ||
+                icon.status.toLowerCase().includes(value)
+            );
+        });
+
+        setFilteredIcons(filtered);
+    };
+
+    const columns = [
+        {
+            header: "ID",
+            cell: ({ row }) => row.index + 1,
+        },
+        {
+            accessorKey: "name",
+            header: "Name",
+        },
+        {
+            accessorKey: "link",
+            header: "Link",
+            cell: ({ getValue }) => (
+                <a href={getValue()} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                    {getValue()}
+                </a>
+            ),
+        },
+        {
+            header: "Status",
+            cell: ({ row }) =>
+                row.original.status === "active" ? (
+                    <span className="text-green-600 font-semibold">Active</span>
+                ) : (
+                    <span className="text-red-600 font-semibold">Inactive</span>
+                ),
+        },
+        {
+            header: "Actions",
+            cell: ({ row }) => (
+                <div className="flex gap-3">
+                    <button
+                        onClick={() => openModal(row.original)}
+                        className="text-green-600"
+                    >
+                        <FaEdit size={20} />
+                    </button>
+                    <button
+                        onClick={() => handleDelete(row.original._id)}
+                        className="text-red-600"
+                    >
+                        <FaTrash size={20} />
+                    </button>
+                </div>
+            ),
+        },
+    ];
+
+    const table = useReactTable({
+        data: filteredIcons,
+        columns,
+        state: {
+            globalFilter: searchText,
+        },
+        onGlobalFilterChange: setSearchText,
+        getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+    });
+
     return (
         <Layout>
             <div className="max-w-5xl mx-auto p-6 bg-white rounded-xl shadow-md">
                 <h2 className="text-2xl font-bold mb-6">Social Media Icons</h2>
+
+                <input
+                    type="text"
+                    placeholder="Search icons..."
+                    value={searchText}
+                    onChange={handleSearch}
+                    className="border p-2 rounded mb-6"
+                />
 
                 <button
                     onClick={() => openModal()}
@@ -87,51 +183,74 @@ export default function SocialMediaForm() {
                     Add New Icon
                 </button>
 
-                {icons.length > 0 ? (
-                    <table className="w-full table-auto border-collapse border border-gray-300">
-                        <thead>
-                            <tr className="bg-gray-100">
-                                <th className="border border-gray-300 px-4 py-2">Name</th>
-                                <th className="border border-gray-300 px-4 py-2">Link</th>
-                                <th className="border border-gray-300 px-4 py-2">Status</th>
-                                <th className="border border-gray-300 px-4 py-2">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {icons.map((icon) => (
-                                <tr key={icon._id} className="hover:bg-gray-50">
-                                    <td className="border border-gray-300 px-4 py-2">{icon.name}</td>
-                                    <td className="border border-gray-300 px-4 py-2">
-                                        <a href={icon.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                                            {icon.link}
-                                        </a>
-                                    </td>
-                                    <td className="border border-gray-300 px-4 py-2">
-                                        <span className={`px-2 py-1 rounded ${icon.status === 'active' ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'}`}>
-                                            {icon.status}
-                                        </span>
-                                    </td>
-                                    <td className="border border-gray-300 flex px-4 py-2">
-                                        <button
-                                            onClick={() => openModal(icon)}
-                                            className="bg-blue-500 text-white px-3 py-1 rounded mr-2 hover:bg-blue-600"
+                <div className="bg-white rounded-lg shadow overflow-x-auto">
+                    <table className="min-w-full border">
+                        <thead className="bg-gray-100">
+                            {table.getHeaderGroups().map(headerGroup => (
+                                <tr key={headerGroup.id}>
+                                    {headerGroup.headers.map(header => (
+                                        <th
+                                            key={header.id}
+                                            className="px-4 py-3 text-left text-sm font-semibold border"
                                         >
-                                           <FaEdit/>
-                                        </button>
-                                        <button
-                                            onClick={() => handleDelete(icon._id)}
-                                            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                                        >
-                                            <FaTrash/>
-                                        </button>
-                                    </td>
+                                            {flexRender(
+                                                header.column.columnDef.header,
+                                                header.getContext()
+                                            )}
+                                        </th>
+                                    ))}
                                 </tr>
                             ))}
+                        </thead>
+
+                        <tbody>
+                            {table.getRowModel().rows.map(row => (
+                                <tr key={row.id} className="hover:bg-gray-50">
+                                    {row.getVisibleCells().map(cell => (
+                                        <td key={cell.id} className="px-4 py-2 border text-sm">
+                                            {flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext()
+                                            )}
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))}
+
+                            {table.getRowModel().rows.length === 0 && (
+                                <tr>
+                                    <td colSpan={columns.length} className="text-center py-6 text-gray-500">
+                                        No icons found
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
-                ) : (
-                    <p className="text-gray-600">No social media icons added yet.</p>
-                )}
+
+                    {/* Pagination */}
+                    <div className="flex justify-between items-center p-4">
+                        <button
+                            onClick={() => table.previousPage()}
+                            disabled={!table.getCanPreviousPage()}
+                            className="px-4 py-2 border rounded disabled:opacity-50"
+                        >
+                            Previous
+                        </button>
+
+                        <span className="text-sm">
+                            Page {table.getState().pagination.pageIndex + 1} of{" "}
+                            {table.getPageCount()}
+                        </span>
+
+                        <button
+                            onClick={() => table.nextPage()}
+                            disabled={!table.getCanNextPage()}
+                            className="px-4 py-2 border rounded disabled:opacity-50"
+                        >
+                            Next
+                        </button>
+                    </div>
+                </div>
 
                 {isModalOpen && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

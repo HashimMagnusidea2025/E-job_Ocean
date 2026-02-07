@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import Select from "react-select";
 import axios from "../../../../utils/axios"; // Adjust path if needed
 import Navbar from '../../navbar/navbar';
 import Footer from '../../footer/footer';
@@ -9,12 +10,12 @@ const CaFreshersForm = () => {
     name: "",
     email: "",
     phone: "",
-    qualification: "",
+    qualification: [],
     experience: "",
-    jobProfile: "",
-    jobLocation: "",
-    passingMonth: "July",
-    passingYear: "2025",
+    jobProfile: [],
+    jobLocation: [],
+    passingMonth: "",
+    passingYear: "",
     ResumeUpload: null,
   });
 
@@ -44,11 +45,11 @@ const CaFreshersForm = () => {
           Location: activeLocations,
         });
 
-        setFormData((prev) => ({
-          ...prev,
-          qualification: filtersRes.data.Qualification?.[0] || "",
-          experience: filtersRes.data.Experience?.[0] || "",
-        }));
+        // setFormData((prev) => ({
+        //   ...prev,
+        //   qualification: filtersRes.data.Qualification?.[0] ? [filtersRes.data.Qualification[0]] : [],
+        //   experience: filtersRes.data.Experience?.[0] || "",
+        // }));
       } catch (err) {
         console.error("Error fetching filter options:", err);
       }
@@ -65,6 +66,14 @@ const CaFreshersForm = () => {
     });
   };
 
+  const handleSelectChange = (selectedOptions, { name }) => {
+    const values = selectedOptions ? selectedOptions.map(option => option.value) : [];
+    setFormData({
+      ...formData,
+      [name]: values,
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -77,10 +86,10 @@ const CaFreshersForm = () => {
       newErrors.phone = "Phone number must be 10 digits";
     }
 
-    if (!formData.qualification) newErrors.qualification = "Qualification is required";
+    if (!formData.qualification || formData.qualification.length === 0) newErrors.qualification = "Qualification is required";
     if (!formData.experience) newErrors.experience = "Experience is required";
-    if (!formData.jobProfile) newErrors.jobProfile = "Profile is required";
-    if (!formData.jobLocation) newErrors.jobLocation = "Location is required";
+    if (!formData.jobProfile || formData.jobProfile.length === 0) newErrors.jobProfile = "Profile is required";
+    if (!formData.jobLocation || formData.jobLocation.length === 0) newErrors.jobLocation = "Location is required";
     if (!formData.passingMonth) newErrors.passingMonth = "Month is required";
     if (!formData.passingYear) newErrors.passingYear = "Year is required";
     // if (!formData.ResumeUpload) newErrors.ResumeUpload = "Resume is required";
@@ -91,9 +100,14 @@ const CaFreshersForm = () => {
 
     try {
       const payload = new FormData();
-      Object.entries(formData).forEach(([key, value]) =>
-        payload.append(key, value)
-      );
+      payload.append("type", "caFresher"); // 👈 IMPORTANT
+      Object.entries(formData).forEach(([key, value]) => {
+        if (Array.isArray(value)) {
+          payload.append(key, JSON.stringify(value));
+        } else {
+          payload.append(key, value);
+        }
+      });
 
       await axios.post("/CA-Fresher", payload);
       alert("Form submitted successfully!");
@@ -102,12 +116,12 @@ const CaFreshersForm = () => {
         name: "",
         email: "",
         phone: "",
-        qualification: filterOptions.Qualification?.[0] || "",
+        qualification: filterOptions.Qualification?.[0] ? [filterOptions.Qualification[0]] : [],
         experience: filterOptions.Experience?.[0] || "",
-        jobProfile: "",
-        jobLocation: "",
-        passingMonth: "July",
-        passingYear: "2025",
+        jobProfile: [],
+        jobLocation: [],
+        passingMonth: "",
+        passingYear: "",
         ResumeUpload: null,
       });
       setErrors({});
@@ -175,17 +189,15 @@ const CaFreshersForm = () => {
           {/* Qualification */}
           <div>
             <label className="block mb-1 text-sm font-medium">Qualification</label>
-            <select
+            <Select
+              isMulti
               name="qualification"
-              value={formData.qualification}
-              onChange={handleChange}
-              className="w-full border rounded px-3 py-2 bg-gray-50"
-            >
-              <option value="">-- Select Qualification --</option>
-              {filterOptions.Qualification.map((q, i) => (
-                <option key={i} value={q}>{q}</option>
-              ))}
-            </select>
+              options={filterOptions.Qualification.map(q => ({ value: q, label: q }))}
+              value={formData.qualification.map(q => ({ value: q, label: q }))}
+              onChange={handleSelectChange}
+              className="w-full"
+              placeholder="-- Select Qualification --"
+            />
             {errors.qualification && <p className="text-red-500 text-sm">{errors.qualification}</p>}
           </div>
 
@@ -209,34 +221,30 @@ const CaFreshersForm = () => {
           {/* Job Profile */}
           <div>
             <label className="block mb-1 text-sm font-medium">Preferred Job Profile</label>
-            <select
+            <Select
+              isMulti
               name="jobProfile"
-              value={formData.jobProfile}
-              onChange={handleChange}
-              className="w-full border rounded px-3 py-2 bg-gray-50"
-            >
-              <option value="">-- Select Profile --</option>
-              {filterOptions.Profile.map((profile, i) => (
-                <option key={i} value={profile}>{profile}</option>
-              ))}
-            </select>
+              options={filterOptions.Profile.map(p => ({ value: p, label: p }))}
+              value={formData.jobProfile.map(p => ({ value: p, label: p }))}
+              onChange={handleSelectChange}
+              className="w-full"
+              placeholder="-- Select Profile --"
+            />
             {errors.jobProfile && <p className="text-red-500 text-sm">{errors.jobProfile}</p>}
           </div>
 
           {/* Location */}
           <div>
             <label className="block mb-1 text-sm font-medium">Preferred Job Location</label>
-            <select
+            <Select
+              isMulti
               name="jobLocation"
-              value={formData.jobLocation}
-              onChange={handleChange}
-              className="w-full border rounded px-3 py-2 bg-gray-50"
-            >
-              <option value="">-- Select Location --</option>
-              {filterOptions.Location.map((loc, i) => (
-                <option key={i} value={loc}>{loc}</option>
-              ))}
-            </select>
+              options={filterOptions.Location.map(l => ({ value: l, label: l }))}
+              value={formData.jobLocation.map(l => ({ value: l, label: l }))}
+              onChange={handleSelectChange}
+              className="w-full"
+              placeholder="-- Select Location --"
+            />
             {errors.jobLocation && <p className="text-red-500 text-sm">{errors.jobLocation}</p>}
           </div>
 

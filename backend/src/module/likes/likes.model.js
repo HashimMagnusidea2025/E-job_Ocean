@@ -5,14 +5,17 @@ import mongoose from "mongoose";
 
 const LikeSchema = mongoose.Schema({
 
-    id: { 
+    id: {
             type: mongoose.Schema.Types.Mixed, // ✅ Number ya String dono accept karega
-            required: true 
+            required: true
         },
 
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
+    },
+    ipAddress: {
+        type: String, // For non-logged-in users
     },
     viewCount: {
         type: Number,

@@ -12,8 +12,8 @@ import {
     getPaginationRowModel,
     flexRender,
 } from "@tanstack/react-table";
-const baseURL = import.meta.env.VITE_BACKEND_URL; // Vite
-// या CRA में: const baseURL = process.env.REACT_APP_BACKEND_URL;
+const baseURL = import.meta.env.VITE_BACKEND_URL;
+
 
 
 const Speakerpage = () => {
@@ -21,7 +21,8 @@ const Speakerpage = () => {
     const [open, setOpen] = useState(false);
     const [editId, setEditId] = useState(null);
     const [previewImage, setPreviewImage] = useState(null);
-    const [globalFilter, setGlobalFilter] = useState("");
+    const [searchText, setSearchText] = useState("");
+    const [filteredSpeakers, setFilteredSpeakers] = useState([]);
 
     const [loading, setLoading] = useState({
         countries: false,
@@ -40,7 +41,8 @@ const Speakerpage = () => {
         introduction: "",
         description: "",
         qualification: "",
-        profilePic: null, // file object
+        position: "",
+        profilePic: null,
     });
     const [countries, setCountries] = useState([]);
     const [states, setStates] = useState([]);
@@ -50,28 +52,9 @@ const Speakerpage = () => {
 
 
 
-    //  useEffect(() => {
-
-    //     axios.get("/country").then((res) => setCountries(res.data.country));
-    // }, []);
 
 
-    // // dependent dropdowns
-    // useEffect(() => {
-    //     if (formData.country) {
-    //         axios.get(`/state/country/${formData.country}`).then((res) => setStates(res.data.data));
-    //     } else setStates([]);
-    // }, [formData.country]);
-
-    // useEffect(() => {
-    //     if (formData.state) {
-    //         axios.get(`/city/state/${formData.state}`).then((res) => setCities(res.data.data));
-    //     } else setCities([]);
-    // }, [formData.state]);
-
-
-
-    // ✅ Load Countries
+    //  Load Countries
     useEffect(() => {
         const loadCountries = async () => {
             setLoading(prev => ({ ...prev, countries: true }));
@@ -88,7 +71,7 @@ const Speakerpage = () => {
         loadCountries();
     }, []);
 
-    // ✅ Load States when country changes
+    //  Load States when country changes
     useEffect(() => {
         const loadStates = async () => {
             if (!formData.country) {
@@ -112,7 +95,7 @@ const Speakerpage = () => {
         loadStates();
     }, [formData.country]);
 
-    // ✅ Load Cities when state changes
+    //  Load Cities when state changes
     useEffect(() => {
         const loadCities = async () => {
             if (!formData.state) {
@@ -136,7 +119,7 @@ const Speakerpage = () => {
         loadCities();
     }, [formData.state]);
 
-    // ✅ Delete Speaker
+    //  Delete Speaker
     const handleDelete = async (id) => {
         if (!window.confirm("Are you sure you want to delete this speaker?")) return;
 
@@ -149,7 +132,7 @@ const Speakerpage = () => {
             alert("Error deleting speaker");
         }
     };
-    // ✅ Open Update Modal
+    //  Open Update Modal
     const handleEdit = async (speaker) => {
         setEditId(speaker._id);
         setFormData({
@@ -164,12 +147,14 @@ const Speakerpage = () => {
             introduction: speaker.introduction || "",
             description: speaker.description || "",
             qualification: speaker.qualification || "",
+            position: speaker.position || "",
+
             status: speaker.status || "active",
             profilePic: null,
         });
-        // Set preview image to existing profile pic
+
         setPreviewImage(getProfilePic(speaker.profilePic));
-        // Load states and cities for the speaker's location
+
         if (speaker.country) {
             try {
                 const statesRes = await axios.get(`/state/country/${speaker.country}`);
@@ -189,8 +174,6 @@ const Speakerpage = () => {
 
 
 
-
-
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
@@ -200,7 +183,7 @@ const Speakerpage = () => {
     };
 
 
-    // ✅ Fix location change handler
+    //  Fix location change handler
     const handleLocationChange = (field, value) => {
         setFormData(prev => ({
             ...prev,
@@ -238,6 +221,26 @@ const Speakerpage = () => {
     const fetchSpeakers = async () => {
         const res = await axios.get("/speakers");
         setSpeakers(res.data);
+        setFilteredSpeakers(res.data);
+    };
+
+    const handleSearch = (e) => {
+        const value = e.target.value.toLowerCase();
+        setSearchText(value);
+
+        const filtered = speakers.filter((speaker) => {
+            const fullName = `${speaker.firstName || ""} ${speaker.lastName || ""}`.toLowerCase();
+
+            return (
+                fullName.includes(value) ||
+                speaker.email.toLowerCase().includes(value) ||
+                speaker.introduction.toLowerCase().includes(value) ||
+                speaker.qualification.toLowerCase().includes(value) ||
+                speaker.status.toLowerCase().includes(value)
+            );
+        });
+
+        setFilteredSpeakers(filtered);
     };
 
     const handleSubmit = async (e) => {
@@ -270,7 +273,6 @@ const Speakerpage = () => {
         }
     };
 
-
     const handleToggleStatus = async (id) => {
         try {
             const speaker = speakers.find((s) => s._id === id);
@@ -288,72 +290,6 @@ const Speakerpage = () => {
             alert("Error updating status");
         }
     };
-    // const columns = [
-    //     {
-    //   name: "ID",
-    //   cell: (row, index) => index + 1,
-    //   width: "80px",
-    // },
-    //     {
-    //         name: "Full Name",
-    //         selector: (row) => `${row.firstName || ""} ${row.lastName || ""}`,
-    //         sortable: true,
-    //     },
-    //     ,
-    //     { name: "Email", selector: (row) => row.email },
-    //     { name: "Introduction", selector: (row) => row.introduction?.name || row.introduction },
-    //     { name: "Qualification", selector: (row) => row.qualification?.name || row.qualification },
-    //     {
-    //         name: "Status",
-    //         cell: (row) => (
-    //             <div className="flex items-center gap-2">
-    //                 <span
-    //                     className={`px-2 py-1 text-xs rounded text-white ${row.status === "active" ? "bg-green-500" : "bg-red-500"
-    //                         }`}
-    //                 >
-    //                     {row.status}
-    //                 </span>
-    //                 <button onClick={() => handleToggleStatus(row._id)}>
-    //                     {row.status === "active" ? (
-    //                         <FaToggleOn size={22} className="text-green-500" />
-    //                     ) : (
-    //                         <FaToggleOff size={22} className="text-red-500" />
-    //                     )}
-    //                 </button>
-    //             </div>
-    //         ),
-    //     },
-    //     {
-    //         name: "Actions",
-    //         cell: (row) => (
-    //             <div className="flex gap-3">
-    //                 {/* View */}
-    //                 <button
-    //                     className="text-blue-500 hover:text-blue-700"
-    //                     onClick={() => handleView(row)}
-    //                 >
-    //                     <FaEye size={20} />
-    //                 </button>
-
-    //                 {/* Edit */}
-    //                 <button
-    //                     className="text-green-500 hover:text-green-700"
-    //                     onClick={() => handleEdit(row)}
-    //                 >
-    //                     <FaEdit size={20} />
-    //                 </button>
-
-    //                 {/* Delete */}
-    //                 <button
-    //                     className="text-red-500 hover:text-red-700"
-    //                     onClick={() => handleDelete(row._id)}
-    //                 >
-    //                     <FaTrash size={20} />
-    //                 </button>
-    //             </div>
-    //         ),
-    //     },
-    // ];
 
     const columns = [
         {
@@ -371,10 +307,21 @@ const Speakerpage = () => {
         {
             header: "Introduction",
             accessorKey: "introduction",
+            cell: ({ getValue }) => {
+                const value = stripHtml(getValue());
+                return value.length > 50
+                    ? value.substring(0, 50) + "..."
+                    : value;
+            },
         },
+
         {
             header: "Qualification",
             accessorKey: "qualification",
+        },
+        {
+            header: "position",
+            accessorKey: "position",
         },
         {
             header: "Status",
@@ -423,12 +370,12 @@ const Speakerpage = () => {
         },
     ];
     const table = useReactTable({
-        data: speakers,
+        data: filteredSpeakers,
         columns,
         state: {
-            globalFilter,
+            globalFilter: searchText,
         },
-        onGlobalFilterChange: setGlobalFilter,
+        onGlobalFilterChange: setSearchText,
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
@@ -449,43 +396,44 @@ const Speakerpage = () => {
     const getProfilePic = (pic) => {
         if (!pic || pic === "null") return "/default-profile.png";
 
-        // Ensure uploads folder is included in the path
         return `${baseURL}/${pic.startsWith("uploads/") ? pic : "uploads" + pic}`;
     };
-
-
+    const stripHtml = (html) => {
+        if (!html) return "";
+        const doc = new DOMParser().parseFromString(html, "text/html");
+        return doc.body.textContent || "";
+    };
 
     return (
         <Layout>
             <div className="p-6">
-                <div className="flex justify-between mb-4">
-                    <h2 className="text-xl font-bold">Speakers</h2>
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-3xl font-bold text-gray-800">Speakers</h2>
+                    <input
+                        type="text"
+                        placeholder="Search speakers..."
+                        value={searchText}
+                        onChange={handleSearch}
+                        className="border p-2 rounded"
+                    />
                     <button
                         onClick={() => setOpen(true)}
-                        className="px-4 py-2 bg-blue-600 text-white rounded"
+                        className="bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition"
                     >
                         + Add Speaker
                     </button>
                 </div>
 
-                {/* Search */}
-                <div className="mb-4">
-                    <input
-                        value={globalFilter ?? ""}
-                        onChange={(e) => setGlobalFilter(e.target.value)}
-                        placeholder="Search speakers..."
-                        className="border px-3 py-2 rounded w-64"
-                    />
-                </div>
-
-                {/* Table */}
-                <div className="overflow-x-auto bg-white shadow rounded">
-                    <table className="w-full border">
+                <div className="bg-white rounded-lg shadow overflow-x-auto">
+                    <table className="min-w-full border">
                         <thead className="bg-gray-100">
-                            {table.getHeaderGroups().map((headerGroup) => (
+                            {table.getHeaderGroups().map(headerGroup => (
                                 <tr key={headerGroup.id}>
-                                    {headerGroup.headers.map((header) => (
-                                        <th key={header.id} className="p-3 border text-left">
+                                    {headerGroup.headers.map(header => (
+                                        <th
+                                            key={header.id}
+                                            className="px-4 py-3 text-left text-sm font-semibold border"
+                                        >
                                             {flexRender(
                                                 header.column.columnDef.header,
                                                 header.getContext()
@@ -497,10 +445,10 @@ const Speakerpage = () => {
                         </thead>
 
                         <tbody>
-                            {table.getRowModel().rows.map((row) => (
+                            {table.getRowModel().rows.map(row => (
                                 <tr key={row.id} className="hover:bg-gray-50">
-                                    {row.getVisibleCells().map((cell) => (
-                                        <td key={cell.id} className="p-3 border">
+                                    {row.getVisibleCells().map(cell => (
+                                        <td key={cell.id} className="px-4 py-2 border text-sm">
                                             {flexRender(
                                                 cell.column.columnDef.cell,
                                                 cell.getContext()
@@ -508,38 +456,45 @@ const Speakerpage = () => {
                                         </td>
                                     ))}
                                 </tr>
-
                             ))}
+
+                            {table.getRowModel().rows.length === 0 && (
+                                <tr>
+                                    <td colSpan={columns.length} className="text-center py-6 text-gray-500">
+                                        No speakers found
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
+
+                    {/* Pagination */}
+                    <div className="flex justify-between items-center p-4">
+                        <button
+                            onClick={() => table.previousPage()}
+                            disabled={!table.getCanPreviousPage()}
+                            className="px-4 py-2 border rounded disabled:opacity-50"
+                        >
+                            Previous
+                        </button>
+
+                        <span className="text-sm">
+                            Page {table.getState().pagination.pageIndex + 1} of{" "}
+                            {table.getPageCount()}
+                        </span>
+
+                        <button
+                            onClick={() => table.nextPage()}
+                            disabled={!table.getCanNextPage()}
+                            className="px-4 py-2 border rounded disabled:opacity-50"
+                        >
+                            Next
+                        </button>
+                    </div>
                 </div>
 
-                {/* Pagination */}
-                <div className="flex justify-between items-center mt-4">
-                    <button
-                        onClick={() => table.previousPage()}
-                        disabled={!table.getCanPreviousPage()}
-                        className="px-3 py-1 border rounded"
-                    >
-                        Previous
-                    </button>
 
-                    <span>
-                        Page {table.getState().pagination.pageIndex + 1} of{" "}
-                        {table.getPageCount()}
-                    </span>
-
-                    <button
-                        onClick={() => table.nextPage()}
-                        disabled={!table.getCanNextPage()}
-                        className="px-3 py-1 border rounded"
-                    >
-                        Next
-                    </button>
-                </div>
-
-
-                {/* ✅ View Modal */}
+                {/*  View Modal */}
 
                 {viewData && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -807,6 +762,21 @@ const Speakerpage = () => {
                                             }
                                         />
                                     </div>
+                                    <div>
+                                        <label className="block text-sm font-medium mb-1">
+                                            Display Position
+                                        </label>
+                                        <input
+                                            type="number"
+                                            placeholder="Enter display order (1 = top)"
+                                            className="w-full border border-gray-300 p-3 rounded-lg"
+                                            value={formData.position}
+                                            onChange={(e) =>
+                                                setFormData({ ...formData, position: e.target.value })
+                                            }
+                                        />
+                                    </div>
+
                                 </div>
 
                                 {/* Status */}

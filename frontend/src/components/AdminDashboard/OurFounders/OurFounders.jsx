@@ -2,6 +2,13 @@ import { useEffect, useState } from "react";
 import axios from "../../../utils/axios.js";
 import Layout from "../../seekerDashboard/partials/layout.jsx";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  flexRender,
+} from "@tanstack/react-table";
 const baseURL = import.meta.env.VITE_BACKEND_URL;
 const OurFounders = () => {
     const [founders, setFounders] = useState([]);
@@ -16,7 +23,9 @@ const OurFounders = () => {
         image: null,
     });
 
-    // Fetch Founders
+    const [filteredFounders, setFilteredFounders] = useState([]);
+    const [searchText, setSearchText] = useState("");
+
     useEffect(() => {
         fetchFounders();
     }, []);
@@ -25,12 +34,93 @@ const OurFounders = () => {
         try {
             const res = await axios.get("/our-founders");
             setFounders(res.data);
+            setFilteredFounders(res.data);
         } catch (error) {
             console.error("Error fetching founders:", error);
         }
     };
 
-    // Handle Delete
+    const handleSearch = (e) => {
+        const value = e.target.value.toLowerCase();
+        setSearchText(value);
+
+        const filtered = founders.filter((founder) => {
+            return (
+                founder.name.toLowerCase().includes(value) ||
+                founder.desgination.toLowerCase().includes(value) ||
+                founder.description.toLowerCase().includes(value)
+            );
+        });
+
+        setFilteredFounders(filtered);
+    };
+
+    const columns = [
+        {
+            header: "ID",
+            cell: ({ row }) => row.index + 1,
+        },
+        {
+            accessorKey: "image",
+            header: "Image",
+            cell: ({ row }) => (
+                <img
+                    src={`${baseURL}${row.original.image}`}
+                    alt={row.original.name}
+                    className="w-16 h-16 object-cover rounded"
+                />
+            ),
+        },
+        {
+            accessorKey: "name",
+            header: "Name",
+        },
+        {
+            accessorKey: "desgination",
+            header: "Designation",
+        },
+        {
+            accessorKey: "description",
+            header: "Description",
+            cell: ({ row }) => (
+                <p className="line-clamp-3 text-sm text-gray-700 max-w-xs">
+                    {row.original.description}
+                </p>
+            ),
+        },
+        {
+            header: "Actions",
+            cell: ({ row }) => (
+                <div className="flex gap-3">
+                    <button
+                        onClick={() => handleEdit(row.original)}
+                        className="text-green-600"
+                    >
+                        <FaEdit size={20} />
+                    </button>
+                    <button
+                        onClick={() => handleDelete(row.original._id)}
+                        className="text-red-600"
+                    >
+                        <FaTrash size={20} />
+                    </button>
+                </div>
+            ),
+        },
+    ];
+
+    const table = useReactTable({
+        data: filteredFounders,
+        columns,
+        state: {
+            globalFilter: searchText,
+        },
+        onGlobalFilterChange: setSearchText,
+        getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+    });
+
     const handleDelete = async (id) => {
         if (!window.confirm("Are you sure you want to delete this founder?")) return;
 
@@ -44,7 +134,7 @@ const OurFounders = () => {
         }
     };
 
-    // Handle Edit
+   
     const handleEdit = (founder) => {
         setEditId(founder._id);
         setFormData({
@@ -57,7 +147,7 @@ const OurFounders = () => {
         setOpen(true);
     };
 
-    // Handle Form Change
+   
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({ ...formData, [name]: value });
@@ -71,7 +161,7 @@ const OurFounders = () => {
         }
     };
 
-    // Handle Submit
+ 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -109,66 +199,94 @@ const OurFounders = () => {
     return (
         <Layout>
             <div className="p-6">
-                <div className="flex justify-between mb-4">
-                    <h2 className="text-xl font-bold">Our Founders</h2>
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-3xl font-bold text-gray-800">Our Founders</h2>
+                    <input
+                        type="text"
+                        placeholder="Search founders..."
+                        value={searchText}
+                        onChange={handleSearch}
+                        className="border p-2 rounded"
+                    />
                     <button
                         onClick={() => setOpen(true)}
-                        className="px-4 py-2 bg-blue-600 text-white rounded"
+                        className="bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition"
                     >
                         + Add Founder
                     </button>
                 </div>
 
-                {/* Table */}
-                <div className="overflow-x-auto bg-white shadow rounded">
-                    <table className="w-full border">
+          
+                <div className="bg-white rounded-lg shadow overflow-x-auto">
+                    <table className="min-w-full border">
                         <thead className="bg-gray-100">
-                            <tr>
-                                <th className="p-3 border text-left">ID</th>
-                                <th className="p-3 border text-left">Image</th>
-                                <th className="p-3 border text-left">Name</th>
-                                <th className="p-3 border text-left">Designation</th>
-                                <th className="p-3 border text-left">Description</th>
-                                <th className="p-3 border text-left">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {founders.map((founder, index) => (
-                                <tr key={founder._id} className="hover:bg-gray-50">
-                                    <td className="p-3 border">{index + 1}</td>
-                                    <td className="p-3 border">
-                                        {founder.image && (
-                                            <img
-                                                src={`${baseURL}${founder.image}`}
-                                                alt={founder.name}
-                                                className="w-16 h-16 object-cover rounded"
-                                            />
-                                        )}
-                                    </td>
-                                    <td className="p-3 border">{founder.name}</td>
-                                    <td className="p-3 border">{founder.desgination}</td>
-                                    <td className="p-3 border">{founder.description}</td>
-                                    <td className="p-3 border">
-                                        <div className="flex gap-3">
-                                            <FaEdit
-                                                size={20}
-                                                className="text-green-500 cursor-pointer"
-                                                onClick={() => handleEdit(founder)}
-                                            />
-                                            <FaTrash
-                                                size={20}
-                                                className="text-red-500 cursor-pointer"
-                                                onClick={() => handleDelete(founder._id)}
-                                            />
-                                        </div>
-                                    </td>
+                            {table.getHeaderGroups().map(headerGroup => (
+                                <tr key={headerGroup.id}>
+                                    {headerGroup.headers.map(header => (
+                                        <th
+                                            key={header.id}
+                                            className="px-4 py-3 text-left text-sm font-semibold border"
+                                        >
+                                            {flexRender(
+                                                header.column.columnDef.header,
+                                                header.getContext()
+                                            )}
+                                        </th>
+                                    ))}
                                 </tr>
                             ))}
+                        </thead>
+
+                        <tbody>
+                            {table.getRowModel().rows.map(row => (
+                                <tr key={row.id} className="hover:bg-gray-50">
+                                    {row.getVisibleCells().map(cell => (
+                                        <td key={cell.id} className="px-4 py-2 border text-sm">
+                                            {flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext()
+                                            )}
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))}
+
+                            {table.getRowModel().rows.length === 0 && (
+                                <tr>
+                                    <td colSpan={columns.length} className="text-center py-6 text-gray-500">
+                                        No founders found
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
+
+                    {/* Pagination */}
+                    <div className="flex justify-between items-center p-4">
+                        <button
+                            onClick={() => table.previousPage()}
+                            disabled={!table.getCanPreviousPage()}
+                            className="px-4 py-2 border rounded disabled:opacity-50"
+                        >
+                            Previous
+                        </button>
+
+                        <span className="text-sm">
+                            Page {table.getState().pagination.pageIndex + 1} of{" "}
+                            {table.getPageCount()}
+                        </span>
+
+                        <button
+                            onClick={() => table.nextPage()}
+                            disabled={!table.getCanNextPage()}
+                            className="px-4 py-2 border rounded disabled:opacity-50"
+                        >
+                            Next
+                        </button>
+                    </div>
                 </div>
 
-                {/* Modal Form */}
+                
                 {open && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                         <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-8">

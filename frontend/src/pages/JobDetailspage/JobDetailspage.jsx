@@ -1,14 +1,29 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "../../utils/axios.js";
-import { FaMapMarkerAlt, FaClock, FaBriefcase, FaMoneyBill, FaGraduationCap, FaUsers, FaCalendar } from "react-icons/fa";
-
-import HeaderPalecment from '../../media/png/HeaderPalecment.png';
-import { JobApplicationForm, CommentList, CommentCards } from "../../components/ui/cards/cards.jsx";
-
-import { FaHome, FaBuilding } from "react-icons/fa";
-
-
+import {
+    FaMapMarkerAlt,
+    FaClock,
+    FaBriefcase,
+    FaMoneyBill,
+    FaGraduationCap,
+    FaBuilding,
+    FaCalendar,
+    FaShareAlt,
+    FaBookmark,
+    FaExternalLinkAlt,
+    FaCheckCircle,
+    FaIndustry,
+    FaUserTie,
+    FaStar,
+    FaRegStar,
+    FaArrowLeft
+} from "react-icons/fa";
+import { SiLevelsdotfyi } from "react-icons/si";
+import { MdWork, MdLocationOn, MdAccessTime } from "react-icons/md";
+import { BsFillBagCheckFill, BsClockHistory } from "react-icons/bs";
+import { FaLocationDot } from "react-icons/fa6";
+import { JobApplicationForm } from "../../components/ui/cards/cards.jsx";
 export default function JobDetailsPage() {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -18,21 +33,20 @@ export default function JobDetailsPage() {
     const [selectedJob, setSelectedJob] = useState(null);
     const [comments, setComments] = useState([]);
     const [commentCount, setCommentCount] = useState(0);
-    const [likeCount, setLikeCount] = useState(0);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [locationNames, setLocationNames] = useState({
         city: "",
         state: "",
         country: ""
     });
-
-
-    // Sidebar jobs state
     const [sidebarJobs, setSidebarJobs] = useState([]);
     const [sidebarLoading, setSidebarLoading] = useState(true);
     const [locationNamesMap, setLocationNamesMap] = useState({});
+    const [isBookmarked, setIsBookmarked] = useState(false);
+    const [activeTab, setActiveTab] = useState("description");
 
     const type = "job";
+
     useEffect(() => {
         const token = localStorage.getItem("token");
         if (token) {
@@ -40,34 +54,9 @@ export default function JobDetailsPage() {
         }
     }, []);
 
-    // useEffect(() => {
-
-    //     const fetchComments = async () => {
-
-    //         try {
-
-    //             const res = await axios.get(`/comment/${id}?type=${type}`);
-    //             setComments(res.data.comments);
-    //             setCommentCount(res.data.count);
-    //         } catch (err) {
-    //             console.error("Error fetching comments:", err);
-
-    //         }
-    //     };
-    //     fetchComments();
-    // }, [id, type]);
-
-    // ✅ Fetch Like Count
-
-    // ✅ Comments fetch करने का function अलग बनाएं
     const fetchComments = async () => {
         try {
-            console.log("JobDetailsPage: Fetching comments for job:", { id, type });
             const res = await axios.get(`/comment/${id}?type=${type}`);
-            console.log("JobDetailsPage: Comments response:", {
-                count: res.data.count,
-                comments: res.data.comments
-            });
             setComments(res.data.comments);
             setCommentCount(res.data.count);
         } catch (err) {
@@ -75,130 +64,126 @@ export default function JobDetailsPage() {
         }
     };
 
-    // ✅ Initial load पर comments fetch करें
     useEffect(() => {
         fetchComments();
     }, [id, type]);
 
-    // ✅ Comment add होने के बाद refresh करने का function
-    const handleCommentAdded = () => {
-        console.log("Comment added, refreshing comments...");
-        fetchComments(); // ✅ Comments को फिर से fetch करें
-    };
 
-    useEffect(() => {
-        const fetchLikeCount = async () => {
-            try {
-                console.log("Fetching like count for job:", id, "type:", type); // Debugging
-                const res = await axios.get(`/blogs/like/likes/${id}/${type}`);
-                console.log("Like count response:", res.data); // Debugging
-                setLikeCount(res.data.totalCount);
-            } catch (err) {
-                console.error(err.response?.data || err.message);
-                console.error("Error fetching like count:", err);
-                console.error("Error details:", err.response?.data); // Detailed error
-                setLikeCount(0); // Default to 0 on error
-            }
-        };
-        fetchLikeCount();
-    }, [id, type]);
-    // ✅ Handle Like
-    const handleLike = async () => {
-        try {
-            const token = localStorage.getItem("token");
-            const res = await axios.post(
-                "/blogs/like",
-                { blogId: id, type },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
+    const fetchLocationNames = async (ids = [], apiPath) => {
+  if (!Array.isArray(ids) || !ids.length) return [];
 
-            if (res.data.totalCount !== undefined) {
-                setLikeCount(res.data.totalCount);
-                setLiked(true);
-            }
-        } catch (err) {
-            console.error(err.response?.data || err.message);
-        }
-    };
+  try {
+    const requests = ids.map(id =>
+      axios
+        .get(`/${apiPath}/${id}`)
+        .then(res => res.data?.data?.name || res.data?.name)
+        .catch(() => null)
+    );
 
+    const results = await Promise.all(requests);
+    return results.filter(Boolean);
+  } catch {
+    return [];
+  }
+};
 
-    useEffect(() => {
-        const fetchJobAndLocations = async () => {
-            try {
-                // Fetch job first
-                const jobResponse = await axios.get(`/job-post/${id}`);
-                const jobData = jobResponse.data;
-                setJob(jobData);
-                console.log(jobData);
+    // useEffect(() => {
+    //     const fetchJobAndLocations = async () => {
+    //         try {
+    //             const jobResponse = await axios.get(`/job-post/${id}`);
+    //             const jobData = jobResponse.data;
+    //             console.log(jobData);
 
+    //             setJob(jobData);
 
-                // Then fetch location names
-                const locationPromises = [];
+    //             const locationPromises = [];
 
-                if (jobData.country) {
-                    locationPromises.push(
-                        axios.get(`/country/${jobData.country}`)
-                            .then(res => res.data.data?.name || "Unknown Country")
-                            .catch(() => "Unknown Country")
-                    );
-                } else {
-                    locationPromises.push(Promise.resolve(""));
-                }
+    //             if (jobData.country) {
+    //                 locationPromises.push(
+    //                     axios.get(`/country/${jobData.country}`)
+    //                         .then(res => res.data.data?.name || "Unknown Country")
+    //                         .catch(() => "Unknown Country")
+    //                 );
+    //             } else {
+    //                 locationPromises.push(Promise.resolve(""));
+    //             }
 
-                if (jobData.state) {
-                    locationPromises.push(
-                        axios.get(`/state/${jobData.state}`)
-                            .then(res => res.data.data?.name || "Unknown State")
-                            .catch(() => "Unknown State")
-                    );
-                } else {
-                    locationPromises.push(Promise.resolve(""));
-                }
+    //             if (jobData.state) {
+    //                 locationPromises.push(
+    //                     axios.get(`/state/${jobData.state}`)
+    //                         .then(res => res.data.data?.name || "Unknown State")
+    //                         .catch(() => "Unknown State")
+    //                 );
+    //             } else {
+    //                 locationPromises.push(Promise.resolve(""));
+    //             }
 
-                if (jobData.city) {
-                    locationPromises.push(
-                        axios.get(`/city/${jobData.city}`)
-                            .then(res => res.data.data?.name || "Unknown City")
-                            .catch(() => "Unknown City")
-                    );
-                } else {
-                    locationPromises.push(Promise.resolve(""));
-                }
+    //             if (jobData.city) {
+    //                 locationPromises.push(
+    //                     axios.get(`/city/${jobData.city}`)
+    //                         .then(res => res.data.data?.name || "Unknown City")
+    //                         .catch(() => "Unknown City")
+    //                 );
+    //             } else {
+    //                 locationPromises.push(Promise.resolve(""));
+    //             }
 
-                const [countryName, stateName, cityName] = await Promise.all(locationPromises);
+    //             const [countryName, stateName, cityName] = await Promise.all(locationPromises);
 
-                setLocationNames({
-                    country: countryName,
-                    state: stateName,
-                    city: cityName
-                });
+    //             setLocationNames({
+    //                 country: countryName,
+    //                 state: stateName,
+    //                 city: cityName
+    //             });
 
-            } catch (error) {
-                console.error("Error fetching job details:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
+    //         } catch (error) {
+    //             console.error("Error fetching job details:", error);
+    //         } finally {
+    //             setLoading(false);
+    //         }
+    //     };
 
-        fetchJobAndLocations();
-    }, [id]);
+    //     fetchJobAndLocations();
+    // }, [id]);
+useEffect(() => {
+  const fetchJobAndLocations = async () => {
+    try {
+      const jobResponse = await axios.get(`/job-post/${id}`);
+      const jobData = jobResponse.data;
+      setJob(jobData);
 
+      const [countryNames, stateNames, cityNames] = await Promise.all([
+        fetchLocationNames(jobData.country, "country"),
+        fetchLocationNames(jobData.state, "state"),
+        fetchLocationNames(jobData.city, "city"),
+      ]);
 
-    // Fetch sidebar jobs
+      setLocationNames({
+        country: countryNames.join(", "),
+        state: stateNames.join(", "),
+        city: cityNames.join(", "),
+      });
+
+    } catch (error) {
+      console.error("Error fetching job details:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchJobAndLocations();
+}, [id]);
+
     useEffect(() => {
         const fetchSidebarJobs = async () => {
             try {
                 const response = await axios.get("/job-post/active");
                 const jobsData = response.data;
 
-
-
-                // Filter out current job and limit to 4-5 jobs
                 const filteredJobs = jobsData
                     .filter(jobItem => jobItem._id !== id)
                     .slice(0, 5);
 
-                // Fetch location names for sidebar jobs
                 const locationPromises = filteredJobs.map(async (jobItem) => {
                     const loc = { city: "", state: "", country: "" };
 
@@ -251,54 +236,8 @@ export default function JobDetailsPage() {
         fetchSidebarJobs();
     }, [id]);
 
-
-
-
-
-
-    // useEffect(() => {
-    //     const fetchJob = async () => {
-    //         try {
-    //             const response = await axios.get(`/job-post/${id}`);
-    //             setJob(response.data);
-    //         } catch (error) {
-    //             console.error("Error fetching job details:", error);
-    //         } finally {
-    //             setLoading(false);
-    //         }
-    //     };
-
-    //     const fetchLocations = async () => {
-    //         try {
-    //             const [countriesRes, statesRes, citiesRes] = await Promise.all([
-    //                 axios.get("/country"),
-    //                 axios.get("/state"),
-    //                 axios.get("/city"),
-    //             ]);
-
-    //             // Use numeric IDs as keys to match your job object
-    //            setLocations({
-    //         countries: Object.fromEntries(
-    //             countriesRes.data.country.map(c => [c.id, c.name])
-    //         ),
-    //         states: Object.fromEntries(
-    //             statesRes.data.state.map(s => [s.id, s.name])
-    //         ),
-    //         cities: Object.fromEntries(
-    //             citiesRes.data.data.map(ct => [ct.id, ct.name])
-    //         ),
-    //     });
-    //         } catch (err) {
-    //             console.error("Error fetching locations:", err);
-    //         }
-    //     };
-
-    //     fetchJob();
-    //     fetchLocations();
-    // }, [id]);
-
     const handleApplyClick = () => {
-        setSelectedJob(job); // job is the current job loaded
+        setSelectedJob(job);
         setIsModalOpen(true);
     };
 
@@ -307,16 +246,11 @@ export default function JobDetailsPage() {
         setIsModalOpen(false);
     };
 
-
-
     const getLocationString = () => {
         const parts = [locationNames.city, locationNames.state, locationNames.country].filter(Boolean);
         return parts.length ? parts.join(", ") : "Location not specified";
     };
 
-
-
-    // Helper functions for sidebar jobs
     const getSidebarLocationString = (jobId) => {
         const loc = locationNamesMap[jobId];
         if (!loc) return "Location not specified";
@@ -346,427 +280,466 @@ export default function JobDetailsPage() {
         setIsModalOpen(true);
     };
 
-    if (loading)
-        return <div className="text-center py-10 text-gray-600 text-lg">Loading...</div>;
-    if (!job)
-        return <div className="text-center py-10 text-gray-600 text-lg">Job not found</div>;
+    const handleShare = () => {
+        if (navigator.share) {
+            navigator.share({
+                title: job?.jobTitle,
+                text: `Check out this job: ${job?.jobTitle}`,
+                url: window.location.href,
+            });
+        } else {
+            navigator.clipboard.writeText(window.location.href);
+            alert("Link copied to clipboard!");
+        }
+    };
 
+    const handleBookmark = () => {
+        setIsBookmarked(!isBookmarked);
+        // Add API call to bookmark job here
+    };
 
+    const formatSalary = () => {
+        if (job?.hideSalary) return "Salary not disclosed";
+        if (job?.salaryFrom && job?.salaryTo) {
+            return `${job.salaryFrom} - ${job.salaryTo} ${job.salaryCurrency}`;
+        }
+        if (job?.salaryFrom) return `From ${job.salaryFrom} ${job.salaryCurrency}`;
+        return "Negotiable";
+    };
 
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#339ca0]"></div>
+            </div>
+        );
+    }
 
-
-    // Location formatter
-    // const getLocationString = () => {    
-    //     if (!job?.city && !job?.state && !job?.country) return "Location not specified";
-
-    //     const cityName = locations.cities[job.city];
-    //     const stateName = locations.states[job.state];
-    //     const countryName = locations.countries[job.country];
-
-    //     const parts = [cityName, stateName, countryName].filter(Boolean);
-    //     return parts.length ? parts.join(", ") : "Location not specified";
-    // };
-
-
-
-
+    if (!job) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center">
+                <div className="text-center">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Job Not Found</h2>
+                    <p className="text-gray-600 mb-6">The job you're looking for doesn't exist or has been removed.</p>
+                    <button
+                        onClick={() => navigate("/placement-program")}
+                        className="bg-[#339ca0] text-white px-6 py-3 rounded-lg hover:bg-[#2a7d80] transition-colors"
+                    >
+                        Browse All Jobs
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
-
-        <div className="">
-
-            <section className="bg-[linear-gradient(to_right,_#090A47,_#20AEB2)] w-full min-h-[300px] sm:min-h-[350px] md:min-h-[400px] flex justify-center items-center text-center font-[Poppins] px-4">
-                <div className="max-w-3xl space-y-4">
-                    <h1 className="text-white text-2xl sm:text-3xl md:text-5xl font-bold leading-tight">
-                        {job?.jobTitle}
-                    </h1>
-
-                    {/* <p className="text-white/90 text-sm sm:text-base md:text-lg font-medium px-2 sm:px-6">
-                        {job?.description}
-                    </p> */}
-                </div>
-            </section>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8  py-12 px-4">
-
-                <section className="lg:col-span-2">
-
-                    {/* <button
+        <div className="min-h-screen bg-gray-50">
+            {/* Header Section */}
+            <div className="bg-[linear-gradient(to_right,_#090A47,_#20AEB2)] to-black text-white">
+                <div className="container mx-auto px-4 py-8">
+                    <button
                         onClick={() => navigate(-1)}
-                        className="mb-8 inline-flex items-center gap-2 text-[#339ca0] font-medium px-5 py-2 rounded-lg border border-[#339ca0] hover:bg-[#339ca0] hover:text-white transition-all duration-300 shadow-sm"
+                        className="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-colors"
                     >
-                        ← Back
-                    </button> */}
+                        <FaArrowLeft /> Back to Jobs
+                    </button>
 
-                    <div className="bg-white rounded-3xl overflow-hidden shadow-2xl border border-gray-100 transform transition-all duration-300 hover:shadow-3xl">
+                    <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+                        <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-4">
+                                {/* <span className="px-3 py-1 bg-[#339ca0]/20 text-[#339ca0] rounded-full text-sm font-medium">
+                                    {job.jobType?.name }
+                                </span> */}
+                                <span className="px-3 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-sm font-medium">
+                                    Featured
+                                </span> 
+                                {/* <span className="px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-sm font-medium">
+                                    {job.mode}
+                                </span> */}
+                            </div>
 
-                        {/* Hero Header Section */}
-                        <div className="relative bg-gradient-to-br from-[#00b6bd] via-[#339ca0] to-[#2a7f83] p-6 text-white overflow-hidden">
-                            {/* Animated Background Elements */}
-                            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mt-20 -mr-20 animate-pulse"></div>
-                            <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full -mb-20 -ml-20 animate-pulse delay-1000"></div>
-                            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-white/5 rounded-full animate-pulse delay-500"></div>
+                            <h1 className="text-3xl md:text-4xl font-bold mb-4">
+                                {job.jobTitle}
+                            </h1>
 
-                            {/* Floating Particles */}
-                            <div className="absolute top-10 left-20 w-4 h-4 bg-white/20 rounded-full animate-bounce"></div>
-                            <div className="absolute bottom-16 right-32 w-3 h-3 bg-white/30 rounded-full animate-bounce delay-300"></div>
-                            <div className="absolute top-32 right-20 w-2 h-2 bg-white/25 rounded-full animate-bounce delay-700"></div>
+                            <div className="flex flex-wrap items-center gap-4 text-white/80">
+                                <div className="flex items-center gap-2">
+                                    <FaBuilding className="text-white" />
+                                    <span>{job.companyId?.company?.name}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <MdLocationOn className="text-white" />
+                                    <span>{getLocationString()}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <BsClockHistory className="text-white" />
+                                    <span>Posted {job.createdAt ? new Date(job.createdAt).toLocaleDateString() : "Recently"}</span>
+                                </div>
+                            </div>
+                        </div>
 
-
+                        <div className="flex items-center gap-4">
                             <button
-                                onClick={() => navigate(-1)}
-                                className=" absolute top-5 right-5 mb-8 inline-flex items-center gap-2 text-white font-medium px-5 py-2 rounded-lg border bo border-white hover:bg-[#339ca0] hover:text-white transition-all duration-300 shadow-sm"
+                                onClick={handleShare}
+                                className="p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition"
                             >
-                                ← Back
+                                <FaShareAlt />
                             </button>
-                            <div className="relative z-10">
-                                <div className="flex items-center gap-3 mb-2">
-                                    <div className="w-3 h-6 bg-yellow-400 rounded-full animate-pulse"></div>
-                                    <span className="text-yellow-300 font-semibold text-lg">Featured Job</span>
-                                </div>
 
-                                <h1 className="text-4xl md:text-4xl font-bold mb-2 leading-tight bg-gradient-to-r from-white to-yellow-100 bg-clip-text text-transparent">
-                                    {job.jobTitle}
-                                </h1>
-
-                                {/* <p className="text-white/90 text-lg leading-relaxed max-w-4xl backdrop-blur-sm bg-white/10 p-3 rounded-2xl border border-white/20">
-                                    {job.description}
-                                </p> */}
-                            </div>
-                        </div>
-
-
-                        <div className="p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 bg-gradient-to-br from-gray-50 to-blue-50/30">
-                            {job.degreeLevel?.name && (
-                                <div className="group bg-white/90 backdrop-blur-sm p-4 rounded-2xl text-center shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 border border-blue-100">
-                                    <div className="w-14 h-14 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
-                                        <FaGraduationCap className="text-white text-2xl" />
-                                    </div>
-                                    <span className="font-bold text-blue-600 block mb-2 text-sm uppercase tracking-wide">Degree Level</span>
-                                    <p className="text-gray-800 font-semibold text-lg">{job.degreeLevel.name}</p>
-                                </div>
-                            )}
-
-                            {job?.experience && (
-
-                                <div className="group bg-white/90 backdrop-blur-sm p-4 rounded-2xl text-center shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 border border-amber-100">
-                                    <div className="w-14 h-14 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
-                                        <FaBriefcase className="text-white text-2xl" />
-                                    </div>
-                                    <span className="font-bold text-amber-600 block mb-2 text-sm uppercase tracking-wide">Experience</span>
-                                    <p className="text-gray-800 font-semibold text-lg">{job.experience}</p>
-                                </div>
-                            )}
-
-
-                            {(locationNames.city || locationNames.state || locationNames.country) && (
-                                <div className="group bg-white/90 p-4 rounded-2xl text-center shadow-lg">
-                                    <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-cyan-500 rounded-2xl flex items-center justify-center mb-4">
-                                        <FaMapMarkerAlt className="text-white text-2xl" />
-                                    </div>
-                                    <span className="font-bold text-cyan-600 block mb-2 text-sm uppercase">
-                                        Location
-                                    </span>
-                                    <p className="text-gray-800 font-semibold text-lg">
-                                        {getLocationString()}
-                                    </p>
-                                </div>
-                            )}
-
-                            {job?.mode && (
-                                <div className="group bg-white/90 backdrop-blur-sm p-4 rounded-2xl text-center shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 border border-amber-100">
-                                    <div className="w-14 h-14 bg-gradient-to-br from-amber-400 to-orange-500 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
-                                        <FaBuilding className="text-white text-2xl" />
-                                    </div>
-                                    <span className="font-bold text-amber-600 block mb-2 text-sm uppercase tracking-wide">Mode</span>
-                                    <p className="text-gray-800 font-semibold text-lg">{job.mode}</p>
-                                </div>
-                            )}
-
-
-                        </div>
-                        {job?.description && (
-                            <div className="p-1">
-                                <p className="text-gray-800 text-base leading-relaxed max-w-4xl bg-gray-50 p-5 rounded-xl border border-gray-200">
-                                    {job.description}
-                                </p>
-                            </div>
-                        )}
-
-
-                        {job.skills?.length > 0 && (
-                            <div className="p-10 border-t border-gray-200 bg-gradient-to-r from-white to-indigo-50/20 relative overflow-hidden">
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full -mt-16 -mr-16"></div>
-
-                                <h3 className="text-2xl font-bold text-gray-800 mb-6 relative z-10 flex items-center gap-3">
-                                    <div className="w-2 h-8 bg-gradient-to-b from-indigo-500 to-purple-600 rounded-full"></div>
-                                    Required Skills & Technologies
-                                </h3>
-
-                                <div className="flex flex-wrap gap-3 relative z-10">
-                                    {job.skills.map((skill, index) => (
-                                        <span
-                                            key={index}
-                                            className="px-3 py-2 text-sm font-semibold rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg hover:shadow-xl hover:scale-105 transform transition-all duration-300 cursor-pointer border border-indigo-400/30 group relative overflow-hidden"
-                                        >
-                                            <div className="absolute inset-0 bg-white/10 group-hover:bg-white/20 transition-all duration-300"></div>
-                                            <span className="relative z-10 flex items-center gap-2">
-
-                                                {typeof skill === "object" ? skill.name : skill}
-                                            </span>
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-
-
-                        {/* Additional Info Section - Modern Grid */}
-                        <div className="p-10 border-t border-gray-200 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 bg-gradient-to-br from-amber-50 to-orange-50/20">
-
-                            {job?.expiryDate && (
-                                <div className="group bg-white/90 backdrop-blur-sm p-4 rounded-2xl text-center shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-1 border border-red-100">
-
-                                    <>
-                                        <div className="w-14 h-14 bg-gradient-to-br from-red-400 to-pink-500 rounded-2xl flex items-center justify-center mb-4 mx-auto group-hover:scale-110 transition-transform duration-300">
-                                            <FaCalendar className="text-white text-2xl" />
-                                        </div>
-                                        <span className="font-bold text-red-600 block mb-2 text-sm uppercase tracking-wide">Apply Before</span>
-                                        <p className="text-gray-800 font-semibold text-lg">
-                                            {job.expiryDate ? new Date(job.expiryDate).toLocaleDateString() : "Open"}
-                                        </p>
-                                    </>
-
-
-                                </div>
-                            )}
-                        </div>
-
-                        
-                        <div className="p-8 flex flex-col md:flex-row gap-6 justify-center items-center border-t border-gray-200 bg-gradient-to-r from-slate-50 to-gray-100/50">
                             <button
                                 onClick={handleApplyClick}
-                                className="group relative bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold px-0 py-3 rounded-2xl shadow-2xl hover:shadow-3xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-1 min-w-[200px] overflow-hidden"
+                                className="bg-white text-[#090A47] px-6 py-3 rounded-lg font-semibold 
+                   hover:bg-gray-100 hover:scale-[1.03] 
+                   shadow-lg transition-all duration-300"
                             >
-                                <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                                <span className="relative z-10 flex items-center justify-center gap-3 text-lg">
-                                    🚀 Apply Now
-                                </span>
-                            </button>
-
-                            <button
-                                onClick={() => navigate(-1)}
-                                className="group relative bg-white text-gray-700 font-bold px-5 py-3 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-500 transform hover:scale-105 hover:-translate-y-1 border-2 border-gray-300 hover:border-gray-400 min-w-[200px] overflow-hidden"
-                            >
-                                <div className="absolute inset-0 bg-gradient-to-r from-gray-100 to-white transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                                <span className="relative z-10 flex items-center justify-center gap-3 text-lg">
-                                    ↩️ Back to Jobs
-                                </span>
+                                Apply Now
                             </button>
                         </div>
 
-                        {/* Comments Section */}
-                        {/* <div className="p-10 border-t border-gray-200 bg-gradient-to-br from-white to-blue-50/20">
-                            <CommentCards
-                                isLoggedIn={isLoggedIn}
-                                blogId={job._id}
-                                type="job"
-                                title="Share Your Thoughts"
-                                des={
-                                    <p className="text-sm text-gray-600 mb-4">
-                                        Your email address will <span className="italic">not</span> be published.
-                                        Required fields are marked <span className="text-red-500">*</span>
-                                    </p>
-                                }
-                                checkbox="Save my name, email, and website in this browser for the next time I comment."
-                                onCommentAdded={handleCommentAdded}
-                            />
-                            <CommentList
-                                comments={comments}
-                                commentCount={commentCount}
-                                setComments={setComments}
-                                onCommentUpdate={fetchComments}
-                            />
-                        </div> */}
                     </div>
-                </section>
+                </div>
+            </div>
 
-                {/* Sidebar - 1/3 width */}
-                <div className="lg:col-span-1">
-                    <div className="sticky top-8 space-y-6">
-                        {/* Similar Jobs Section */}
-                        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
-                            <div className="bg-gradient-to-r from-[#339ca0] to-[#2a7f83] p-4 text-white">
-                                <h3 className="text-xl font-bold flex items-center gap-2">
-                                    <FaBriefcase className="text-white" />
-                                    Similar Jobs
-                                </h3>
-                                <p className="text-white/80 text-sm mt-1">Other opportunities you might like</p>
+            {/* Main Content */}
+            <div className="container mx-auto px-4 py-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Left Column - Main Content */}
+                    <div className="lg:col-span-2">
+                        {/* Quick Stats */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                            {job.experience && (
+                                <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-blue-50 rounded-lg">
+                                            <FaBriefcase className="text-blue-600" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-600">Experience</p>
+                                            <p className="font-semibold text-sm text-gray-800 mt-2">{job.experience} Years</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+
+
+                            {job?.degreeLevel?.name && (
+                                <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-purple-50 rounded-lg">
+                                            <FaGraduationCap className="text-purple-600" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-600">Qualification</p>
+                                            <p className="font-semibold text-sm text-gray-800 mt-2">{job.degreeLevel?.name}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+
+                            <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+                                <div className="flex items-center gap-3">
+                                    <div className="p-2 bg-green-50 rounded-lg">
+                                        <FaLocationDot className="text-green-600" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm  text-gray-600">Location</p>
+                                        <p className="font-semibold text-sm text-gray-800 mt-2">
+                                            {job.address && (
+                                                <span> {job?.address} </span>
+                                            )}
+                                            {getLocationString()}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            {job?.mode && (
+                                <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-200">
+                                    <div className="flex items-center gap-3">
+                                        <div className="p-2 bg-red-50 rounded-lg">
+                                            <FaCalendar className="text-red-600" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-600">Mode</p>
+                                            <p className="font-semibold text-sm text-gray-800 mt-2">
+                                                {job.mode}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                        </div>
+
+                        {/* Tabs */}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 mb-8">
+                            <div className="border-b border-gray-200">
+                                <div className="flex space-x-8 px-6">
+                                    <button
+                                        onClick={() => setActiveTab("description")}
+                                        className={`py-4 font-medium border-b-2 transition-colors ${activeTab === "description" ? "border-[#339ca0] text-[#339ca0]" : "border-transparent text-gray-600 hover:text-gray-900"}`}
+                                    >
+                                         Description
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveTab("requirements")}
+                                        className={`py-4 font-medium border-b-2 transition-colors ${activeTab === "requirements" ? "border-[#339ca0] text-[#339ca0]" : "border-transparent text-gray-600 hover:text-gray-900"}`}
+                                    >
+                                        Requirements
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveTab("skills")}
+                                        className={`py-4 font-medium border-b-2 transition-colors ${activeTab === "skills" ? "border-[#339ca0] text-[#339ca0]" : "border-transparent text-gray-600 hover:text-gray-900"}`}
+                                    >
+                                        Skills
+                                    </button>
+                                </div>
                             </div>
 
-                            <div className="p-4">
-                                {sidebarLoading ? (
-                                    <div className="text-center py-4 text-gray-500">Loading similar jobs...</div>
-                                ) : sidebarJobs.length === 0 ? (
-                                    <div className="text-center py-4 text-gray-500">No similar jobs found</div>
-                                ) : (
+                            <div className="p-6">
+                                {activeTab === "description" && (
+                                    <div className="prose max-w-none">
+                                        <h3 className="text-xl font-semibold text-gray-800 mb-4">Job Description</h3>
+                                        <p className="text-gray-700 whitespace-pre-line">
+                                            {job.description || "No description provided."}
+                                        </p>
+
+                                        {job.responsibilities && (
+                                            <div className="mt-6">
+                                                <h4 className="text-lg font-semibold text-gray-800 mb-3">Key Responsibilities</h4>
+                                                <ul className="space-y-2">
+                                                    {job.responsibilities.split('\n').map((item, index) => (
+                                                        <li key={index} className="flex items-start gap-2">
+                                                            <FaCheckCircle className="text-green-500 mt-1 flex-shrink-0" />
+                                                            <span className="text-gray-700">{item}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {activeTab === "requirements" && (
                                     <div className="space-y-4">
-                                        {sidebarJobs.map((jobItem) => {
-                                            const companyLogo = getCompanyLogo(jobItem);
-                                            const companyName = getCompanyName(jobItem);
+                                        <h3 className="text-xl font-semibold text-gray-800 mb-4">Requirements</h3>
 
-                                            return (
-                                                <div
-                                                    key={jobItem._id}
-                                                    onClick={() => handleSidebarJobClick(jobItem)}
-                                                    className="bg-gray-50 rounded-xl p-4 border border-gray-200 hover:border-[#339ca0] hover:shadow-md transition-all duration-300 cursor-pointer group"
+                                        {job.experience && (
+                                            <div className="bg-gray-50 rounded-lg p-4">
+                                                <h4 className="font-semibold text-gray-800 mb-2">Experience</h4>
+                                                <p className="text-gray-700">{job.experience} Years</p>
+                                            </div>
+                                        )}
+
+                                        {job.degreeLevel?.name && (
+                                            <div className="bg-gray-50 rounded-lg p-4">
+                                                <h4 className="font-semibold text-gray-800 mb-2">Education</h4>
+                                                <p className="text-gray-700">{job.degreeLevel.name}</p>
+                                            </div>
+                                        )}
+
+                                        {job.specialization?.name && (
+                                            <div className="bg-gray-50 rounded-lg p-4">
+                                                <h4 className="font-semibold text-gray-800 mb-2">Specialization</h4>
+                                                <p className="text-gray-700">{job.specialization.name}</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {activeTab === "skills" && job.skills?.length > 0 && (
+                                    <div>
+                                        <h3 className="text-xl font-semibold text-gray-800 mb-4">Required Skills</h3>
+                                        <div className="flex flex-wrap gap-2">
+                                            {job.skills.map((skill, index) => (
+                                                <span
+                                                    key={index}
+                                                    className="px-4 py-2 bg-gradient-to-r from-[#339ca0]/10 to-[#2a7d80]/10 text-[#339ca0] rounded-full text-sm font-medium border border-[#339ca0]/20"
                                                 >
-                                                    {/* Company Logo and Name */}
-                                                    <div className="flex items-center gap-3 mb-3">
-                                                        {companyLogo ? (
-                                                            <img
-                                                                src={companyLogo}
-                                                                alt={companyName}
-                                                                className="w-10 h-10 rounded-lg object-cover border border-gray-200"
-                                                            />
-                                                        ) : (
-                                                            <div className="w-10 h-10 bg-gradient-to-br from-[#e0f7fa] to-[#b2ebf2] rounded-lg border border-gray-200 flex items-center justify-center">
-                                                                <span className="text-[#00796b] font-bold text-sm">
-                                                                    {companyName.charAt(0)}
-                                                                </span>
-                                                            </div>
-                                                        )}
-                                                        <div className="flex-1 min-w-0">
-                                                            <h4 className="font-semibold text-gray-900 text-sm group-hover:text-[#339ca0] transition-colors line-clamp-1">
-                                                                {jobItem.jobTitle}
-                                                            </h4>
-                                                            <p className="text-xs text-gray-600 truncate">{companyName}</p>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Job Details */}
-                                                    <div className="space-y-2 text-xs text-gray-600">
-                                                        {/* Location */}
-                                                        <div className="flex items-center gap-2">
-                                                            <FaMapMarkerAlt className="text-[#339ca0] text-xs flex-shrink-0" />
-                                                            <span className="line-clamp-1">
-                                                                {getSidebarLocationString(jobItem._id)}
-                                                            </span>
-                                                        </div>
-
-                                                        {/* Job Type */}
-                                                        {jobItem.jobType?.name && (
-                                                            <div className="flex items-center gap-2">
-                                                                <FaBriefcase className="text-[#339ca0] text-xs flex-shrink-0" />
-                                                                <span>{jobItem.jobType.name}</span>
-                                                            </div>
-                                                        )}
-
-                                                        {/* Salary */}
-                                                        {!jobItem.hideSalary && jobItem.salaryFrom && (
-                                                            <div className="flex items-center gap-2">
-                                                                <FaMoneyBill className="text-[#339ca0] text-xs flex-shrink-0" />
-                                                                <span className="line-clamp-1">
-                                                                    {jobItem.salaryFrom} - {jobItem.salaryTo} {jobItem.salaryCurrency}
-                                                                </span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-
-                                                    {/* Skills Preview */}
-                                                    {jobItem.skills?.length > 0 && (
-                                                        <div className="mt-3 flex flex-wrap gap-1">
-                                                            {jobItem.skills.slice(0, 2).map((skill, index) => (
-                                                                <span
-                                                                    key={index}
-                                                                    className="px-2 py-1 bg-[#339ca0]/10 text-[#339ca0] text-xs rounded-md"
-                                                                >
-                                                                    {typeof skill === "object" ? skill.name : skill}
-                                                                </span>
-                                                            ))}
-                                                            {jobItem.skills.length > 2 && (
-                                                                <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md">
-                                                                    +{jobItem.skills.length - 2} more
-                                                                </span>
-                                                            )}
-                                                        </div>
-                                                    )}
-
-                                                    {/* Action Buttons */}
-                                                    <div className="mt-3 flex gap-2">
-                                                        <button
-                                                            onClick={() => handleSidebarJobClick(jobItem)}
-                                                            className="flex-1 bg-white border border-[#339ca0] text-[#339ca0] text-sm font-medium py-2 rounded-lg hover:bg-[#339ca0] hover:text-white transition-colors"
-                                                        >
-                                                            View Details
-                                                        </button>
-                                                        <button
-                                                            onClick={(e) => handleSidebarApplyClick(jobItem, e)}
-                                                            className="flex-1 bg-[#339ca0] hover:bg-[#2a7f83] text-white text-sm font-medium py-2 rounded-lg transition-colors"
-                                                        >
-                                                            Apply
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
+                                                    {typeof skill === "object" ? skill.name : skill}
+                                                </span>
+                                            ))}
+                                        </div>
                                     </div>
                                 )}
                             </div>
                         </div>
 
-                        {/* Quick Stats Section */}
-                        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
-                            <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                                Job Statistics
-                            </h3>
-                            <div className="space-y-2 text-sm">
-                                <div className="flex justify-between items-center">
-                                    <span className="text-gray-600">Views</span>
-                                    <span className="font-semibold text-gray-800">{likeCount}</span>
+                        {/* Additional Information */}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                            <h3 className="text-xl font-semibold text-gray-800 mb-6">Additional Information</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                                <div className="flex items-start gap-3">
+                                    <MdLocationOn className="text-[#339ca0] mt-1 flex-shrink-0" />
+                                    <div>
+                                        <h4 className="font-medium text-gray-800 mb-1">Address</h4>
+                                        {job.address && (
+
+                                            <p className="text-gray-700">{job.address}</p>
+
+                                        )}
+                                        <span className="text-gray-700">
+                                            {getLocationString()}
+                                        </span>
+                                    </div>
                                 </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-gray-600">Posted</span>
-                                    <span className="font-semibold text-gray-800">
-                                        {job.createdAt ? new Date(job.createdAt).toLocaleDateString() : 'Recently'}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <span className="text-gray-600">Expires</span>
-                                    <span className="font-semibold text-gray-800">
-                                        {job.expiryDate ? new Date(job.expiryDate).toLocaleDateString() : 'Open'}
-                                    </span>
-                                </div>
+
+
+                                {job.mode && (
+                                    <div className="flex items-start gap-3">
+                                        <FaBuilding className="text-[#339ca0] mt-1 flex-shrink-0" />
+                                        <div>
+                                            <h4 className="font-medium text-gray-800 mb-1">Work Mode</h4>
+                                            <p className="text-gray-700">{job.mode}</p>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* {job.jobType?.name && (
+                                    <div className="flex items-start gap-3">
+                                        <FaBriefcase className="text-[#339ca0] mt-1 flex-shrink-0" />
+                                        <div>
+                                            <h4 className="font-medium text-gray-800 mb-1">Job Type</h4>
+                                            <p className="text-gray-700">{job.jobType.name}</p>
+                                        </div>
+                                    </div>
+                                )} */}
+
+                                {job.industry?.name && (
+                                    <div className="flex items-start gap-3">
+                                        <FaIndustry className="text-[#339ca0] mt-1 flex-shrink-0" />
+                                        <div>
+                                            <h4 className="font-medium text-gray-800 mb-1">Industry</h4>
+                                            <p className="text-gray-700">{job.industry.name}</p>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
+                    </div>
 
-                        {/* Quick Actions */}
-                        <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-4">
-                            <h3 className="text-lg font-bold text-gray-800 mb-3">Quick Actions</h3>
-                            <div className="space-y-2">
+                    {/* Right Column - Sidebar */}
+                    <div className="lg:col-span-1">
+                        <div className="sticky top-8 space-y-6">
+                            {/* Company Card */}
+                            {/* <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                                <div className="flex items-center gap-4 mb-4">
+                                    {job.companyId?.company?.employerLogo ? (
+                                        <img
+                                            src={`${import.meta.env.VITE_BACKEND_URL}${job.companyId.company.employerLogo}`}
+                                            alt={job.companyId.company.name}
+                                            className="w-16 h-16 rounded-lg object-cover border border-gray-200"
+                                        />
+                                    ) : (
+                                        <div className="w-16 h-16 bg-gradient-to-br from-[#339ca0] to-[#2a7d80] rounded-lg flex items-center justify-center">
+                                            <span className="text-white text-xl font-bold">
+                                                {job.companyId?.company?.name?.charAt(0) || "C"}
+                                            </span>
+                                        </div>
+                                    )}
+                                    <div>
+                                        <h3 className="font-semibold text-gray-800">{job.companyId?.company?.name || "Company"}</h3>
+                                        <p className="text-sm text-gray-600">
+                                            {job.companyId?.company?.website || "No website"}
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => window.open(job.companyId?.company?.website, '_blank')}
+                                    className="w-full border border-[#339ca0] text-[#339ca0] py-2 rounded-lg font-medium hover:bg-[#339ca0] hover:text-white transition-colors flex items-center justify-center gap-2"
+                                >
+                                    Visit Website <FaExternalLinkAlt />
+                                </button>
+                            </div> */}
+
+                            {/* Similar Jobs */}
+                            <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+                                <div className="p-6 border-b border-gray-200">
+                                    <h3 className="font-semibold text-gray-800">Similar Jobs</h3>
+                                </div>
+                                <div className="p-6">
+                                    {sidebarLoading ? (
+                                        <div className="text-center py-4 text-gray-500">Loading similar jobs...</div>
+                                    ) : sidebarJobs.length === 0 ? (
+                                        <div className="text-center py-4 text-gray-500">No similar jobs found</div>
+                                    ) : (
+                                        <div className="space-y-4">
+                                            {sidebarJobs.map((jobItem) => (
+                                                <div
+                                                    key={jobItem._id}
+                                                    className="group cursor-pointer"
+                                                    onClick={() => handleSidebarJobClick(jobItem)}
+                                                >
+                                                    <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors">
+                                                        {getCompanyLogo(jobItem) ? (
+                                                            <img
+                                                                src={getCompanyLogo(jobItem)}
+                                                                alt={getCompanyName(jobItem)}
+                                                                className="w-12 h-12 rounded-lg object-cover"
+                                                            />
+                                                        ) : (
+                                                            <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                                                                <span className="text-gray-600 font-bold">
+                                                                    {getCompanyName(jobItem).charAt(0)}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                        <div className="flex-1 min-w-0">
+                                                            <h4 className="font-medium text-gray-800 group-hover:text-[#339ca0] transition-colors line-clamp-1">
+                                                                {jobItem.jobTitle}
+                                                            </h4>
+                                                            <p className="text-sm text-gray-600 truncate">
+                                                                {getCompanyName(jobItem)}
+                                                            </p>
+                                                            <div className="flex items-center gap-2 mt-1">
+                                                                <MdLocationOn className="text-gray-400 text-xs" />
+                                                                <span className="text-xs text-gray-500">
+                                                                    {getSidebarLocationString(jobItem._id)}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Quick Apply Card */}
+                            <div className="bg-gradient-to-br from-[#339ca0] to-[#2a7d80] rounded-xl p-6 text-white">
+                                <h3 className="font-semibold text-lg mb-2">Ready to Apply?</h3>
+                                <p className="text-white/80 text-sm mb-6">
+                                    Submit your application and take the next step in your career.
+                                </p>
                                 <button
                                     onClick={handleApplyClick}
-                                    className="w-full bg-[#339ca0] hover:bg-[#2a7f83] text-white font-medium py-2 rounded-lg transition-colors"
+                                    className="w-full bg-white text-[#339ca0] py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
                                 >
-                                    Apply for this Job
+                                    Apply Now
                                 </button>
-                                <button
-                                    onClick={() => navigate('/placement-program')}
-                                    className="w-full bg-white border border-[#339ca0] text-[#339ca0] hover:bg-[#339ca0] hover:text-white font-medium py-2 rounded-lg transition-colors"
-                                >
-                                    Browse All Jobs
-                                </button>
+                                <div className="mt-6 pt-6 border-t border-white/20">
+                                    <div className="flex items-center justify-between text-sm">
+                                        <span className="text-white/80">Posted</span>
+                                        <span className="font-medium">
+                                            {job.createdAt ? new Date(job.createdAt).toLocaleDateString() : "Recently"}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between text-sm mt-2">
+                                        <span className="text-white/80">Expires</span>
+                                        <span className="font-medium">
+                                            {job.expiryDate ? new Date(job.expiryDate).toLocaleDateString() : "Open"}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
             </div>
 
-
-
-
+            {/* Application Modal */}
             {isModalOpen && selectedJob && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
                     <div className="bg-white rounded-lg p-6 w-full max-w-2xl relative shadow-lg">
@@ -778,13 +751,12 @@ export default function JobDetailsPage() {
                         </button>
 
                         <h3 className="text-2xl font-bold mb-2">{selectedJob.jobTitle}</h3>
-                        <p className="text-gray-700 mb-6">{selectedJob.description}</p>
+                        {/* <p className="text-gray-700 mb-6">{selectedJob.description}</p> */}
 
                         <JobApplicationForm jobId={selectedJob._id} closeModal={closeModal} />
                     </div>
                 </div>
             )}
-
         </div>
     );
 }

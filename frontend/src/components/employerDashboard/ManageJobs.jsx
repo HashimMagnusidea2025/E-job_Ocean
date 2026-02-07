@@ -12,7 +12,7 @@ export default function ManageJobs() {
     const [locationNamesMap, setLocationNamesMap] = useState({});
     const navigate = useNavigate();
 
-    // Fetch employer's jobs
+    
     useEffect(() => {
         fetchEmployerJobs();
     }, []);
@@ -110,7 +110,7 @@ export default function ManageJobs() {
         return job.companyId?.company?.name || "Company";
     };
 
-    // Alternative: Direct location display (if you want to show individual fields)
+   
     const getLocationName = (job) => {
         // Try populated city name from location map first
         const loc = locationNamesMap[job._id];
@@ -235,25 +235,7 @@ export default function ManageJobs() {
                                     key={job._id}
                                     className="bg-white border rounded-lg shadow-sm hover:shadow-md transition-shadow p-6 space-y-3 relative"
                                 >
-                                    {/* Company Logo */}
-                                    {/* <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                                        {companyLogo ? (
-                                            <img
-                                                src={companyLogo}
-                                                alt={companyName}
-                                                className="w-26 h-20 rounded-lg border-2 border-white shadow-md object-cover"
-                                                onError={(e) => {
-                                                    e.target.style.display = 'none';
-                                                    e.target.nextSibling.style.display = 'flex';
-                                                }}
-                                            />
-                                        ) : (
-                                            <div className="w-12 h-12 bg-blue-100 rounded-lg border-2 border-white shadow-md flex items-center justify-center">
-                                                <FaBuilding className="text-blue-600 text-lg" />
-                                            </div>
-                                        )}
-                                    </div> */}
-
+                                    
                                     {/* Job Status Badges */}
                                     <div className="flex justify-between items-start">
                                         <span className={`px-2 py-1 rounded text-xs font-medium ${job.isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
@@ -333,7 +315,7 @@ export default function ManageJobs() {
                                     </div>
                                     
 
-                                    {/* Action Buttons */}
+                                   
                                     <div className="flex justify-between items-center pt-3 border-t">
                                         <button
                                             className="bg-blue-600 text-white text-xs px-3 py-1 rounded hover:bg-blue-700 flex items-center gap-1"
@@ -341,7 +323,7 @@ export default function ManageJobs() {
                                         >
                                             <FaUsers />
                                             <span>Candidates</span>
-                                            {/* Optional: Application count show karein */}
+                                            
                                             {job.applicationCount > 0 && (
                                                 <span className="bg-white text-blue-600 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold">
                                                     {job.applicationCount}

@@ -10,8 +10,8 @@ export default function KnowledgeBaseForm({ selectedData, onSuccess }) {
         description: "",
         tags: "",
         keywords: "",
-        fromStatus: "Enabled", // ✅ default
-        status: "active",      // ✅ default
+        fromStatus: "Enabled", //  default
+        status: "active",      //  default
     });
     const [uploadPDF, setUploadPDF] = useState(null);
 

@@ -19,7 +19,7 @@ export default function EditMentorDetails() {
     const [preview, setPreview] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    // ✅ Fetch logged-in mentor details
+    //  Fetch logged-in mentor details
     useEffect(() => {
         const fetchMentor = async () => {
             try {
@@ -42,12 +42,12 @@ export default function EditMentorDetails() {
                         password: "",
                         newPassword: "",
                     });
-                    // ✅ Robust preview URL
+                    //  Robust preview URL
                     const pic = res.data.profilePicture;
                     if (pic) {
                         setPreview(pic.startsWith("http") ? pic : `${baseUrl}${pic}`);
                     } else {
-                        setPreview(null); // do nothing, leave empty
+                        setPreview(null); 
                     }
 
                 }
@@ -59,7 +59,7 @@ export default function EditMentorDetails() {
         fetchMentor();
     }, []);
 
-    // ✅ Handle image preview
+    //  Handle image preview
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -68,13 +68,13 @@ export default function EditMentorDetails() {
         }
     };
 
-    // ✅ Handle input change
+    //  Handle input change
     const handleChange = (e) => {
         const { name, value } = e.target;
         setMentor((prev) => ({ ...prev, [name]: value }));
     };
 
-    // ✅ Submit update
+    //  Submit update
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -97,8 +97,8 @@ export default function EditMentorDetails() {
 
             if (res.status === 200) {
 
-                // ✅ Update localStorage
-                // ✅ FIXED: Update localStorage with complete user data
+                //  Update localStorage
+                //  FIXED: Update localStorage with complete user data
                 const updatedUser = {
                     ...loggedInUser,
                     firstName: res.data.firstName || mentor.firstName,
@@ -110,12 +110,12 @@ export default function EditMentorDetails() {
 
                 localStorage.setItem("user", JSON.stringify(updatedUser));
 
-                // ✅ Trigger navbar update event
+                //  Trigger navbar update event
                 window.dispatchEvent(new Event("userUpdated"));
 
                 Swal.fire("Updated!", "Your details were updated successfully", "success");
 
-                // ✅ Update preview with new profile picture URL
+                //  Update preview with new profile picture URL
                 if (res.data.profilePicture) {
                     if (res.data.profilePicture.startsWith('http')) {
                         setPreview(res.data.profilePicture);
@@ -140,29 +140,9 @@ export default function EditMentorDetails() {
                 </h2>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
-                    {/* ✅ Profile Picture */}
+                    {/*  Profile Picture */}
                     <div className="flex items-center justify-center">
 
-
-                        {/* <div className="relative">
-                            {preview && (
-                                <img
-                                    src={preview}
-                                    alt="Profile"
-                                    className="w-28 h-28 rounded-full object-cover border"
-                                />
-                            )}
-                           <h2 className="border">
-                             Add Profile picture
-                           </h2>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={handleFileChange}
-                                className="absolute bottom-0 right-0 opacity-0 w-28 h-28 cursor-pointer"
-                                title="Change profile picture"
-                            />
-                        </div> */}
 
                         <div className="relative flex flex-col items-center">
                             {preview && (
@@ -191,7 +171,7 @@ export default function EditMentorDetails() {
 
                     </div>
 
-                    {/* ✅ Basic Info */}
+                    {/*  Basic Info */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <input
                             type="text"
@@ -232,7 +212,7 @@ export default function EditMentorDetails() {
                         required
                     />
 
-                    {/* ✅ Password Change - Optional */}
+                    {/*  Password Change - Optional */}
                     <details className="border rounded-lg p-3">
                         <summary className="cursor-pointer font-medium">
                             Change Password (Optional)

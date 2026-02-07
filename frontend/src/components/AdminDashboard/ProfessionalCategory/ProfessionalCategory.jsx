@@ -1,9 +1,15 @@
 import React, { useEffect, useState } from "react";
 import axios from "../../../utils/axios"; // adjust path as needed
-import DataTable from "react-data-table-component";
 import Swal from "sweetalert2";
 import { FaEdit, FaTrash, FaToggleOn, FaToggleOff } from "react-icons/fa";
 import Layout from "../../seekerDashboard/partials/layout";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  flexRender,
+} from "@tanstack/react-table";
 
 
 const ProfessionalCategoryPage = () => {
@@ -22,15 +28,7 @@ const ProfessionalCategoryPage = () => {
         fetchFilterOptions();
     }, []);
 
-    useEffect(() => {
-        const lower = searchText.toLowerCase();
-        const filtered = categories.filter(cat =>
-            cat.name.toLowerCase().includes(lower) ||
-            cat.type.toLowerCase().includes(lower) ||
-            cat.status.toLowerCase().includes(lower)
-        );
-        setFilteredCategories(filtered);
-    }, [searchText, categories]);
+
 
     const fetchFilterOptions = async () => {
         try {
@@ -45,6 +43,19 @@ const ProfessionalCategoryPage = () => {
         const res = await axios.get("/professional-categories");
         setCategories(res.data.data);
         setFilteredCategories(res.data.data);
+    };
+
+    const handleSearch = (e) => {
+        const value = e.target.value.toLowerCase();
+        setSearchText(value);
+
+        const filtered = categories.filter((cat) =>
+            cat.name.toLowerCase().includes(value) ||
+            cat.type.toLowerCase().includes(value) ||
+            cat.status.toLowerCase().includes(value)
+        );
+
+        setFilteredCategories(filtered);
     };
 
     const handleInputChange = (e) => {
@@ -142,80 +153,73 @@ const ProfessionalCategoryPage = () => {
 
 
     const columns = [
-         {
-      name: "ID",
-      selector: (row, index) => index + 1,
-      width: "70px",
-    },
-        { name: "Name", selector: (row) => row.name, sortable: true },
-        { name: "Type", selector: (row) => row.type, sortable: true },
-        {
-            name: "Status",
-            cell: (row) => (
-                <div className="flex items-center gap-2">
-                    <span
-                        className={`px-2 py-1 rounded text-white text-xs ${row.status === "active" ? "bg-green-500" : "bg-red-500"
-                            }`}
-                    >
-                        {row.status}
-                    </span>
-                    <button
-                        onClick={() => handleToggleStatus(row._id, row.status)}
-                        className="p-1 rounded hover:bg-gray-200"
-                        title="Toggle Status"
-                    >
-                        {row.status === "active" ? (
-                            <FaToggleOn size={26} className="text-green-500" />
-                        ) : (
-                            <FaToggleOff size={26} className="text-red-500" />
-                        )}
-                    </button>
-                </div>
-            ),
-            sortable: true
-        },
-        {
-            name: "Actions",
-            cell: (row) => (
-                <div className="flex gap-3 items-center">
-                    {/* Edit Button */}
-                    <button
-                        onClick={() => handleEdit(row)}
-                        className="text-blue-600 hover:text-blue-800"
-                        title="Edit"
-                    >
-                        <FaEdit size={20} />
-                    </button>
-
-                    {/* Delete Button */}
-                    <button
-                        onClick={() => handleDelete(row._id)}
-                        className="text-red-600 hover:text-red-800"
-                        title="Delete"
-                    >
-                        <FaTrash size={20} />
-                    </button>
-
-                    {/* Toggle Status Button */}
-                    {/* <button
-                        onClick={() => toggleStatus(row._id)}
-                        title="Toggle Status"
-                        className={`transition duration-200 ${row.status === "active"
-                            ? "text-green-500 hover:text-green-700"
-                            : "text-red-500 hover:text-red-700"
-                            }`}
-                    >
-                        {row.status === "active" ? (
-                            <FaToggleOn size={26} />
-                        ) : (
-                            <FaToggleOff size={26} />
-                        )}
-                    </button> */}
-                </div>
-            ),
-        }
-
+      {
+        header: "ID",
+        cell: ({ row }) => row.index + 1,
+      },
+      {
+        accessorKey: "name",
+        header: "Name",
+      },
+      {
+        accessorKey: "type",
+        header: "Type",
+      },
+      {
+        header: "Status",
+        cell: ({ row }) => (
+          <div className="flex items-center gap-2">
+            <span
+              className={`px-2 py-1 rounded text-white text-xs ${row.original.status === "active" ? "bg-green-500" : "bg-red-500"}`}
+            >
+              {row.original.status}
+            </span>
+            <button
+              onClick={() => handleToggleStatus(row.original._id, row.original.status)}
+              className="p-1 rounded hover:bg-gray-200"
+              title="Toggle Status"
+            >
+              {row.original.status === "active" ? (
+                <FaToggleOn size={26} className="text-green-500" />
+              ) : (
+                <FaToggleOff size={26} className="text-red-500" />
+              )}
+            </button>
+          </div>
+        ),
+      },
+      {
+        header: "Actions",
+        cell: ({ row }) => (
+          <div className="flex gap-3">
+            <button
+              onClick={() => handleEdit(row.original)}
+              className="text-green-600"
+            >
+              <FaEdit size={20} />
+            </button>
+            <button
+              onClick={() => handleDelete(row.original._id)}
+              className="text-red-600"
+            >
+              <FaTrash size={20} />
+            </button>
+          </div>
+        ),
+      },
     ];
+
+    const table = useReactTable({
+      data: filteredCategories,
+      columns,
+      state: {
+        globalFilter: searchText,
+      },
+      onGlobalFilterChange: setSearchText,
+      getCoreRowModel: getCoreRowModel(),
+      getFilteredRowModel: getFilteredRowModel(),
+      getPaginationRowModel: getPaginationRowModel(),
+    });
 
     return (
         <Layout>
@@ -225,9 +229,9 @@ const ProfessionalCategoryPage = () => {
                 <div className="mb-4">
                     <input
                         type="text"
-                        placeholder="Search by name and type"
+                        placeholder="Search categories..."
                         value={searchText}
-                        onChange={(e) => setSearchText(e.target.value)}
+                        onChange={handleSearch}
                         className="border p-2 w-full max-w-sm"
                     />
                 </div>
@@ -243,12 +247,74 @@ const ProfessionalCategoryPage = () => {
                 </button>
             </div>
 
-            <DataTable
-                columns={columns}
-                data={filteredCategories}
-                pagination
-                highlightOnHover
-            />
+            <div className="bg-white rounded-lg shadow overflow-x-auto">
+              <table className="min-w-full border">
+                <thead className="bg-gray-100">
+                  {table.getHeaderGroups().map(headerGroup => (
+                    <tr key={headerGroup.id}>
+                      {headerGroup.headers.map(header => (
+                        <th
+                          key={header.id}
+                          className="px-4 py-3 text-left text-sm font-semibold border"
+                        >
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                        </th>
+                      ))}
+                    </tr>
+                  ))}
+                </thead>
+
+                <tbody>
+                  {table.getRowModel().rows.map(row => (
+                    <tr key={row.id} className="hover:bg-gray-50">
+                      {row.getVisibleCells().map(cell => (
+                        <td key={cell.id} className="px-4 py-2 border text-sm">
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+
+                  {table.getRowModel().rows.length === 0 && (
+                    <tr>
+                      <td colSpan={columns.length} className="text-center py-6 text-gray-500">
+                        No categories found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+
+              {/* Pagination */}
+              <div className="flex justify-between items-center p-4">
+                <button
+                  onClick={() => table.previousPage()}
+                  disabled={!table.getCanPreviousPage()}
+                  className="px-4 py-2 border rounded disabled:opacity-50"
+                >
+                  Previous
+                </button>
+
+                <span className="text-sm">
+                  Page {table.getState().pagination.pageIndex + 1} of{" "}
+                  {table.getPageCount()}
+                </span>
+
+                <button
+                  onClick={() => table.nextPage()}
+                  disabled={!table.getCanNextPage()}
+                  className="px-4 py-2 border rounded disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
 
             {/* Modal Form */}
             {showModal && (
@@ -282,16 +348,6 @@ const ProfessionalCategoryPage = () => {
                                 ))}
                             </select>
 
-
-                            {/* <input
-                                type="text"
-                                name="type"
-                                placeholder="Type"
-                                value={form.type}
-                                onChange={handleInputChange}
-                                className="border p-2 w-full"
-                                required
-                            /> */}
 
                             <select
                                 name="status"

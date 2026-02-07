@@ -1,5 +1,5 @@
 import SpeakerModel from "./Speaker.model.js";
-import {slugify} from './../../utils/slugify.js';
+import { slugify } from './../../utils/slugify.js';
 import OneToOneModel from "../OneToOne/OneToOne.model.js";
 
 export const CreateSpeaker = async (req, res) => {
@@ -15,9 +15,10 @@ export const CreateSpeaker = async (req, res) => {
             city,
             introduction,
             description,
-            qualification
+            qualification,
+            position
         } = req.body;
-  const slug = slugify(`${firstName} ${lastName}`);
+        const slug = slugify(`${firstName} ${lastName}`);
         // yaha object banaya
         const speakerData = {
             salutation,
@@ -31,7 +32,8 @@ export const CreateSpeaker = async (req, res) => {
             introduction,
             description,
             qualification,
-             slug,
+            position,
+            slug,
         };
 
         // agar file ayi hai to profilePic set karo
@@ -46,7 +48,6 @@ export const CreateSpeaker = async (req, res) => {
         res.status(400).json({ message: err.message });
     }
 };
-
 
 
 export const getSpeakers = async (req, res) => {
@@ -123,7 +124,10 @@ export const deleteSpeaker = async (req, res) => {
 
 export const getActiveSpeakers = async (req, res) => {
     try {
-        const speakers = await SpeakerModel.find({ status: "active" });
+        // const speakers = await SpeakerModel.find({ status: "active" });
+        const speakers = await SpeakerModel
+            .find({ status: "active" })
+            .sort({ position: 1, createdAt: 1 });
 
         // Check for each speaker if they have one-to-one sessions
         const speakersWithOneToOne = await Promise.all(
@@ -148,16 +152,16 @@ export const getActiveSpeakers = async (req, res) => {
 
 
 export const getSpeakerBySlug = async (req, res) => {
-  try {
-    console.log("Fetching speaker with slug:", req.params.slug);
-    const speaker = await SpeakerModel.findOne({ slug: req.params.slug });
-    console.log("Speaker found:", speaker);
-    if (!speaker) return res.status(404).json({ message: "Speaker not found" });
-    res.json(speaker);
-  } catch (err) {
-    console.error("Error fetching speaker:", err);
-    res.status(500).json({ message: err.message });
-  }
+    try {
+        console.log("Fetching speaker with slug:", req.params.slug);
+        const speaker = await SpeakerModel.findOne({ slug: req.params.slug });
+        console.log("Speaker found:", speaker);
+        if (!speaker) return res.status(404).json({ message: "Speaker not found" });
+        res.json(speaker);
+    } catch (err) {
+        console.error("Error fetching speaker:", err);
+        res.status(500).json({ message: err.message });
+    }
 };
 
 

@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import DataTable from "react-data-table-component";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  flexRender,
+} from "@tanstack/react-table";
 import { FaEdit, FaTrash, FaPlus, FaToggleOn, FaToggleOff } from "react-icons/fa";
 import axios from "../../../utils/axios.js";
 import Swal from "sweetalert2";
@@ -7,7 +13,8 @@ import Layout from "../../seekerDashboard/partials/layout.jsx";
 
 export default function JobShiftCategoryPage() {
   const [categories, setCategories] = useState([]);
-  const [search, setSearch] = useState("");
+  const [filteredCategories, setFilteredCategories] = useState([]);
+  const [searchText, setSearchText] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [formData, setFormData] = useState({ id: null, name: "", status: "active" });
 
@@ -16,6 +23,7 @@ export default function JobShiftCategoryPage() {
     try {
       const res = await axios.get("/job-Shift-category");
       setCategories(res.data);
+      setFilteredCategories(res.data);
     } catch (err) {
       console.error(err);
       Swal.fire("Error", "Failed to fetch categories", "error");
@@ -92,101 +100,171 @@ export default function JobShiftCategoryPage() {
     }
   };
 
-  // DataTable columns
+  const handleSearch = (e) => {
+    const value = e.target.value.toLowerCase();
+    setSearchText(value);
+
+    const filtered = categories.filter((category) => {
+      return (
+        category.name.toLowerCase().includes(value) ||
+        category.status.toLowerCase().includes(value)
+      );
+    });
+
+    setFilteredCategories(filtered);
+  };
+
   const columns = [
     {
-      name: "ID",
-      selector: (row, index) => index + 1,
-      width: "70px",
+      header: "ID",
+      cell: ({ row }) => row.index + 1,
     },
     {
-      name: "Name",
-      selector: (row) => row.name,
-      sortable: true
+      accessorKey: "name",
+      header: "Name",
     },
     {
-      name: "Status",
-      cell: (row) => (
-        <div className="flex items-center gap-2">
-          <span
-            className={`px-2 py-1 text-xs rounded text-white ${row.status === "active" ? "bg-green-500" : "bg-red-500"
-              }`}
-          >
-            {row.status}
-          </span>
-          <button onClick={() => handleToggleStatus(row._id, row.status)}>
-            {row.status === "active" ? (
-              <FaToggleOn size={24} className="text-green-500" />
-            ) : (
-              <FaToggleOff size={24} className="text-red-500" />
-            )}
-          </button>
-        </div>
-      ),
-      sortable: true
+      header: "Status",
+      cell: ({ row }) =>
+        row.original.status === "active" ? (
+          <span className="text-green-600 font-semibold">Active</span>
+        ) : (
+          <span className="text-red-600 font-semibold">Inactive</span>
+        ),
     },
     {
-      name: "Actions",
-      cell: (row) => (
-        <div className="flex gap-2">
+      header: "Actions",
+      cell: ({ row }) => (
+        <div className="flex gap-3">
           <button
             onClick={() => {
-              setFormData({ id: row._id, name: row.name, status: row.status });
+              setFormData({ id: row.original._id, name: row.original.name, status: row.original.status });
               setModalOpen(true);
             }}
-            className="text-blue-500 hover:text-blue-700"
+            className="text-green-600"
           >
             <FaEdit size={20} />
           </button>
           <button
-            onClick={() => handleDelete(row._id)}
-            className="text-red-500 hover:text-red-700"
+            onClick={() => handleDelete(row.original._id)}
+            className="text-red-600"
           >
             <FaTrash size={20} />
           </button>
+          <button
+            onClick={() => handleToggleStatus(row.original._id, row.original.status)}
+            className={row.original.status === "active" ? "text-blue-600" : "text-gray-600"}
+          >
+            {row.original.status === "active" ? <FaToggleOn size={20} /> : <FaToggleOff size={20} />}
+          </button>
         </div>
-      )
-    }
+      ),
+    },
   ];
 
-  // Filter data
-  const filteredData = categories.filter(
-    (item) =>
-      item.name.toLowerCase().includes(search.toLowerCase()) ||
-      item.status.toLowerCase().includes(search.toLowerCase())
-  );
+  const table = useReactTable({
+    data: filteredCategories,
+    columns,
+    state: {
+      globalFilter: searchText,
+    },
+    onGlobalFilterChange: setSearchText,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+  });
 
   return (
     <Layout>
       <div className="p-6 max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-xl font-bold">Job Shift Categories</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-3xl font-bold text-gray-800">Job Shift Categories</h2>
           <input
             type="text"
-            placeholder="Search..."
-            className="border px-3 py-2 rounded mb-4 "
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search categories..."
+            value={searchText}
+            onChange={handleSearch}
+            className="border p-2 rounded"
           />
           <button
             onClick={() => {
               setFormData({ id: null, name: "", status: "active" });
               setModalOpen(true);
             }}
-            className="flex items-center bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600"
+            className="bg-blue-600 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition"
           >
-            <FaPlus className="mr-2" /> Add Category
+            + Add Category
           </button>
         </div>
 
-        <DataTable
-          columns={columns}
-          data={filteredData}
-          pagination
-          highlightOnHover
-          striped
-          className="bg-white rounded shadow"
-        />
+        <div className="bg-white rounded-lg shadow overflow-x-auto">
+          <table className="min-w-full border">
+            <thead className="bg-gray-100">
+              {table.getHeaderGroups().map(headerGroup => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map(header => (
+                    <th
+                      key={header.id}
+                      className="px-4 py-3 text-left text-sm font-semibold border"
+                    >
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+
+            <tbody>
+              {table.getRowModel().rows.map(row => (
+                <tr key={row.id} className="hover:bg-gray-50">
+                  {row.getVisibleCells().map(cell => (
+                    <td key={cell.id} className="px-4 py-2 border text-sm">
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+
+              {table.getRowModel().rows.length === 0 && (
+                <tr>
+                  <td colSpan={columns.length} className="text-center py-6 text-gray-500">
+                    No categories found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+
+          {/* Pagination */}
+          <div className="flex justify-between items-center p-4">
+            <button
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+              className="px-4 py-2 border rounded disabled:opacity-50"
+            >
+              Previous
+            </button>
+
+            <span className="text-sm">
+              Page {table.getState().pagination.pageIndex + 1} of{" "}
+              {table.getPageCount()}
+            </span>
+
+            <button
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+              className="px-4 py-2 border rounded disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        </div>
 
         {modalOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center">

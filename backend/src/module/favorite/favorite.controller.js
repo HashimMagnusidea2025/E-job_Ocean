@@ -12,7 +12,6 @@ export const toggleFavorite = async (req, res) => {
         .json({ success: false, message: "Job ID and type are required" });
     }
 
-   
     const existing = await FavoriteModel.findOne({ user: userId, jobId, type });
 
     if (existing) {

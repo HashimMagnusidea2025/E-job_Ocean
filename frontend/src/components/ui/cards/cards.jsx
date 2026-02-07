@@ -17,7 +17,6 @@ import { FaLinkedinIn } from "react-icons/fa6";
 import { FaFacebook, FaTwitter, FaLinkedin, FaPinterest, FaGlobe, FaTelegram, FaInstagram } from "react-icons/fa";
 import {
     FaFacebookF,
-
     FaTelegramPlane,
 
 } from "react-icons/fa";
@@ -46,11 +45,13 @@ import {
 
 } from "react-share";
 
-export const BlogsPostCards = ({ id, img, title, description, button, type, Commentbtn = false, Viewbtn = false, category, slug }) => {
+export const BlogsPostCards = ({ id, img, title, description, button, type, Likebtn = false, Commentbtn = false, Viewbtn = false, category, slug }) => {
     const navigate = useNavigate();
     const [commentCount, setCommentCount] = useState(0);
+    const [likeCount, setLikeCount] = useState(0);
+    const [liked, setLiked] = useState(false);
 
-    // Handle read more click // 
+    // Handle read more click //
     const handleReadMore = async () => {
         try {
 
@@ -61,6 +62,39 @@ export const BlogsPostCards = ({ id, img, title, description, button, type, Comm
             console.error("Error incrementing view:", err);
             //   // navigate even if API fails (optional)
             //   navigate(`/blogs/${id}`);
+        }
+    };
+
+    const handleLike = async () => {
+        try {
+            const token = localStorage.getItem("token");
+
+            const res = await axios.post(
+                "/blogs/like",
+                { id: id, type },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            if (res.data.totalCount !== undefined) {
+                setLikeCount(res.data.totalCount);
+                setLiked(true);
+            }
+        } catch (err) {
+            console.error("Blog like error:", {
+                status: err.response?.status,
+                data: err.response?.data,
+                message: err.message
+            });
+
+            if (err.response?.data?.message === "Already liked") {
+                alert("You've already liked this blog");
+                setLiked(true);
+            } else if (err.response?.status === 401) {
+                // alert("Please login to like blogs");
+            } else {
+                alert("Failed to like blog:" + (err.response?.data?.message || err.message));
+            }
+
         }
     };
 
@@ -84,6 +118,20 @@ export const BlogsPostCards = ({ id, img, title, description, button, type, Comm
             }
         };
         fetchComments();
+    }, [id, type]);
+
+    useEffect(() => {
+        const fetchLikeCount = async () => {
+            try {
+                const res = await axios.get(`/blogs/like/likes/${id}/${type}`);
+                setLikeCount(res.data.totalCount);
+            } catch (err) {
+                console.error("Error fetching like count:", err);
+            }
+        };
+        if (id && type) {
+            fetchLikeCount();
+        }
     }, [id, type]);
 
 
@@ -122,10 +170,21 @@ export const BlogsPostCards = ({ id, img, title, description, button, type, Comm
                 </button>
 
                 <div className="flex gap-4">
-
+                    {Likebtn && (
+                        <div className="flex items-center gap-1 text-gray-600 text-sm">
+                            <button
+                                onClick={handleLike}
+                                disabled={liked}
+                                className="flex items-center gap-1 hover:text-blue-600 transition"
+                            >
+                                {liked ? <AiFillLike size={20} /> : <AiOutlineLike size={20} />}
+                                <span>{likeCount}</span>
+                            </button>
+                        </div>
+                    )}
                     {Commentbtn && (
                         <div className="flex items-center gap-1 text-gray-600 text-sm">
-                            {/* ✅ Pass commentCount prop */}
+                            {/*  Pass commentCount prop */}
                             <CommentButton blogId={id} type={type} commentCount={commentCount} />
                         </div>
                     )}
@@ -1644,7 +1703,21 @@ export const WebinarCardsList = ({ webinar, image, onRegisterClick }) => {
                 <div className="text-sm text-gray-600 flex items-center gap-2 mb-3 border-l-4 border-red-600 pl-3">
                     <FaRegCalendarAlt className="text-red-600" />
                     <span>
-                        {start.toLocaleString()} - {end.toLocaleTimeString()}
+                        {start.toLocaleDateString("en-GB", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                        })}{" "}
+                        {start.toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                        })}
+                        {" - "}
+                        {end.toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                        })}
+
                     </span>
                 </div>
                 <div>
@@ -1789,7 +1862,7 @@ export const HallOfFameCards = ({ speaker, noClick = false }) => {
 
 
     return (
-        <div onClick={handleClick} className="w-72 bg-white rounded-xl shadow-lg overflow-hidden justify-center flex items-center flex-col">
+        <div onClick={handleClick} className="w-72 bg-white rounded-xl shadow-lg overflow-hidden justify-center flex items-center flex-col cursor-pointer">
 
 
             <img
@@ -1820,8 +1893,7 @@ export const HallOfFameCards = ({ speaker, noClick = false }) => {
                 {speaker.introduction || "No introduction available."}
             </p> */}
             <div className="mt-2 text-sm text-gray-700 line-clamp-3 px-2">
-                <span className="text-yellow-600 text-lg mr-1">👨‍💼</span>
-
+                {/* <span className="text-yellow-600 text-lg mr-1">👨‍💼</span> */}
                 <div
                     className="inline prose prose-sm max-w-none"
                     dangerouslySetInnerHTML={{

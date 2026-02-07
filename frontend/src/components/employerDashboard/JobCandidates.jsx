@@ -1,4 +1,4 @@
-// components/JobCandidates.jsx
+
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "../../utils/axios.js";
@@ -13,7 +13,7 @@ import {
     FaFilePdf
 } from "react-icons/fa";
 import Layout from "../seekerDashboard/partials/layout.jsx";
-const baseURL = import.meta.env.VITE_BACKEND_URL; // Vite
+const baseURL = import.meta.env.VITE_BACKEND_URL; 
 export default function JobCandidates() {
     const { jobId } = useParams();
     const navigate = useNavigate();
@@ -72,11 +72,11 @@ export default function JobCandidates() {
                         if (countryResponse.data.success) {
                             location.country = countryResponse.data.data.name;
                         } else {
-                            location.country = candidate.country; // Fallback to ID
+                            location.country = candidate.country; 
                         }
                     } catch (err) {
                         console.error(`Error fetching country ${candidate.country}:`, err);
-                        location.country = candidate.country; // Fallback to ID
+                        location.country = candidate.country; 
                     }
                 }
 
@@ -87,11 +87,11 @@ export default function JobCandidates() {
                         if (stateResponse.data.success) {
                             location.state = stateResponse.data.data.name;
                         } else {
-                            location.state = candidate.state; // Fallback to ID
+                            location.state = candidate.state; 
                         }
                     } catch (err) {
                         console.error(`Error fetching state ${candidate.state}:`, err);
-                        location.state = candidate.state; // Fallback to ID
+                        location.state = candidate.state;
                     }
                 }
 
@@ -102,11 +102,11 @@ export default function JobCandidates() {
                         if (cityResponse.data.success) {
                             location.city = cityResponse.data.data.name;
                         } else {
-                            location.city = candidate.city; // Fallback to ID
+                            location.city = candidate.city; 
                         }
                     } catch (err) {
                         console.error(`Error fetching city ${candidate.city}:`, err);
-                        location.city = candidate.city; // Fallback to ID
+                        location.city = candidate.city; 
                     }
                 }
 
@@ -126,7 +126,7 @@ export default function JobCandidates() {
         }
     };
 
-    // ✅ Get location string for a candidate
+    //  Get location string for a candidate
     const getLocationString = (candidateId) => {
         const location = locationNamesMap[candidateId];
         if (!location) return "Loading location...";

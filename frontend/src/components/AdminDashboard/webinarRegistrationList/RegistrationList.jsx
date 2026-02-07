@@ -1,10 +1,14 @@
-// components/admin/WebinarRegistrationList.jsx
-
 
 import { useEffect, useState } from "react";
 import axios from "../../../utils/axios.js";
 import Layout from "../../seekerDashboard/partials/layout.jsx";
-import DataTable from "react-data-table-component";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  flexRender,
+} from "@tanstack/react-table";
 import { FaEye } from "react-icons/fa";
 import { FaEdit, FaTrash, FaToggleOn, FaToggleOff } from "react-icons/fa";
 import Papa from "papaparse";
@@ -76,21 +80,6 @@ export default function WebinarRegistrationList() {
     }, []);
 
 
-    // Search filter effect
-    // useEffect(() => {
-    //     const result = registrations.filter((row) => {
-    //         return (
-    //             row.webinarId?.WebinarTitle?.toLowerCase().includes(search.toLowerCase()) ||
-    //             row.firstName?.toLowerCase().includes(search.toLowerCase()) ||
-    //             row.lastName?.toLowerCase().includes(search.toLowerCase()) ||
-    //             row.email?.toLowerCase().includes(search.toLowerCase()) ||
-    //             row.mobile?.toString().includes(search.toLowerCase()) ||
-    //             row.type?.toLowerCase().includes(search.toLowerCase())
-    //         );
-    //     });
-    //     setFilteredData(result);
-    // }, [search, registrations]);
-
     useEffect(() => {
         const result = registrations.filter((row) => {
             const matchesSearch =
@@ -112,7 +101,7 @@ export default function WebinarRegistrationList() {
 
 
 
-    // 📌 Handle View
+    //  Handle View
     const handleView = (row) => {
         setSelectedRow(row);
         setIsViewOpen(true);
@@ -185,30 +174,48 @@ export default function WebinarRegistrationList() {
         }
     };
     const columns = [
-        { name: "#", cell: (row, index) => index + 1, width: "60px" },
         {
-            name: "Webinar",
-            selector: (row) => row.webinarId?.WebinarTitle || "N/A",
-            sortable: true
+            header: "ID",
+            cell: ({ row }) => row.index + 1,
         },
-
-        { name: "First Name", selector: (row) => row.firstName, sortable: true },
-        { name: "Last Name", selector: (row) => row.lastName, sortable: true },
-        { name: "Email", selector: (row) => row.email, sortable: true },
-        { name: "Mobile", selector: (row) => row.mobile, sortable: true },
-        { name: "Type", selector: (row) => row.type, sortable: true },
         {
-            name: "Actions", cell: (row) => (
+            header: "Webinar",
+            cell: ({ row }) => row.original.webinarId?.WebinarTitle || "N/A",
+        },
+        {
+            header: "Name",
+            cell: ({ row }) => `${row.original.firstName || ""} ${row.original.lastName || ""}`.trim(),
+        },
+        {
+            accessorKey: "email",
+            header: "Email",
+        },
+        {
+            accessorKey: "mobile",
+            header: "Mobile",
+        },
+        {
+            accessorKey: "type",
+            header: "Type",
+        },
+        {
+            header: "Actions",
+            cell: ({ row }) => (
                 <div className="flex gap-3">
-                    <button onClick={() => handleView(row)} title="View"><FaEye className="text-blue-500" size={22} /></button>
-                    <button onClick={() => handleEdit(row)} title="Edit"><FaEdit className="text-green-500" size={22} /></button>
-                    <button onClick={() => handleDelete(row._id)} title="Delete"><FaTrash className="text-red-500" size={22} /></button>
+                    <button onClick={() => handleView(row.original)} className="text-blue-600"><FaEye size={20} /></button>
+                    <button onClick={() => handleEdit(row.original)} className="text-green-600"><FaEdit size={20} /></button>
+                    <button onClick={() => handleDelete(row.original._id)} className="text-red-600"><FaTrash size={20} /></button>
                 </div>
-            ), ignoreRowClick: true
-        }
-
+            ),
+        },
     ];
 
+    const table = useReactTable({
+        data: filteredData,
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+    });
 
     const handleFileUpload = async (e) => {
         const file = e.target.files[0];
@@ -399,17 +406,76 @@ export default function WebinarRegistrationList() {
                     </div>
                 </div>
 
-                <DataTable
-                    columns={columns}
-                    data={filteredData}
-                    pagination
-                    highlightOnHover
-                    responsive
-                    striped
-                    dense
-                />
+                <div className="bg-white rounded-lg shadow overflow-x-auto">
+                    <table className="min-w-full border">
+                        <thead className="bg-gray-100">
+                            {table.getHeaderGroups().map(headerGroup => (
+                                <tr key={headerGroup.id}>
+                                    {headerGroup.headers.map(header => (
+                                        <th
+                                            key={header.id}
+                                            className="px-4 py-3 text-left text-sm font-semibold border"
+                                        >
+                                            {flexRender(
+                                                header.column.columnDef.header,
+                                                header.getContext()
+                                            )}
+                                        </th>
+                                    ))}
+                                </tr>
+                            ))}
+                        </thead>
 
-                {/* 📌 View Modal */}
+                        <tbody>
+                            {table.getRowModel().rows.map(row => (
+                                <tr key={row.id} className="hover:bg-gray-50">
+                                    {row.getVisibleCells().map(cell => (
+                                        <td key={cell.id} className="px-4 py-2 border text-sm">
+                                            {flexRender(
+                                                cell.column.columnDef.cell,
+                                                cell.getContext()
+                                            )}
+                                        </td>
+                                    ))}
+                                </tr>
+                            ))}
+
+                            {table.getRowModel().rows.length === 0 && (
+                                <tr>
+                                    <td colSpan={columns.length} className="text-center py-6 text-gray-500">
+                                        No registrations found
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+
+                    {/* Pagination */}
+                    <div className="flex justify-between items-center p-4">
+                        <button
+                            onClick={() => table.previousPage()}
+                            disabled={!table.getCanPreviousPage()}
+                            className="px-4 py-2 border rounded disabled:opacity-50"
+                        >
+                            Previous
+                        </button>
+
+                        <span className="text-sm">
+                            Page {table.getState().pagination.pageIndex + 1} of{" "}
+                            {table.getPageCount()}
+                        </span>
+
+                        <button
+                            onClick={() => table.nextPage()}
+                            disabled={!table.getCanNextPage()}
+                            className="px-4 py-2 border rounded disabled:opacity-50"
+                        >
+                            Next
+                        </button>
+                    </div>
+                </div>
+
+                {/*  View Modal */}
                 {isViewOpen && selectedRow && (
                     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                         <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg relative">
@@ -597,45 +663,3 @@ export default function WebinarRegistrationList() {
         </Layout>
     );
 }
-
-
-
-// import { useState } from "react";
-// import api from "../../../utils/axios.js";
-// import Swal from "sweetalert2";
-// export default function WebinarRegistrationList() {
-//   const [file, setFile] = useState(null);
-//   const [loading, setLoading] = useState(false);
-//   const handleFileChange = (e) => {
-//     setFile(e.target.files[0]);
-//   };
-//   const handleImport = async () => {
-//     if (!file) {
-//       Swal.fire("Error", "Please select a JSON file", "error");
-//       return;
-//     }
-//     const formData = new FormData();
-//     formData.append("file", file);
-//     setLoading(true);
-//     try {
-//       const res = await api.post("/registrations/import", formData, {
-//         headers: { "Content-Type": "multipart/form-data" },
-//       });
-//       Swal.fire("Success", `${res.data.count} records imported successfully`, "success");
-//     } catch (err) {
-//       console.error(err);
-//       Swal.fire("Error", err.response?.data?.message || "Import failed", "error");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-//   return (
-//     <div>
-//       <h2>Import Webinar Registrations</h2>
-//       <input type="file" accept=".json" onChange={handleFileChange} />
-//       <button onClick={handleImport} disabled={loading}>
-//         {loading ? "Importing..." : "Import JSON"}
-//       </button>
-//     </div>
-//   );
-// }

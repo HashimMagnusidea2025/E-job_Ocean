@@ -6,7 +6,7 @@ import {protect} from '../../middleware/auth.Middleware.js'
 const LikeRoute  = express.Router();
 
 
-LikeRoute.post('/', protect, LikeCreate);
+LikeRoute.post('/', LikeCreate);
 LikeRoute.get('/likes/:id/:type', getLikeCount);
 
 LikeRoute.post('/view/:id', incrementView);

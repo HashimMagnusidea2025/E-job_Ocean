@@ -37,7 +37,7 @@ export default function PurchasedCvsPackage() {
                     </table>
                 </div>
 
-                {/* Upgrade Section */}
+               
                 <div>
                     <UpgradeCVSearchPackages />
                 </div>

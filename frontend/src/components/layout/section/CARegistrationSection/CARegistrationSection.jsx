@@ -26,27 +26,6 @@ export default function CARegistrationSection() {
         </h2>
 
         
-        {/* <p className="mt-4 text-gray-600 text-lg max-w-xl">
-            Connect with genuine business clients, build credibility,
-            and expand your CA practice on a trusted professional platform.
-        </p> */}
-
-        
-        {/* <ul className="mt-4 space-y-4 text-gray-700">
-            {[
-                "Verified & high-intent client leads",
-                "Professional CA profile & branding",
-                "No registration or subscription fee",
-                "Fast onboarding & dedicated support",
-            ].map((text, i) => (
-                <li key={i} className="flex items-center justify-center gap-3">
-                    <FaCheckCircle className="text-[#339ca0]" />
-                    <span>{text}</span>
-                </li>
-            ))}
-        </ul> */}
-
-        {/* Button */}
         <button
             onClick={() => navigate("/ca-register")}
             className="mt-10 inline-flex items-center gap-3 bg-[#339ca0] text-white px-10 py-4 rounded-xl text-lg font-semibold shadow-lg hover:shadow-xl hover:bg-[#2b8588] transition-all duration-300"

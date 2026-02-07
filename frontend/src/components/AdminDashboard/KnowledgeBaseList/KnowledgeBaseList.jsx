@@ -148,7 +148,7 @@ export default function KnowledgeBaseList() {
             }
         });
     };
-   // ================= COLUMNS =================
+   // COLUMNS 
   const columns = useMemo(
     () => [
       {
@@ -162,11 +162,18 @@ export default function KnowledgeBaseList() {
       {
         header: "Description",
         accessorKey: "description",
-        cell: (info) => info.getValue() || "-",
+        cell: (info) => {
+          const value = info.getValue() || "-";
+          return value.length > 50 ? value.substring(0, 30) + "..." : value;
+        },
       },
       {
         header: "Keywords",
         accessorKey: "keywords",
+        cell: (info) => {
+          const value = info.getValue() || "-";
+          return value.length > 50 ? value.substring(0, 30) + "..." : value;
+        },
       },
       {
         header: "PDF",
@@ -221,7 +228,7 @@ export default function KnowledgeBaseList() {
     []
   );
 
-  // ================= TABLE INSTANCE =================
+  // TABLE INSTANCE 
   const table = useReactTable({
     data,
     columns,
@@ -231,7 +238,6 @@ export default function KnowledgeBaseList() {
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
-
 
 
     const handleEdit = (row) => {
@@ -265,14 +271,16 @@ export default function KnowledgeBaseList() {
           </button>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto bg-white shadow rounded">
-          <table className="w-full border-collapse">
+        <div className="bg-white rounded-lg shadow overflow-x-auto">
+          <table className="min-w-full border">
             <thead className="bg-gray-100">
-              {table.getHeaderGroups().map((hg) => (
-                <tr key={hg.id}>
-                  {hg.headers.map((header) => (
-                    <th key={header.id} className="p-3 text-left border">
+              {table.getHeaderGroups().map(headerGroup => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map(header => (
+                    <th
+                      key={header.id}
+                      className="px-4 py-3 text-left text-sm font-semibold border"
+                    >
                       {flexRender(
                         header.column.columnDef.header,
                         header.getContext()
@@ -284,10 +292,10 @@ export default function KnowledgeBaseList() {
             </thead>
 
             <tbody>
-              {table.getRowModel().rows.map((row) => (
+              {table.getRowModel().rows.map(row => (
                 <tr key={row.id} className="hover:bg-gray-50">
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="p-3 border">
+                  {row.getVisibleCells().map(cell => (
+                    <td key={cell.id} className="px-4 py-2 border text-sm">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -296,32 +304,40 @@ export default function KnowledgeBaseList() {
                   ))}
                 </tr>
               ))}
+
+              {table.getRowModel().rows.length === 0 && (
+                <tr>
+                  <td colSpan={columns.length} className="text-center py-6 text-gray-500">
+                    No knowledge base found
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
-        </div>
 
-        {/* Pagination */}
-        <div className="flex justify-between items-center mt-4">
-          <button
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-            className="px-3 py-1 border rounded"
-          >
-            Previous
-          </button>
+          {/* Pagination */}
+          <div className="flex justify-between items-center p-4">
+            <button
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+              className="px-4 py-2 border rounded disabled:opacity-50"
+            >
+              Previous
+            </button>
 
-          <span>
-            Page {table.getState().pagination.pageIndex + 1} of{" "}
-            {table.getPageCount()}
-          </span>
+            <span className="text-sm">
+              Page {table.getState().pagination.pageIndex + 1} of{" "}
+              {table.getPageCount()}
+            </span>
 
-          <button
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-            className="px-3 py-1 border rounded"
-          >
-            Next
-          </button>
+            <button
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+              className="px-4 py-2 border rounded disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
     </Layout>

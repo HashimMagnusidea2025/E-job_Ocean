@@ -16,8 +16,8 @@ import noImg from '../../media/png/no-image.png';
 import Layout from "../seekerDashboard/partials/layout";
 import { useState, useEffect } from "react";
 import axios from '../../utils/axios.js';
-const baseURL = import.meta.env.VITE_BACKEND_URL; // Vite
-// या CRA में: const baseURL = process.env.REACT_APP_BACKEND_URL;
+const baseURL = import.meta.env.VITE_BACKEND_URL; 
+
 import { FollowSocialsEmployer } from "../ui/cards/cards.jsx";
 export default function CompanyPublicProfile() {
 
@@ -65,7 +65,7 @@ export default function CompanyPublicProfile() {
             return;
         }
 
-        // ✅ Check if the location is already an iframe code (from old data)
+        //  Check if the location is already an iframe code (from old data)
         if (location.includes('<iframe')) {
             // Extract the src URL from iframe code
             const srcMatch = location.match(/src="([^"]*)"/);
@@ -77,7 +77,7 @@ export default function CompanyPublicProfile() {
                 setMapEmbedCode(`https://maps.google.com/maps?q=${encodedLocation}&output=embed`);
             }
         } else {
-            // ✅ Normal address - generate map URL
+            //  Normal address - generate map URL
             const encodedLocation = encodeURIComponent(location);
             setMapEmbedCode(`https://maps.google.com/maps?q=${encodedLocation}&output=embed`);
         }
@@ -97,7 +97,7 @@ export default function CompanyPublicProfile() {
                     }
                 } catch (err) {
                     console.error("Error fetching country:", err);
-                    newLocationNames.country = address.country; // Fallback to ID if name not found
+                    newLocationNames.country = address.country; 
                 }
             }
 
@@ -110,11 +110,11 @@ export default function CompanyPublicProfile() {
                     }
                 } catch (err) {
                     console.error("Error fetching state:", err);
-                    newLocationNames.state = address.state; // Fallback to ID if name not found
+                    newLocationNames.state = address.state; 
                 }
             }
 
-            // Fetch city name
+          
 
             if (address.city) {
                 try {
@@ -124,7 +124,7 @@ export default function CompanyPublicProfile() {
                     }
                 } catch (err) {
                     console.error("Error fetching city:", err);
-                    newLocationNames.city = address.city; // Fallback to ID if name not found
+                    newLocationNames.city = address.city; 
                 }
             }
 
@@ -154,11 +154,11 @@ export default function CompanyPublicProfile() {
     const getFullImageUrl = (path) => {
         if (!path) return noImg;
         if (path.startsWith('http')) return path;
-        // Replace with your actual backend base URL
+        
         return `${baseURL}${path}`;
     };
 
-    // Generate location string with proper names
+
 
     const getLocationString = () => {
         if (!companyData?.company?.address) return "Location not specified";
@@ -232,49 +232,7 @@ export default function CompanyPublicProfile() {
 
                     <div className="w-full lg:w-[320px] flex flex-col gap-6">
 
-                        {/* <div className="w-full bg-white shadow-lg rounded-xl p-6 space-y-4 border">
-                            <h2 className="text-xl font-semibold text-blue-600 text-center">Company Detail</h2>
-
-                            <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 text-sm text-gray-700">
-                                <div className="flex flex-col items-center gap-2">
-                                    <FaCheckCircle className="text-blue-500" size={22} />
-                                    <span className="font-medium">Offices:</span>
-                                    <span></span>
-                                </div>
-
-                                {companyData?.company?.foundedYear && (
-                                    <div className="flex flex-col items-center text-center gap-1">
-                                        <FaCalendarAlt className="text-blue-500" size={22} />
-                                        <span className="font-medium">Founded:</span>
-                                        <span>{companyData.company.foundedYear}</span>
-                                    </div>
-                                )}
-
-
-                                {companyData?.company?.employeesCount && (
-                                    <div className="flex flex-col items-center gap-2">
-                                        <BsPersonVcard className="text-blue-500" size={22} />
-                                        <span className="font-medium">Employees:</span>
-                                        <span>{companyData.company.employeesCount}</span>
-                                    </div>
-                                )}
-                                {companyData?.company?.officesCount && (
-                                    <div className="flex flex-col items-center gap-2">
-                                        <FaMapMarkerAlt className="text-blue-500" size={22} />
-                                        <span className="font-medium">Offices:</span>
-                                        <span>{companyData.company.officesCount}</span>
-                                    </div>
-                                )}
-                                {companyData?.company?.ownershipType && (
-                                    <div className="flex flex-col items-center gap-2">
-                                        <FaBriefcase className="text-blue-500" />
-                                        <span className="font-medium">Ownership:</span>
-                                        <span>{companyData.company.ownershipType}</span>
-                                    </div>
-                                )}
-
-                            </div>
-                        </div> */}
+                        
 
                         <div className="w-full bg-white shadow-xl rounded-2xl p-6 border border-gray-200">
 
@@ -333,7 +291,6 @@ export default function CompanyPublicProfile() {
                             </div>
                         </div>
 
-
                         <FollowSocialsEmployer
                             socialLinks={{
                                 facebook: companyData?.company?.socialLinks?.facebook || "",
@@ -341,7 +298,7 @@ export default function CompanyPublicProfile() {
                                 linkedin: companyData?.company?.socialLinks?.linkedin || "",
                                 pinterest: companyData?.company?.socialLinks?.pinterest || "",
                                 other: companyData?.company?.socialLinks?.other || "",
-                                // Add instagram and telegram if they exist in your data
+                                
                                 instagram: companyData?.company?.socialLinks?.instagram || "",
                                 telegram: companyData?.company?.socialLinks?.telegram || ""
                             }}
@@ -376,46 +333,7 @@ export default function CompanyPublicProfile() {
                 </div>
 
 
-                {/* <div className="pt-10">
-                    <h2 className="text-xl font-semibold sm:text-[25px]">Current Openings</h2>
-                    <div className="flex flex-wrap justify-center sm:justify-start gap-4 mt-4">
-                        {[1, 2, 3, 4].map((_, i) => (
-                            <div key={i} className="max-w-xs w-full bg-white border shadow-md rounded-xl py-8 px-5 space-y-3 text-sm">
-                                <div className="flex items-center gap-2 text-gray-500">
-                                    <FaSuitcase className="text-gray-400" />
-                                    <span> Full Time/Permanent</span>
-                                </div>
-
-                                <h3 className="font-semibold text-lg text-gray-900 truncate">
-                                    Full Stack Developer
-                                </h3>
-
-                                <p className="text-gray-700">
-                                    <strong>Salary:</strong> <span className="font-bold text-black">0 - 0</span>
-                                </p>
-
-                                <div className="flex items-center text-blue-600 gap-1">
-                                    <FaMapMarkerAlt className="text-blue-500" />
-                                    <span className="font-semibold"> Atlanta</span>
-                                </div>
-
-                                <div className="bg-gray-100 p-3 rounded-lg flex items-center justify-between">
-                                    <div>
-                                        <p className="text-gray-500 text-xs">Jun 18, 2025</p>
-                                        <p className="text-gray-700 font-medium">Multimedia Design</p>
-                                    </div>
-                                    <img
-                                        src={noImg}
-                                        alt="Company Logo"
-                                        className="w-10 h-10 object-contain rounded-full"
-                                    />
-                                </div>
-
-
-                            </div>
-                        ))}
-                    </div>
-                </div> */}
+                
             </div>
         </Layout>
     );

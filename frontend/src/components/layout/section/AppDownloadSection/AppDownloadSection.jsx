@@ -127,11 +127,6 @@ export default function AppDownloadSection() {
 
 
 
-
-// ✅ Placement Program Section with same design
-
-
-
 export function PlacementProgramSection() {
 
   const [icons, setIcons] = useState([]);
@@ -183,14 +178,14 @@ export function PlacementProgramSection() {
             </h2>
 
             {/* Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-6">
+            {/* <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-6">
               <button className="bg-black text-white px-6 py-3 rounded-md shadow hover:bg-gray-800 transition-all">
                 Apply Now
               </button>
               <button className="bg-black text-white px-6 py-3 rounded-md shadow hover:bg-gray-800 transition-all">
                 Know More
               </button>
-            </div>
+            </div> */}
 
             {/* <div className="border-t border-white/40 pt-6 text-white w-full">
               <p className="font-semibold text-lg mb-4 text-center lg:text-left">
@@ -259,21 +254,21 @@ export function PlacementProgramSection() {
                 })}
               </div>
 
-              {/* Telegram CTA – sirf tab dikhe jab telegram active ho */}
-              {icons.some((i) => i.name.toLowerCase() === "telegram") && (
+              
+              {icons.some((i) => i.name.toLowerCase() === "linkedin") && (
                 <div className="pt-8 text-center lg:text-left">
                   <h3 className="text-[22px] sm:text-[26px] lg:text-[28px] font-medium mb-4">
                     Get Job/Articleship Updates on Telegram
                   </h3>
                   <a
                     href={
-                      icons.find((i) => i.name.toLowerCase() === "telegram")?.link
+                      icons.find((i) => i.name.toLowerCase() === "linkedin")?.link
                     }
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-block text-[18px] bg-black text-white px-6 py-3 rounded-md shadow hover:bg-gray-800 transition-all"
                   >
-                    Join Us On Telegram
+                    Join Us On Linkedin
                   </a>
                 </div>
               )}

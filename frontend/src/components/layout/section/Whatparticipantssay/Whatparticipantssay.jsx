@@ -4,6 +4,7 @@ import { Navigation, } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import MamtaJangra from '../../../../media/jpg/MamtaJangra.jpg';
+import noImg from '../../../../media/png/no-image.png';
 
 const testimonials = [
     {
@@ -89,14 +90,7 @@ export default function Testimonials() {
                                         {item.text}
                                         <FaQuoteRight className="inline ml-1" />
                                     </p>
-                                    <div className="flex items-center justify-between">
-                                        <h3 className="font-semibold text-base">{item.name}</h3>
-                                        <img
-                                            src={item.companyLogo}
-                                            alt={item.company}
-                                            className="w-[40px] h-auto object-contain"
-                                        />
-                                    </div>
+                                    
                                 </div>
                             </div>
                         </SwiperSlide>

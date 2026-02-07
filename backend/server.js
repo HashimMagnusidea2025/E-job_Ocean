@@ -61,8 +61,12 @@ import ContactRoute from './src/module/contact/contact.Routes.js';
 import CourseRouter from './src/module/Course/Course.Route.js';
 import OurFoundersRouter from './src/module/OurFounders/OurFounders.Routes.js';
 import SocialMediaIconrouter from './src/module/SocialMediaIcon/SocialMediaIcon.Route.js';
+import CourseRegisterRouter from './src/module/CourseRegister/CourseRegister.Route.js';
+import MeetOurTeamRouter from './src/module/meetaourteam/meetourteam.Routes.js'
+import "./src/cron/webinarReminder.cron.js";
+
 import cors from 'cors';
-import dotenv from 'dotenv'	
+import dotenv from 'dotenv'
 dotenv.config();
 
 
@@ -84,13 +88,13 @@ server.use("/api-docs", (req, res, next) => {
 }, swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 server.use(cors({
-  origin: 'http://localhost:5173',
-  origin: [ "http://localhost:5173","https://site.ejobocean.in", "http://ejobocean.in"],
-  methods: ['GET', 'POST', 'PUT', "PATCH", 'DELETE'],
+
+  origin: ['http://localhost:5173', 'https://ejobocean.in', 'https://www.ejobocean.in'],
+
   credentials: true
 }));
 
-server.use(express.static(path.join(__dirname, "dist")));
+
 
 server.set("trust proxy", true);
 
@@ -108,11 +112,11 @@ server.use('/api/course-category', Courserouter);
 server.use('/api/cmspage', CMSRouter);
 server.use('/api/general-settings', generalSettingsRoute);
 server.use('/api/cms-page', CMSPageRoutes);
-server.use('/api/cms-content',CMSContentrouter);
+server.use('/api/cms-content', CMSContentrouter);
 server.use('/api/country', CountryRouter);
 server.use('/api/state', StateRouter);
 server.use('/api/city', CityRouter);
-server.use('/api/post-offices',PostOfficerouter);
+server.use('/api/post-offices', PostOfficerouter);
 server.use('/api/professional-categories', ProfessionalCategoryRouter);
 server.use('/api/location', LocationRouter);
 server.use('/api/CA-Fresher', CaFresherRouter);
@@ -135,13 +139,13 @@ server.use('/api/established-in-category', EstablishedInCategoryRouter);
 // server.use('/api/founded-year-category', FoundedYearCategoryRouter)
 
 
-server.use('/api/build-Resume',buildResumeRoute);
+server.use('/api/build-Resume', buildResumeRoute);
 
 server.use('/api/blogs/like', LikeRoute);
 server.use('/api/comment', CommentRuter);
 server.use('/api/reaction', ReactionRouter);
 
-server.use('/api/favorite',FavoriteRoute);
+server.use('/api/favorite', FavoriteRoute);
 
 server.use('/api/speakers', SpeakerRouter);
 server.use('/api/webinars', WebinarRouter);
@@ -160,15 +164,18 @@ server.use('/api/knowlege-base-register', knowlegeBaseRegisterRouter);
 
 server.use('/api/seeker', SeekerInformationRouter);
 
-server.use('/api/job-alerts',JobAlertsRoute);
+server.use('/api/job-alerts', JobAlertsRoute);
 
 server.use('/api/google', Googlerouter);
 
-server.use('/api/contact',ContactRoute);
+server.use('/api/contact', ContactRoute);
 server.use('/api/courses', CourseRouter);
 server.use('/api/our-founders', OurFoundersRouter);
 
 server.use('/api/social-media-icons', SocialMediaIconrouter);
+
+server.use('/api/course-register', CourseRegisterRouter)
+server.use('/api/meet-our-team',MeetOurTeamRouter);
 // filterOptionRoutes //
 server.use("/api", filterOptionRouter);
 
@@ -183,13 +190,6 @@ server.use("/api", filterOptionRouter);
 //   res.send('Test route working!');
 // });
 
-server.use((req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
-});
-//  Works in Express 5+
-// server.get("/*", (req, res) => {
-//   res.sendFile(path.join(__dirname, "dist", "index.html"));
-// });
 
 
 server.listen(process.env.PORT, () => {

@@ -1,20 +1,3 @@
-// import express from 'express';
-
-// import { CreatePayment,getPayment,getPaymentByRegistration } from './Payment.controller.js';
-
-
-// const PaymentRouter = express.Router();
-
-
-// PaymentRouter.post('/',CreatePayment);
-
-
-// PaymentRouter.get('/',getPayment);
-// PaymentRouter.get('/registration/:registrationId',getPaymentByRegistration);
-
-// export default PaymentRouter;
-
-
 import express from "express";
 import { createRazorpayOrder, verifyRazorpayPayment ,getPaymentByRegistration} from "./Payment.controller.js";
 

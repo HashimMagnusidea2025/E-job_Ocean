@@ -9,12 +9,13 @@ import {
   getPaginationRowModel,
   flexRender,
 } from "@tanstack/react-table";
-
+import ReactQuill from "react-quill-new";
+import "react-quill-new/dist/quill.snow.css";
 import { FaEdit, FaTrash, FaEye } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
-const baseURL = import.meta.env.VITE_BACKEND_URL; // Vite
-// या CRA में: const baseURL = process.env.REACT_APP_BACKEND_URL;
+const baseURL = import.meta.env.VITE_BACKEND_URL;
+
 const WebinarPage = () => {
   const [webinars, setWebinars] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
@@ -41,7 +42,7 @@ const WebinarPage = () => {
     WebinarType: "",
     IncludingGST: false,
     IsActive: false,
-    Speakers: [], // Changed from Speaker to Speakers (array)
+    Speakers: [],
     WebinarImage: null,
     WebinarLogo: null,
     WebinarVideoOptional: null,
@@ -50,7 +51,7 @@ const WebinarPage = () => {
     registrationFees: "",
   });
 
-  // fetch webinars on mount
+
   useEffect(() => {
     fetchWebinars();
     fetchSpeakers();
@@ -100,13 +101,6 @@ const WebinarPage = () => {
     }
   };
 
-  // const handleChange = (e) => {
-  //   const { name, value, type, checked } = e.target;
-  //   setFormData({
-  //     ...formData,
-  //     [name]: type === "checkbox" ? checked : value,
-  //   });
-  // };
 
 
   const handleChange = (e) => {
@@ -165,14 +159,7 @@ const WebinarPage = () => {
     setModalOpen(true);
   };
 
-  // const handleEdit = (row) => {
-  //   setEditData(row);
-  //   setFormData({
-  //     ...row,
-  //     Speaker: row.Speaker?._id || ""
-  //   });
-  //   setModalOpen(true);
-  // };
+
   const handleEdit = (row) => {
     setEditData(row);
     // Convert array of speaker objects to array of speaker IDs
@@ -183,38 +170,8 @@ const WebinarPage = () => {
     });
     setModalOpen(true);
   };
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   const data = new FormData();
-  //   Object.keys(formData).forEach((key) => {
-  //     data.append(key, formData[key]);
-  //   });
-  //   const token = localStorage.getItem("token");
-  //   try {
-  //     if (editData) {
-  //       await axios.put(`/webinars/${editData._id}`, data, {
-  //         headers: {
-  //           "Content-Type": "multipart/form-data",
-  //           "Authorization": `Bearer ${token}`,
-  //         },
-  //       });
-  //       alert("Webinar updated!");
-  //     } else {
-  //       await axios.post("/webinars", data, {
-  //         headers: {
-  //           "Content-Type": "multipart/form-data",
-  //           "Authorization": `Bearer ${token}`,  //  Add this
-  //         },
-  //       });
-  //       alert("Webinar created!");
-  //     }
-  //     setModalOpen(false);
-  //     fetchWebinars();
-  //   } catch (err) {
-  //     console.error(err);
-  //     alert("Error saving webinar");
-  //   }
-  // };
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const data = new FormData();
@@ -276,26 +233,6 @@ const WebinarPage = () => {
 
 
 
-  // const handleSearch = (e) => {
-  //   const value = e.target.value.toLowerCase();
-  //   setSearchText(value);
-
-  //   const filtered = webinars.filter((webinar) => {
-  //     // Yahan aap jo columns filter karna chahte ho unhe check kar sakte ho
-  //     return (
-  //       webinar.WebinarTitle.toLowerCase().includes(value) ||
-  //       webinar.Introduction.toLowerCase().includes(value) ||
-  //       webinar.Speaker?.firstName.toLowerCase().includes(value) ||
-  //       webinar.Speaker?.lastName.toLowerCase().includes(value) ||
-  //       webinar.IsActive.toLowerCase().includes(value) ||
-  //       webinar.WebinarStartDateTime.toLowerCase().includes(value) ||
-  //       webinar.WebinarEndDateTime.toLowerCase().includes(value)
-  //     );
-  //   });
-
-  //   setFilteredWebinars(filtered);
-  // };
-
   const handleSearch = (e) => {
     const value = e.target.value.toLowerCase();
     setSearchText(value);
@@ -318,67 +255,6 @@ const WebinarPage = () => {
     setFilteredWebinars(filtered);
   };
 
-  // const columns = [
-  //   {
-  //     name: "ID",
-  //     cell: (row, index) => index + 1,
-  //     width: "80px",
-  //   },
-  //   { name: "Title", selector: (row) => row.WebinarTitle, sortable: true },
-  //   { name: "Introduction", selector: (row) => row.Introduction },
-  //   {
-  //     name: "Speakers",
-  //     cell: (row) => (
-  //       <div>
-  //         {row.Speakers?.slice(0, 2).map((speaker, idx) => (
-  //           <div key={idx} className="text-sm">
-  //             {speaker.firstName} {speaker.lastName}
-  //           </div>
-  //         ))}
-  //         {row.Speakers?.length > 2 && (
-  //           <div className="text-xs text-gray-500">
-  //             +{row.Speakers.length - 2} more
-  //           </div>
-  //         )}
-  //       </div>
-  //     ),
-  //     width: "150px"
-  //   },
-  //   { name: "Start Date", selector: (row) => row.WebinarStartDateTime },
-  //   { name: "End Date", selector: (row) => row.WebinarEndDateTime },
-  //   {
-  //     name: "Active Webinar",
-  //     selector: (row) =>
-  //       row.IsActive === "active" ? "Active" : "Inactive",
-  //   },
-  //   {
-  //     name: "Actions",
-  //     cell: (row) => (
-  //       <div className="flex gap-3">
-  //         <button
-  //           className="text-blue-500 hover:text-blue-700"
-  //           onClick={() => handleView(row)}
-  //         >
-  //           <FaEye size={22} />
-  //         </button>
-  //         <button
-  //           className="text-green-500 hover:text-green-700"
-  //           onClick={() => handleEdit(row)}
-  //         >
-  //           <FaEdit size={22} />
-  //         </button>
-  //         <button
-  //           className="text-red-500 hover:text-red-700"
-  //           onClick={() => handleDelete(row._id)}
-  //         >
-  //           <FaTrash size={22} />
-  //         </button>
-  //       </div>
-  //     ),
-  //   }
-
-  // ];
-
   const columns = [
     {
       header: "ID",
@@ -392,23 +268,7 @@ const WebinarPage = () => {
       accessorKey: "Introduction",
       header: "Introduction",
     },
-    // {
-    //   header: "Speakers",
-    //   cell: ({ row }) => (
-    //     <div>
-    //       {row.original.Speakers?.slice(0, 2).map((spk, i) => (
-    //         <div key={i} className="text-sm">
-    //           {spk.firstName} {spk.lastName}
-    //         </div>
-    //       ))}
-    //       {row.original.Speakers?.length > 2 && (
-    //         <div className="text-xs text-gray-500">
-    //           +{row.original.Speakers.length - 2} more
-    //         </div>
-    //       )}
-    //     </div>
-    //   ),
-    // },
+
 
     {
       header: "Start Date",
@@ -503,9 +363,7 @@ const WebinarPage = () => {
           </button>
         </div>
 
-        {/* Data Table */}
 
-        {/* <DataTable columns={columns} data={filteredWebinars} pagination highlightOnHover /> */}
 
         <div className="bg-white rounded-lg shadow overflow-x-auto">
           <table className="min-w-full border">
@@ -614,20 +472,6 @@ const WebinarPage = () => {
                 </label>
 
 
-                {/* Webinar Slug */}
-                {/* <label className="block">
-                  <span className="text-gray-700 flex items-center gap-1">
-                    Webinar Slug <span className="text-red-500">*</span>
-                  </span>
-                  <input
-                    type="text"
-                    name="WebinarSlug"
-                    value={formData.WebinarSlug}
-                    placeholder="Enter webinar slug"
-                    className="w-full border p-2 rounded mt-1"
-                    onChange={handleChange}
-                  />
-                </label> */}
 
                 <label className="block">
                   <span className="text-gray-700 flex items-center gap-1">
@@ -641,9 +485,9 @@ const WebinarPage = () => {
                     className="w-full border p-2 rounded mt-1"
                     onChange={(e) => {
                       const value = e.target.value
-                        .toLowerCase()         // convert to lowercase
-                        .replace(/\s+/g, "-")  // replace spaces with hyphen
-                        .replace(/[^a-z0-9\-]/g, ""); // remove special characters (optional)
+                        .toLowerCase()
+                        .replace(/\s+/g, "-")
+                        .replace(/[^a-z0-9\-]/g, "");
 
                       setFormData({ ...formData, WebinarSlug: value });
                     }}
@@ -683,15 +527,19 @@ const WebinarPage = () => {
                 <div className="md:col-span-2">
                   <label className="block">
                     <span className="text-gray-700 font-medium">Keywords</span>
-                    <textarea
-                      name="Keywords"
+
+                    <ReactQuill
+                      theme="snow"
                       value={formData.Keywords}
-                      placeholder="Keywords"
-                      className="w-full border p-2 rounded mt-1"
-                      onChange={handleChange}
+                      onChange={(value) =>
+                        setFormData({ ...formData, Keywords: value })
+                      }
+                      className="mt-1 bg-white"
+                      placeholder="Enter keywords..."
                     />
                   </label>
                 </div>
+
 
                 {/* Number of Seats */}
                 <label className="block md:col-span-2">
@@ -984,7 +832,10 @@ const WebinarPage = () => {
                     <p><span className="font-semibold">Slug:</span> {viewData.WebinarSlug}</p>
                     <p className="md:col-span-2"><span className="font-semibold">Introduction:</span> {viewData.Introduction}</p>
                     <p className="md:col-span-2"><span className="font-semibold">Description:</span> {viewData.Description}</p>
-                    <p className="md:col-span-2"><span className="font-semibold">Keywords:</span> {viewData.Keywords}</p>
+                    <div
+                      dangerouslySetInnerHTML={{ __html: viewData.Keywords }}
+                    />
+
                     <p><span className="font-semibold">Seats:</span> {viewData.NumberofSeats}</p>
 
                     {viewData.WebinarType === "Paid" && (
@@ -1047,13 +898,6 @@ const WebinarPage = () => {
                     <p><span className="font-semibold">Registration Close:</span> {formatDate(viewData.RegistrationCloseDateTime)}</p>
                   </div>
                 </div>
-
-                {/* Speaker */}
-                {/* <div className="md:col-span-2 p-6 bg-white rounded-xl border shadow-sm">
-                  <h4 className="text-lg font-semibold mb-4 border-b pb-2 text-gray-900">Speaker</h4>
-                  <p className="text-gray-800">{viewData.Speaker?.salutation} {viewData.Speaker?.firstName} {viewData.Speaker?.lastName}</p>
-                </div> */}
-
 
 
                 {/* Media Section */}
@@ -1132,9 +976,6 @@ const WebinarPage = () => {
             </div>
           </div>
         )}
-
-
-
 
       </div>
     </Layout>

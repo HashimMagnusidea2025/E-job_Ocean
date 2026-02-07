@@ -16,12 +16,12 @@ export default function Navbar() {
   const [profileImage, setProfileImage] = useState(null);
   const [user, setUser] = useState(null);
   const [companyLogo, setCompanyLogo] = useState(null);
-  const baseURL = import.meta.env.VITE_BACKEND_URL; // Vite
-  // या CRA में: const baseURL = process.env.REACT_APP_BACKEND_URL;
+  const baseURL = import.meta.env.VITE_BACKEND_URL;
+
 
   const fetchCompanyLogo = async () => {
     try {
-      const response = await axios.get('/general-settings'); // ya aapke backend endpoint
+      const response = await axios.get('/general-settings');
       if (response.data && response.data.logo) {
         setCompanyLogo(`${baseURL}${response.data.logo}`);
       }
@@ -39,7 +39,7 @@ export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // API function to get company logo
+
   const getCompanyLogo = async () => {
     try {
       const response = await axios.get('/company-information/user/logo', {
@@ -68,96 +68,11 @@ export default function Navbar() {
       setUser(null);
     }
 
-    setShowProfile(false); // close dropdown on route change
+    setShowProfile(false);
   }, [location]);
 
 
-  // Load user data & listen for external updates
-  // useEffect(() => {
-  //   const loadUserData = async () => {
-  //     const userData = localStorage.getItem("user");
-  //     if (userData) {
-  //       const parsedUser = JSON.parse(userData);
-  //       setUser(parsedUser);
-  //       setIsLoggedIn(!!localStorage.getItem("token"));
 
-  //       try {
-  //         // 🔹 SIMPLIFIED VERSION: सभी roles के लिए common approach
-  //         if (parsedUser.profilePicture) {
-  //           // अगर user के पास profilePicture है
-  //           setProfileImage(`${baseURL}${parsedUser.profilePicture}`);
-  //         } else if (parsedUser.roleID?.name === "superadmin") {
-  //           // केवल superadmin के लिए default logo
-  //           setProfileImage(logo);
-  //         } else {
-  //           // बाकी सभी के लिए null (default avatar show होगा)
-  //           setProfileImage(null);
-  //         }
-
-  //         console.log("Parsed User Data:", parsedUser);
-  //       } catch (error) {
-  //         console.error("Error processing user data:", error);
-  //         setProfileImage(null);
-  //       }
-  //     }
-  //   };
-
-  //   loadUserData();
-  //   window.addEventListener("userUpdated", loadUserData);
-  //   return () => {
-  //     window.removeEventListener("userUpdated", loadUserData);
-  //   };
-  // }, []);
-
-  // Load user data & listen for external updates
-  // useEffect(() => {
-  //   const loadUserData = async () => {
-  //     const userData = localStorage.getItem("user");
-  //     if (userData) {
-  //       const parsedUser = JSON.parse(userData);
-  //       setUser(parsedUser);
-  //       setIsLoggedIn(!!localStorage.getItem("token"));
-
-  //       try {
-  //         if (parsedUser.roleID?.name === "Employer") {
-  //           // 🔹 Employer -> fetch company logo
-  //           const response = await getCompanyLogo();
-  //           if (response.success) {
-  //             const fullLogoUrl = `${baseURL}${response.logo}`;
-  //             setProfileImage(fullLogoUrl);
-  //             console.log("Employer Logo URL:", fullLogoUrl);
-  //           } else {
-  //             setProfileImage(null);
-  //           }
-  //         } else if (parsedUser.roleID?.name === "mentor") {
-  //           const response = await getCompanyLogo();
-  //           const fullLogoUrl = `${baseURL}${response.logo}`;
-  //           setProfileImage(fullLogoUrl);
-  //         } else if (parsedUser.roleID?.name === "seeker") {
-  //           const response = await getCompanyLogo();
-  //           const fullLogoUrl = `${baseURL}${response.logo}`;
-  //           setProfileImage(fullLogoUrl);
-  //         } else if (parsedUser.roleID?.name === "superadmin") {
-  //           // 🔹 Superadmin -> use default logo
-  //           setProfileImage(logo);
-  //         }
-
-  //         console.log("Parsed User Data:", parsedUser);
-  //       } catch (error) {
-  //         console.error("Error fetching logo/profile:", error);
-  //         setProfileImage(null);
-  //       }
-  //     }
-
-  //   };
-
-  //   loadUserData(); // On initial load
-  //   window.addEventListener("userUpdated", loadUserData);
-  //   return () => {
-  //     window.removeEventListener("userUpdated", loadUserData);
-  //   };
-  // }, []);
-  // Navbar.js में loadUserData function को replace करें
   useEffect(() => {
     const loadUserData = async () => {
       const userData = localStorage.getItem("user");
@@ -169,7 +84,7 @@ export default function Navbar() {
         setIsLoggedIn(true);
 
         try {
-          // 🔹 SEEKER के लिए अलग logic
+          //  SEEKER के लिए अलग logic
           if (parsedUser.roleID?.name === "seeker") {
             try {
               // Seeker profile data fetch करें
@@ -283,309 +198,443 @@ export default function Navbar() {
   };
 
   return (
-    <div className='sticky top-0 z-50 bg-[#edf1f9]'>
-      <div className='container mx-auto'>
-        <nav className="h-[70px] text-black px-10 flex items-center justify-between relative font-[Poppins] z-50">
-          <div className="flex items-center">
-            <Link to="/">
-              <img
-                src={companyLogo || '/media/logo/ejob_ocean.png'}
-                alt="Company Logo"
-                className="h-8"
-              />
-            </Link>
+    <>
 
-          </div>
+      <div className="bg-[linear-gradient(to_right,_#090A47,_#20AEB2)] to-black shadow-sm sticky top-0 z-50">
+        <div className="container mx-auto py-2">
+          <div className="flex justify-end px-6">
+            <ul className="flex items-center gap-3 text-sm font-semibold text-white">
 
-          <div className="text-4xl cursor-pointer block md:hidden" onClick={toggleMenu}>
-            ☰
-          </div>
-
-          <ul className="hidden md:flex items-center gap-4 text-sm font-medium px-6 py-4">
-            <Link to='/blogs'><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">BLOGS</li></Link>
-            {/* <li className="relative">
-              
-              <span onClick={toggleDropdown} className=" cursor-pointer p-4">
-                <Link to='/courses' className='hover:text-[#339ca0]'>COURSES</Link>
-              </span>
-              {showDropdown && (
-                <div className="absolute left-[-110px] top-[28px] mt-1 w-[900px] bg-white border shadow-xl flex z-50 p-16 rounded-lg">
-                  <div className="w-1/3 border-r pr-4">
-                    <ul className="space-y-2 font-semibold text-sm">
-                      <li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">FLAGSHIP MASTERCLASSES [DOMAIN-WISE]</li>
-                      <li className="hover:bg-[#339ca0] hover:text-white cursor-pointer p-2">FINANCE TOOLS MASTERCLASSES</li>
-                      <li className="hover:bg-[#339ca0] hover:text-white cursor-pointer p-2">INTERVIEW AND SOFT SKILLS</li>
-                      <li className="hover:bg-[#339ca0] hover:text-white cursor-pointer p-2">COMBO PACKAGES</li>
-                      <li className="hover:bg-[#339ca0] hover:text-white cursor-pointer p-2">FREE COURSES</li>
-                      <button className="mt-4 bg-black text-white px-4 py-2 rounded w-full">VIEW ALL COURSES</button>
-                    </ul>
-                  </div>
-                  <div className="w-2/3 grid grid-cols-2 gap-4 pl-4 text-sm">
-                    {[
-                      "Investment Banking Masterclass",
-                      "IND AS & IFRS Masterclass",
-                      "AI & ChatGPT For Finance MasterClass",
-                      "Dubai (UAE) Tax MasterClass",
-                      "Audit MasterClass",
-                      "Financial Statement MasterClass",
-                      "Financial Modelling & Valuation MasterClass",
-                      "GST MasterClass"
-                    ].map((item, idx) => (
-                      <Link key={idx} className="p-3 hover:bg-[#339ca0] hover:text-white cursor-pointer">{item}</Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </li> */}
-
-            {/* <li><Link to="/placement-program" className="hover:text-[#339ca0]">PLACEMENT PROGRAM</Link></li> */}
-            <li><Link to="/webinars" className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">WEBINARS</Link></li>
-            <li><Link to="/hall-of-fame" className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer"> MENTORSHIP</Link></li>
-            {/* <li><Link to="/live-mentorship" className="hover:text-[#339ca0]">LIVE MENTORSHIP</Link></li> */}
-
-            <Link to="/placement-program">
-              <li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">JOBS</li>
-            </Link>
-            <Link to='/about-us'><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">ABOUT US</li></Link>
-            <Link to="/knowledge-base"><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">KNOWLEDGE-BASE</li></Link>
-            {/* <li className="relative">
-              <span onClick={toggleMoreDropdown} className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">MORE</span>
-              {showMoreDropdown && (
-                <div className="absolute left-[-130px] top-[28px] mt-1 w-[250px] bg-white border shadow-xl z-50 p-6 rounded-lg text-sm">
-                  <ul className="space-y-3">
-                    <li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">WHATSAPP GROUPS</li> 
-
-                    <Link to='/testimonials-page'><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">TESTIMONIALS</li></Link>
-                    <Link to="/become-a-mentor"><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">BECOME A MENTOR</li></Link>
-
-                    <li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">HIRE FORM US</li>
-                    <li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">B2B CORPORATE TRAINING</li>
-                    <Link to='/about-us'><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">ABOUT US</li></Link>
-                    <Link to="/knowledge-base"><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">KNOWLEDGE-BASE</li></Link>
-
-                  </ul>
-                </div>
-              )}
-            </li> */}
-
-            <Link to="/ca-register"><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">CA Fresher</li></Link>
-
-            {!isLoggedIn ? (
-              <>
-                <li onClick={() => setShowRegisterModal(true)} className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">Register</li>
-                <li onClick={() => setShowLoginModal(true)} className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">LOGIN</li>
-              </>
-            ) : (
-              <div className="relative profile-dropdown">
-                <button
-                  className="flex items-center gap-2 font-semibold focus:outline-none"
-                  onClick={() => setShowProfile(prev => !prev)}
-                >
-                  {profileImage ? (
-                    <img
-                      src={getImageSource()}
-                      alt="Profile"
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
-                      <FaUser className="text-gray-600" />
-                    </div>
-                  )}
-                  <span className="hidden md:inline">{user?.firstName || "Admin"}</span>
-                </button>
-
-                {showProfile && (
-                  <div className="absolute right-0 mt-2 w-60 bg-white border rounded-md shadow-md z-10">
-                    <div className="flex items-center gap-3 p-3 border-b">
-                      <div>
-                        <div className='flex gap-2 items-center'>
-                          {profileImage ? (
-                            <img
-                              src={getImageSource()}
-                              alt="Profile"
-                              className="w-10 h-10 rounded-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
-                              <FaUser className="text-gray-600" />
-                            </div>
-                          )}
-                          <p className="font-medium text-sm">
-                            {user ? `${user.firstName} ${user.lastName}` : "Admin"}
-                          </p>
-                        </div>
-
-                        <p className="text-xs text-gray-500">  {user?.email || "@example.com"}</p>
-                      </div>
-                    </div>
-                    <ul className="text-sm text-gray-700">
-                      <li
-                        onClick={() => {
-                          const roleName = user?.roleID?.name?.toLowerCase();
-                          if (roleName === "seeker") navigate("/seeker-dashboard");
-                          else if (roleName === "employer") navigate("/employer-dashboard");
-                          else if (roleName === "superadmin") navigate("/admin-dash");
-                          else if (roleName === "mentor") navigate('/mentor-dashboard')
-                          else navigate("/");
-                          setShowProfile(false);
-                        }}
-                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
-                      >
-                        <FaUser /> Profile
-                      </li>
-                      {/* <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2">
-                                  <FaEnvelope /> Messages
-                                </li> */}
-                      <li
-                        onClick={handleLogout}
-                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2 text-red-500"
-                      >
-                        <FaSignOutAlt /> Logout
-                      </li>
-                    </ul>
-                  </div>
-                )}
-              </div>
-            )}
-          </ul>
-
-          {/* Mobile Menu */}
-          {menuOpen && (
-            <ul className="space-y-2 absolute top-[70px] left-0 w-full bg-white shadow-md py-4 px-6 flex flex-col md:hidden text-sm font-medium z-50">
-              <li onClick={closeMenu} className="hover:bg-[#339ca0] border-b block hover:text-white p-2 rounded cursor-pointer"><Link to='/blogs' >BLOGS</Link></li>
-              {/* <li onClick={closeMenu}><Link to="/Courses" className="p-2 border-b block hover:text-[#339ca0]">COURSES</Link></li> */}
-
-              <li onClick={closeMenu}><Link to="/webinars" className="p-2 border-b block hover:text-[#339ca0]">WEBINARS</Link></li>
-              <li onClick={closeMenu}><Link to="/hall-of-fame" className="p-2 border-b block hover:text-[#339ca0]">HALL OF FAME</Link></li>
-              <li onClick={closeMenu}><Link to="/live-mentorship" className="p-2 border-b block hover:text-[#339ca0]"> MENTORSHIP</Link></li>
-
-              <li onClick={closeMenu}><Link to="/placement-program" className="p-2 border-b block hover:text-[#339ca0]">JOBS</Link></li>
-              <li onClick={closeMenu} className="p-2 border-b block hover:text-[#339ca0]">
-                <Link to="/about-us" className="hover:text-[#339ca0] block">ABOUT US</Link>
-              </li>
-              <li onClick={closeMenu} className="p-2 border-b block hover:text-[#339ca0]">
-                <Link to="/knowledge-base" className="hover:text-[#339ca0] block">KNOWLEDGE-BASE</Link>
-              </li>
-              {/* <li className="border-b">
-                <div onClick={toggleMoreDropdown} className="p-2 flex justify-between items-center cursor-pointer hover:text-[#339ca0]">
-                  <span>MORE</span>
-                  <span>{showMoreDropdown ? "▲" : "▼"}</span>
-                </div>
-
-                {showMoreDropdown && (
-                  <ul className="pl-4 mt-2 space-y-3 text-[15px]">
-                    
-                    <li onClick={closeMenu}>
-                      <Link to="/testimonials-page" className="hover:text-[#339ca0] block">TESTIMONIALS</Link>
-                    </li>
-                    <li onClick={closeMenu}>
-                      
-                    </li>
-                    
-                    <li onClick={closeMenu}>
-                      <Link to="/about-us" className="hover:text-[#339ca0] block">ABOUT US</Link>
-                    </li>
-                    <li onClick={closeMenu}>
-                      <Link to="/knowledge-base" className="hover:text-[#339ca0] block">KNOWLEDGE-BASE</Link>
-                    </li>
-                  </ul>
-                )}
-              </li> */}
               {!isLoggedIn ? (
                 <>
-                  <li onClick={closeMenu}><Link to="/ca-register" className="p-2 block hover:text-[#339ca0]">CA Fresher</Link></li>
-                  <li onClick={() => { setShowRegisterModal(true); closeMenu(); }} className="p-2 cursor-pointer hover:text-[#339ca0]">Register</li>
-                  <li onClick={() => { setShowLoginModal(true); closeMenu(); }} ><Link to="/login" className="p-2 block hover:text-[#339ca0]">Login</Link></li>
+                  {/* REGISTER */}
+                  <li
+                    onClick={() => setShowRegisterModal(true)}
+                    className="
+                px-4 py-2 rounded-lg
+                bg-white/10 backdrop-blur-md
+                border border-white/20
+                hover:bg-white hover:text-[#339ca0]
+                transition-all duration-300
+                cursor-pointer
+              "
+                  >
+                    REGISTER
+                  </li>
+
+                  {/* LOGIN */}
+                  <li
+                    onClick={() => setShowLoginModal(true)}
+                    className="
+                px-4 py-2 rounded-lg
+                bg-white text-[#339ca0]
+                hover:bg-gray-100
+                transition-all duration-300
+                cursor-pointer
+                shadow-sm
+              "
+                  >
+                    LOGIN
+                  </li>
                 </>
               ) : (
-                <li onClick={() => { handleLogout(); closeMenu(); }} className="p-2 cursor-pointer text-red-500">Logout</li>
+                <div className="relative profile-dropdown">
+
+                  {/* PROFILE BUTTON */}
+                  <button
+                    className="
+                flex items-center gap-2 px-3 py-1.5
+                bg-white/10 backdrop-blur-md
+                border border-white/20
+                rounded-full
+                hover:bg-white hover:text-[#339ca0]
+                transition-all duration-300
+                font-semibold
+              "
+                    onClick={() => setShowProfile(prev => !prev)}
+                  >
+                    {profileImage ? (
+                      <img
+                        src={getImageSource()}
+                        alt="Profile"
+                        className="w-9 h-9 rounded-full object-cover border"
+                      />
+                    ) : (
+                      <div className="w-9 h-9 rounded-full bg-gray-300 flex items-center justify-center">
+                        <FaUser className="text-gray-600" />
+                      </div>
+                    )}
+
+                    <span className="hidden md:inline">
+                      {user?.firstName || "Admin"}
+                    </span>
+                  </button>
+
+                  {/* DROPDOWN */}
+                  {showProfile && (
+                    <div className="
+                absolute right-0 mt-3 w-64
+                bg-white rounded-xl shadow-xl
+                border overflow-hidden z-[9999]
+                animate-fadeIn
+              ">
+
+                      <div className="flex items-center gap-3 p-4 border-b bg-gray-50">
+                        {profileImage ? (
+                          <img
+                            src={getImageSource()}
+                            alt="Profile"
+                            className="w-10 h-10 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
+                            <FaUser className="text-gray-600" />
+                          </div>
+                        )}
+
+                        <div>
+                          <p className="font-medium text-sm text-black">
+                            {user
+                              ? `${user.firstName} ${user.lastName}`
+                              : "Admin"}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {user?.email || "@example.com"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <ul className="text-sm text-gray-700">
+
+                        <li
+                          onClick={() => {
+                            const roleName =
+                              user?.roleID?.name?.toLowerCase();
+
+                            if (roleName === "seeker")
+                              navigate("/seeker-dashboard");
+                            else if (roleName === "employer")
+                              navigate("/employer-dashboard");
+                            else if (roleName === "superadmin")
+                              navigate("/admin-dash");
+                            else if (roleName === "mentor")
+                              navigate("/mentor-dashboard");
+                            else navigate("/");
+
+                            setShowProfile(false);
+                          }}
+                          className="
+                      px-4 py-3 hover:bg-gray-100
+                      cursor-pointer flex items-center gap-2
+                    "
+                        >
+                          <FaUser /> Profile
+                        </li>
+
+                        <li
+                          onClick={handleLogout}
+                          className="
+                      px-4 py-3 hover:bg-red-50
+                      cursor-pointer flex items-center gap-2
+                      text-red-500
+                    "
+                        >
+                          <FaSignOutAlt /> Logout
+                        </li>
+
+                      </ul>
+                    </div>
+                  )}
+
+                </div>
               )}
+
             </ul>
-          )}
-
-          {/* REGISTER MODAL */}
-          {showRegisterModal && (
-            <div
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-              onClick={() => setShowRegisterModal(false)}
-            >
-              <div
-                className="bg-white p-6 rounded-lg w-[400px] text-center space-y-4"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="flex justify-between items-center">
-                  <h2 className="text-xl font-bold mb-4">Register As</h2>
-                  <button onClick={() => setShowRegisterModal(false)}>
-                    <IoMdClose size={20} />
-                  </button>
-                </div>
-
-                <button
-                  onClick={() => {
-                    setShowRegisterModal(false);
-                    window.location.href = "/job-seeker-register";
-                  }}
-                  className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
-                  Job Seeker
-                </button>
-                <button
-                  onClick={() => {
-                    setShowRegisterModal(false);
-                    window.location.href = "/company-register";
-                  }}
-                  className="w-full py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                >
-                  Company
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* LOGIN MODAL */}
-          {showLoginModal && (
-            <div
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-              onClick={() => setShowLoginModal(false)}
-            >
-              <div
-                className="bg-white p-6 rounded-lg w-[400px] text-center space-y-4"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="flex justify-between items-center">
-                  <h2 className="text-xl font-bold mb-4">Login As</h2>
-                  <button onClick={() => setShowLoginModal(false)}>
-                    <IoMdClose size={20} />
-                  </button>
-                </div>
-
-                <button
-                  onClick={() => { setShowLoginModal(false); navigate("/login?role=seeker"); }}
-                  className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
-                  Job Seeker
-                </button>
-
-                <button
-                  onClick={() => { setShowLoginModal(false); navigate("/login?role=Mentor"); }}
-                  className="w-full py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                >
-                  Mentor
-                </button>
-
-                <button
-                  onClick={() => { setShowLoginModal(false); navigate("/login?role=employer"); }}
-                  className="w-full py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700"
-                >
-                  Employer
-                </button>
-
-              </div>
-            </div>
-          )}
-        </nav>
+          </div>
+        </div>
       </div>
-    </div>
+
+
+
+
+      <div className='sticky top-12  bg-[#edf1f9]'>
+        <div className='container mx-auto'>
+          <nav className="h-[70px] text-black px-10 flex items-center justify-between relative font-[Poppins] z-50">
+            <div className="flex items-center">
+              <Link to="/">
+                <img
+                  src={companyLogo || '/media/logo/ejob_ocean.png'}
+                  alt="Company Logo"
+                  className="h-8"
+                />
+              </Link>
+
+            </div>
+
+            <div className="text-4xl cursor-pointer block md:hidden" onClick={toggleMenu}>
+              ☰
+            </div>
+
+            <ul className="hidden md:flex items-center gap-4 text-sm font-medium px-6 py-4">
+              <Link to="/ca-register"><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">CA FRESHER</li></Link>
+              <Link to="/upload-cv"><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">UPLOAD CV</li></Link>
+              <Link to='/about-us'><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">ABOUT US</li></Link>
+              <Link to="/placement-program">
+                <li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">JOBS</li>
+              </Link>
+
+              <Link to='/blogs'><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">BLOGS</li></Link>
+
+
+              {/* <li><Link to="/placement-program" className="hover:text-[#339ca0]">PLACEMENT PROGRAM</Link></li> */}
+              <li><Link to="/webinars" className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">WEBINARS</Link></li>
+              <Link to="/knowledge-base"><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">KNOWLEDGE-BASE</li></Link>
+              <li><Link to="/hall-of-fame" className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer"> MENTORSHIP</Link></li>
+              {/* <li><Link to="/live-mentorship" className="hover:text-[#339ca0]">LIVE MENTORSHIP</Link></li> */}
+
+              <Link to="/contact"><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">CONTACT US</li></Link>
+              {/* <li className="relative">
+                <span onClick={toggleMoreDropdown} className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">MORE</span>
+                {showMoreDropdown && (
+                  <div className="absolute left-[-130px] top-[28px] mt-1 w-[250px] bg-white border shadow-xl z-50 p-6 rounded-lg text-sm">
+                    <ul className="space-y-3">
+
+                      <Link to='/ca-register'><li className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">CA FRESHER</li></Link>
+                      
+
+
+                    </ul>
+                  </div>
+                )}
+              </li> */}
+
+
+
+              {/* {!isLoggedIn ? (
+                <>
+                  <li onClick={() => setShowRegisterModal(true)} className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">Register</li>
+                  <li onClick={() => setShowLoginModal(true)} className="hover:bg-[#339ca0] hover:text-white p-2 rounded cursor-pointer">LOGIN</li>
+                </>
+              ) : (
+                <div className="relative profile-dropdown">
+                  <button
+                    className="flex items-center gap-2 font-semibold focus:outline-none"
+                    onClick={() => setShowProfile(prev => !prev)}
+                  >
+                    {profileImage ? (
+                      <img
+                        src={getImageSource()}
+                        alt="Profile"
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
+                        <FaUser className="text-gray-600" />
+                      </div>
+                    )}
+                    <span className="hidden md:inline">{user?.firstName || "Admin"}</span>
+                  </button>
+
+                  {showProfile && (
+                    <div className="absolute right-0 mt-2 w-60 bg-white border rounded-md shadow-md z-10">
+                      <div className="flex items-center gap-3 p-3 border-b">
+                        <div>
+                          <div className='flex gap-2 items-center'>
+                            {profileImage ? (
+                              <img
+                                src={getImageSource()}
+                                alt="Profile"
+                                className="w-10 h-10 rounded-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center">
+                                <FaUser className="text-gray-600" />
+                              </div>
+                            )}
+                            <p className="font-medium text-sm">
+                              {user ? `${user.firstName} ${user.lastName}` : "Admin"}
+                            </p>
+                          </div>
+
+                          <p className="text-xs text-gray-500">  {user?.email || "@example.com"}</p>
+                        </div>
+                      </div>
+                      <ul className="text-sm text-gray-700">
+                        <li
+                          onClick={() => {
+                            const roleName = user?.roleID?.name?.toLowerCase();
+                            if (roleName === "seeker") navigate("/seeker-dashboard");
+                            else if (roleName === "employer") navigate("/employer-dashboard");
+                            else if (roleName === "superadmin") navigate("/admin-dash");
+                            else if (roleName === "mentor") navigate('/mentor-dashboard')
+                            else navigate("/");
+                            setShowProfile(false);
+                          }}
+                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
+                        >
+                          <FaUser /> Profile
+                        </li>
+                      
+                        <li
+                          onClick={handleLogout}
+                          className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2 text-red-500"
+                        >
+                          <FaSignOutAlt /> Logout
+                        </li>
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )} */}
+
+            </ul>
+
+            {/* Mobile Menu */}
+            {menuOpen && (
+              <ul className="space-y-2 absolute top-[70px] left-0 w-full bg-white shadow-md py-4 px-6 flex flex-col md:hidden text-sm font-medium z-50">
+                <li onClick={closeMenu}>
+                  <Link to="/ca-register" className="hover:bg-[#339ca0] border-b block hover:text-white p-2 rounded cursor-pointer">CA FRESHER</Link>
+                </li>
+                <li onClick={closeMenu}>
+                  <Link to="/upload-cv" className="hover:bg-[#339ca0] border-b block hover:text-white p-2 rounded cursor-pointer">UPLOAD CV</Link>
+                </li>
+                <li onClick={closeMenu} className="p-2 border-b block hover:text-[#339ca0]">
+                  <Link to="/about-us" className="hover:text-[#339ca0] block">ABOUT US</Link>
+                </li>
+                <li onClick={closeMenu}><Link to="/placement-program" className="p-2 border-b block hover:text-[#339ca0]">JOBS</Link></li>
+                {/* <li onClick={closeMenu}><Link to="/ca-register" className="p-2 block hover:text-[#339ca0]">CA Fresher</Link></li> */}
+                <li onClick={closeMenu} className="hover:bg-[#339ca0] border-b block hover:text-white p-2 rounded cursor-pointer"><Link to='/blogs' >BLOGS</Link></li>
+                {/* <li onClick={closeMenu}><Link to="/Courses" className="p-2 border-b block hover:text-[#339ca0]">COURSES</Link></li> */}
+
+                <li onClick={closeMenu}><Link to="/webinars" className="p-2 border-b block hover:text-[#339ca0]">WEBINARS</Link></li>
+                <li onClick={closeMenu}><Link to="/hall-of-fame" className="p-2 border-b block hover:text-[#339ca0]">HALL OF FAME</Link></li>
+                <li onClick={closeMenu} className="p-2 border-b block hover:text-[#339ca0]">
+                  <Link to="/knowledge-base" className="hover:text-[#339ca0] block">KNOWLEDGE-BASE</Link>
+                </li>
+                <li onClick={closeMenu}><Link to="/live-mentorship" className="p-2 border-b block hover:text-[#339ca0]"> MENTORSHIP</Link></li>
+
+
+
+
+                <li onClick={closeMenu} className="p-2 border-b block hover:text-[#339ca0]">
+                  <Link to="/contact" className="hover:text-[#339ca0] block">Contact us</Link>
+                </li>
+                {/* <li className="border-b">
+                  <div onClick={toggleMoreDropdown} className="p-2 flex justify-between items-center cursor-pointer hover:text-[#339ca0]">
+                    <span>MORE</span>
+                    <span>{showMoreDropdown ? "▲" : "▼"}</span>
+                  </div>
+
+                  {showMoreDropdown && (
+                    <ul className="pl-4 mt-2 space-y-3 text-[15px]">
+
+                      <li onClick={closeMenu}>
+                        <Link to="/ca-register" className="hover:text-[#339ca0] block">CA FRESHER</Link>
+                      </li>
+                      <li onClick={closeMenu}>
+
+                      </li>
+
+                      
+
+                    </ul>
+                  )}
+                </li> */}
+                {/* {!isLoggedIn ? (
+                  <>
+
+                    <li onClick={() => { setShowRegisterModal(true); closeMenu(); }} className="p-2 cursor-pointer hover:text-[#339ca0]">Register</li>
+                    <li onClick={() => { setShowLoginModal(true); closeMenu(); }} ><Link to="/login" className="p-2 block hover:text-[#339ca0]">Login</Link></li>
+                  </>
+                ) : (
+                  <li onClick={() => { handleLogout(); closeMenu(); }} className="p-2 cursor-pointer text-red-500">Logout</li>
+                )} */}
+              </ul>
+            )}
+
+            {/* REGISTER MODAL */}
+            {showRegisterModal && (
+              <div
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                onClick={() => setShowRegisterModal(false)}
+              >
+                <div
+                  className="bg-white p-6 rounded-lg w-[400px] text-center space-y-4"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-xl font-bold mb-4">Register As</h2>
+                    <button onClick={() => setShowRegisterModal(false)}>
+                      <IoMdClose size={20} />
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setShowRegisterModal(false);
+                      window.location.href = "/job-seeker-register";
+                    }}
+                    className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  >
+                    Job Seeker
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowRegisterModal(false);
+                      window.location.href = "/company-register";
+                    }}
+                    className="w-full py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                  >
+                    Company
+                  </button>
+                </div>
+              </div>
+            )}
+
+            
+            {showLoginModal && (
+              <div
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                onClick={() => setShowLoginModal(false)}
+              >
+                <div
+                  className="bg-white p-6 rounded-lg w-[400px] text-center space-y-4"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-xl font-bold mb-4">Login As</h2>
+                    <button onClick={() => setShowLoginModal(false)}>
+                      <IoMdClose size={20} />
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={() => { setShowLoginModal(false); navigate("/login?role=seeker"); }}
+                    className="w-full py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                  >
+                    Job Seeker
+                  </button>
+
+                  <button
+                    onClick={() => { setShowLoginModal(false); navigate("/login?role=mentor"); }}
+                    className="w-full py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                  >
+                    Mentor
+                  </button>
+
+                  <button
+                    onClick={() => { setShowLoginModal(false); navigate("/login?role=employer"); }}
+                    className="w-full py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700"
+                  >
+                    Employer
+                  </button>
+
+                </div>
+              </div>
+            )}
+          </nav>
+        </div>
+      </div>
+    </>
   );
 }

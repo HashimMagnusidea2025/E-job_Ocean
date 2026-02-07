@@ -9,6 +9,13 @@ export const createCourse = async (req, res) => {
     if (req.files && req.files.courseFile && req.files.courseFile.length > 0) {
       req.body.courseFile = req.files.courseFile[0].path;
     }
+    // Handle empty instructor and category fields
+    if (req.body.instructor === '' || req.body.instructor === 'undefined') {
+      req.body.instructor = undefined;
+    }
+    if (req.body.category === '' || req.body.category === 'undefined') {
+      req.body.category = undefined;
+    }
     const course = await CourseSchemaModel.create(req.body);
     res.status(201).json({ success: true, data: course });
   } catch (err) {
@@ -26,6 +33,19 @@ export const getAllCourses = async (req, res) => {
   }
 };
 
+// Get Course by ID
+export const getCourseById = async (req, res) => {
+  try {
+    const course = await CourseSchemaModel.findById(req.params.id).populate('category').populate('instructor');
+    if (!course) {
+      return res.status(404).json({ success: false, message: 'Course not found' });
+    }
+    res.status(200).json({ success: true, data: course });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 // Update Course
 export const updateCourse = async (req, res) => {
   try {
@@ -34,6 +54,13 @@ export const updateCourse = async (req, res) => {
     }
     if (req.files && req.files.courseFile && req.files.courseFile.length > 0) {
       req.body.courseFile = req.files.courseFile[0].path;
+    }
+    // Handle empty instructor and category fields
+    if (req.body.instructor === '' || req.body.instructor === 'undefined') {
+      req.body.instructor = undefined;
+    }
+    if (req.body.category === '' || req.body.category === 'undefined') {
+      req.body.category = undefined;
     }
     const course = await CourseSchemaModel.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     if (!course) {

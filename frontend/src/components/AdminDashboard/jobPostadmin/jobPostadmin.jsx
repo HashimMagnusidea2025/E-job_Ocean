@@ -12,29 +12,35 @@ export default function PostAJobAdmin() {
     const [formData, setFormData] = useState({
         jobTitle: "",
         description: "",
-        benefits: "",
         salaryFrom: "",
         salaryTo: "",
         salaryCurrency: "",
         salaryPeriod: "",
-        mode: "",
         hideSalary: false,
-        careerLevel: "",
-        functionalArea: "",
+        // careerLevel: "",
+        // functionalArea: "",
+        careerLevel: [],
+        functionalArea: [],
         jobType: "",
         jobShift: "",
         positions: "",
         expiryDate: "",
-        degreeLevel: "",
+        // degreeLevel: "",
+        degreeLevel: [],
         experience: "",
         externalJob: "",
+        mode: "",
         isFreelance: false,
         isActive: true,
-        country: "",
-        state: "",
-        city: "",
+        // country: "",
+        // state: "",
+        // city: "",
+        country: [],
+        state: [],
+        city: [],
+        address: "",
         postedByType: "superadmin",
-         companyId: "" // ✅ Add companyId for admin posts
+        companyId: "" // Add companyId for admin posts
     });
 
     const [salaryCurrencies, setSalaryCurrencies] = useState([]);
@@ -51,14 +57,26 @@ export default function PostAJobAdmin() {
     const [states, setStates] = useState([]);
     const [cities, setCities] = useState([]);
     const [errors, setErrors] = useState({});
-    const [loading, setLoading] = useState({
-        countries: false,
-        states: false,
-        cities: false
-    })
+    const [loading, setLoading] = useState(false);
+    const [showOtherInput, setShowOtherInput] = useState(false);
+    const [customSkill, setCustomSkill] = useState("");
 
-     const [companies, setCompanies] = useState([]);
-        // ✅ Fetch companies for admin to select
+    const [companies, setCompanies] = useState([]);
+    const careerLevelOptions = careerLevels.map(level => ({
+        value: level._id,
+        label: level.name
+    }));
+
+    const functionalAreaOptions = functionalAreas.map(area => ({
+        value: area._id,
+        label: area.name
+    }));
+    const degreeLevelOptions = degreeLevels.map(deg => ({
+        value: deg._id,
+        label: deg.name
+    }));
+
+    // Fetch companies for admin to select
     useEffect(() => {
         const fetchCompanies = async () => {
             try {
@@ -73,98 +91,99 @@ export default function PostAJobAdmin() {
         fetchCompanies();
     }, []);
 
-    // // country list
-    // useEffect(() => {
-    //     axios.get("/country").then((res) => setCountries(res.data.country));
-    //     console.log(countries);
+    // country list
+    useEffect(() => {
+        axios.get("/country").then((res) => setCountries(res.data.country));
+    }, []);
 
-    // }, []);
-
-    // // dependent dropdowns
+    // dependent dropdowns
     // useEffect(() => {
     //     if (formData.country) {
     //         axios.get(`/state/country/${formData.country}`).then((res) => setStates(res.data.data));
     //     } else setStates([]);
     // }, [formData.country]);
+    useEffect(() => {
+        const fetchStates = async () => {
+            if (!formData.country.length) {
+                setStates([]);
+                return;
+            }
+
+            try {
+                const responses = await Promise.all(
+                    formData.country.map(countryId =>
+                        axios.get(`/state/country/${countryId}`)
+                    )
+                );
+
+                const mergedStates = responses
+                    .flatMap(res => res.data.data)
+                    .filter(
+                        (state, index, self) =>
+                            index === self.findIndex(s => s.id === state.id)
+                    );
+
+                setStates(mergedStates);
+            } catch (err) {
+                console.error("Error fetching states", err);
+            }
+        };
+
+        fetchStates();
+    }, [formData.country]);
 
     // useEffect(() => {
     //     if (formData.state) {
     //         axios.get(`/city/state/${formData.state}`).then((res) => setCities(res.data.data));
     //     } else setCities([]);
     // }, [formData.state]);
-
-    // Load countries
     useEffect(() => {
-        const loadCountries = async () => {
-            setLoading(prev => ({ ...prev, countries: true }));
-            try {
-                const response = await axios.get("/country");
-                setCountries(response.data.country || []);
-            } catch (error) {
-                console.error("Failed to fetch countries:", error);
-                Swal.fire("Error", "Failed to load countries", "error");
-            } finally {
-                setLoading(prev => ({ ...prev, countries: false }));
-            }
-        };
-        loadCountries();
-    }, []);
-
-    // Load states when country changes
-    useEffect(() => {
-        const loadStates = async () => {
-            if (!formData.country) {
-                setStates([]);
-                setFormData(prev => ({ ...prev, state: "", city: "" }));
+        const fetchCities = async () => {
+            if (!formData.state.length) {
+                setCities([]);
                 return;
             }
 
-            setLoading(prev => ({ ...prev, states: true }));
             try {
-                const response = await axios.get(`/state/country/${formData.country}`);
-                setStates(response.data.data || []);
-            } catch (error) {
-                console.error("Failed to fetch states:", error);
-                setStates([]);
-                Swal.fire("Error", "Failed to load states", "error");
-            } finally {
-                setLoading(prev => ({ ...prev, states: false }));
+                const responses = await Promise.all(
+                    formData.state.map(stateId =>
+                        axios.get(`/city/state/${stateId}`)
+                    )
+                );
+
+                const mergedCities = responses
+                    .flatMap(res => res.data.data)
+                    .filter(
+                        (city, index, self) =>
+                            index === self.findIndex(c => c.id === city.id)
+                    );
+
+                setCities(mergedCities);
+            } catch (err) {
+                console.error("Error fetching cities", err);
             }
         };
 
-        loadStates();
-    }, [formData.country]);
-
-    // Load cities when state changes
-    useEffect(() => {
-        const loadCities = async () => {
-            if (!formData.state) {
-                setCities([]);
-                setFormData(prev => ({ ...prev, city: "" }));
-                return;
-            }
-
-            setLoading(prev => ({ ...prev, cities: true }));
-            try {
-                const response = await axios.get(`/city/state/${formData.state}`);
-                setCities(response.data.data || []);
-            } catch (error) {
-                console.error("Failed to fetch cities:", error);
-                setCities([]);
-                Swal.fire("Error", "Failed to load cities", "error");
-            } finally {
-                setLoading(prev => ({ ...prev, cities: false }));
-            }
-        };
-
-        loadCities();
+        fetchCities();
     }, [formData.state]);
+
+    useEffect(() => {
+        const fetchDegreeLevels = async () => {
+            try {
+                const res = await axios.get("/degree-Level-Category/active");
+                setDegreeLevels(res.data);
+            } catch (err) {
+                console.error("Failed to fetch degree levels:", err);
+            }
+        };
+        fetchDegreeLevels();
+    }, []);
 
     useEffect(() => {
         const fetchCareerLevels = async () => {
             try {
-                const { data } = await axios.get("/career-level-category/active");
-                setCareerLevels(data);
+                const res = await axios.get("/career-level-category/active");
+                setCareerLevels(res.data);
             } catch (err) {
                 console.error("Failed to fetch career levels:", err);
             }
@@ -175,8 +194,8 @@ export default function PostAJobAdmin() {
     useEffect(() => {
         const fetchFunctionalAreas = async () => {
             try {
-                const { data } = await axios.get("/functionalArea-Category/active");
-                setFunctionalAreas(data);
+                const res = await axios.get("/functionalArea-Category/active");
+                setFunctionalAreas(res.data);
             } catch (err) {
                 console.error("Failed to fetch functional areas:", err);
             }
@@ -216,6 +235,8 @@ export default function PostAJobAdmin() {
                     value: skill._id,
                     label: skill.name,
                 }));
+                // Add "Other" option
+                formatted.push({ value: "other", label: "Other" });
                 setSkills(formatted);
             } catch (error) {
                 console.error("Failed to fetch skills:", error);
@@ -224,22 +245,9 @@ export default function PostAJobAdmin() {
         fetchSkills();
     }, []);
 
-
-    useEffect(() => {
-        const fetchDegreeLevels = async () => {
-            try {
-                const res = await axios.get("/degree-level-category/active");
-                setDegreeLevels(res.data); // store only active categories
-            } catch (error) {
-                console.error("Failed to fetch degree levels:", error);
-            }
-        };
-        fetchDegreeLevels();
-    }, []);
-
     // Fetch additional data
     useEffect(() => {
-        // Mock data for demonstration - replace with actual API calls
+
         setSalaryCurrencies([
             { _id: "1", name: "USD" },
             { _id: "2", name: "INR" },
@@ -252,20 +260,76 @@ export default function PostAJobAdmin() {
             { _id: "3", name: "Weekly" }
         ]);
 
-        // setDegreeLevels([
-        //     { _id: "1", name: "High School" },
-        //     { _id: "2", name: "Bachelor's" },
-        //     { _id: "3", name: "Master's" },
-        //     { _id: "4", name: "PhD" }
-        // ]);
-
         setExperienceLevels([
             { _id: "1", name: "0-1 years" },
             { _id: "2", name: "1-3 years" },
             { _id: "3", name: "3-5 years" },
-            { _id: "4", name: "5+ years" }
+            { _id: "4", name: "5-10 years" },
+            { _id: "5", name: "10-15 years" },
+            { _id: "6", name: "15+ Years" }
         ]);
     }, []);
+
+    // Fetch job data for editing
+    useEffect(() => {
+        if (id) {
+            const fetchJobData = async () => {
+                try {
+                    setLoading(true);
+                    const response = await axios.get(`/job-post/${id}`);
+                    const job = response.data;
+
+                    setFormData({
+                        jobTitle: job.jobTitle || "",
+                        description: job.description || "",
+                        salaryFrom: job.salaryFrom || "",
+                        salaryTo: job.salaryTo || "",
+                        salaryCurrency: job.salaryCurrency?._id || job.salaryCurrency || "",
+                        salaryPeriod: job.salaryPeriod || "",
+                        hideSalary: job.hideSalary || false,
+                        // careerLevel: job.careerLevel?._id || job.careerLevel || "",
+                        // functionalArea: job.functionalArea?._id || job.functionalArea || "",
+                        careerLevel: job.careerLevel?.map(c => c._id) || [],
+                        functionalArea: job.functionalArea?.map(f => f._id) || [],
+
+                        jobType: job.jobType?._id || job.jobType || "",
+                        jobShift: job.jobShift?._id || job.jobShift || "",
+                        positions: job.positions || "",
+                        expiryDate: job.expiryDate?.split("T")[0] || "",
+                        // degreeLevel: job.degreeLevel || "",
+                        degreeLevel: job.degreeLevel?.map(d => d._id || d) || [],
+
+                        experience: job.experience || "",
+                        externalJob: job.externalJob || "",
+                        mode: job.mode || "",
+                        isFreelance: job.isFreelance || false,
+                        isActive: job.isActive ?? true,
+                        country: job.country || "",
+                        state: job.state || "",
+                        city: job.city || "",
+                        address: job.address || "",
+                        postedByType: "superadmin",
+                        companyId: job.companyId || ""
+                    });
+
+                    // populate selected skills
+                    if (job.skills && job.skills.length > 0) {
+                        const skillsData = job.skills.map(skill => ({
+                            value: skill._id || skill,
+                            label: skill.name || skill
+                        }));
+                        setSelectedSkills(skillsData);
+                    }
+                } catch (err) {
+                    console.error("Error fetching job data:", err);
+                    Swal.fire("Error", "Failed to load job data", "error");
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchJobData();
+        }
+    }, [id]);
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -283,26 +347,64 @@ export default function PostAJobAdmin() {
         }
     };
 
-    // const handleLocationChange = (field, value) => {
-    //     setFormData(prev => ({
-    //         ...prev,
-    //         [field]: Number(value),
-    //         // Reset dependent fields when parent changes
-    //         ...(field === 'country' && { state: "", city: "" }),
-    //         ...(field === 'state' && { city: "" })
-    //     }));
-    // };
     const handleLocationChange = (field, value) => {
         setFormData(prev => ({
             ...prev,
-            [field]: value,
+            [field]: Number(value),
             // Reset dependent fields when parent changes
             ...(field === 'country' && { state: "", city: "" }),
             ...(field === 'state' && { city: "" })
         }));
     };
+    const handleMultiLocationChange = (field, selectedOptions) => {
+        const values = selectedOptions
+            ? selectedOptions.map(opt => opt.value)
+            : [];
+
+        setFormData(prev => ({
+            ...prev,
+            [field]: values,
+            ...(field === "country" && { state: [], city: [] }),
+            ...(field === "state" && { city: [] })
+        }));
+    };
+    const countryOptions = countries.map(c => ({
+        value: c.id,
+        label: c.name
+    }));
+
+    const stateOptions = states.map(s => ({
+        value: s.id,
+        label: s.name
+    }));
+
+    const cityOptions = cities.map(c => ({
+        value: c.id,
+        label: c.name
+    }));
+
     const handleSkillsChange = (selected) => {
-        setSelectedSkills(selected || []);
+        const selectedArray = selected || [];
+        const hasOther = selectedArray.some(skill => skill.value === "other");
+        setShowOtherInput(hasOther);
+        setSelectedSkills(selectedArray);
+    };
+
+    const handleAddCustomSkill = async () => {
+        if (!customSkill.trim()) return;
+        try {
+            const res = await axios.post("/skills-categories", { name: customSkill.trim() });
+            const newSkill = { value: res.data._id, label: res.data.name };
+            // Add to skills list
+            setSkills(prev => [...prev.filter(s => s.value !== "other"), newSkill, { value: "other", label: "Other" }]);
+            // Add to selected skills, replace "other"
+            setSelectedSkills(prev => [...prev.filter(s => s.value !== "other"), newSkill]);
+            setCustomSkill("");
+            setShowOtherInput(false);
+        } catch (error) {
+            console.error("Failed to add custom skill:", error);
+            Swal.fire("Error", "Failed to add custom skill", "error");
+        }
     };
 
     const validateForm = () => {
@@ -310,16 +412,15 @@ export default function PostAJobAdmin() {
 
         if (!formData.jobTitle.trim()) newErrors.jobTitle = "Job title is required";
         if (!formData.description.trim()) newErrors.description = "Description is required";
-        if (!formData.country) newErrors.country = "Country is required";
-        if (!formData.state) newErrors.state = "State is required";
-        if (!formData.city) newErrors.city = "City is required";
-        if (!formData.careerLevel) newErrors.careerLevel = "Career level is required";
-        if (!formData.jobType) newErrors.jobType = "Job type is required";
-        if (!formData.functionalArea) newErrors.functionalArea = "Functional Area is required";
-        if (!formData.positions) newErrors.positions = "Number of positions is required";
-        if (!formData.jobShift) newErrors.jobShift = "Job Shift is required";
-        if (!formData.mode) newErrors.mode = " Mode is required";
+        // if (!formData.country) newErrors.country = "Country is required";
+        // if (!formData.state) newErrors.state = "State is required";
+        // if (!formData.city) newErrors.city = "City is required";
+        if (!formData.country.length) newErrors.country = "Country is required";
+        if (!formData.state.length) newErrors.state = "State is required";
+        if (!formData.city.length) newErrors.city = "City is required";
 
+        if (!formData.mode) newErrors.mode = "Job Mode is required";
+        if (!formData.companyId) newErrors.companyId = "Company is required";
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -328,12 +429,10 @@ export default function PostAJobAdmin() {
         setFormData({
             jobTitle: "",
             description: "",
-            benefits: "",
             salaryFrom: "",
             salaryTo: "",
             salaryCurrency: "",
             salaryPeriod: "",
-            mode: "",
             hideSalary: false,
             careerLevel: "",
             functionalArea: "",
@@ -344,69 +443,55 @@ export default function PostAJobAdmin() {
             degreeLevel: "",
             experience: "",
             externalJob: "",
+            mode: "",
             isFreelance: false,
             isActive: true,
             country: "",
             state: "",
-            city: ""
+            city: "",
+            address: "",
+            postedByType: "superadmin",
+            companyId: ""
         });
         setSelectedSkills([]);
         setErrors({});
+        setShowOtherInput(false);
+        setCustomSkill("");
     };
-
-
-
-    useEffect(() => {
-        if (id) {
-            // fetch job data for editing
-            axios.get(`/job-post/${id}`).then(res => {
-                const job = res.data;
-                setFormData({
-                    jobTitle: job.jobTitle || "",
-                    description: job.description || "",
-                    benefits: job.benefits || "",
-                    salaryFrom: job.salaryFrom || "",
-                    salaryTo: job.salaryTo || "",
-                    salaryCurrency: job.salaryCurrency?._id || "",
-                    salaryPeriod: job.salaryPeriod || "",
-                    mode: job.mode || "",
-                    hideSalary: job.hideSalary || false,
-                    careerLevel: job.careerLevel?._id || "",
-                    functionalArea: job.functionalArea?._id || "",
-                    jobType: job.jobType?._id || "",
-                    jobShift: job.jobShift?._id || "",
-                    positions: job.positions || "",
-                    expiryDate: job.expiryDate?.split("T")[0] || "",
-                    degreeLevel: job.degreeLevel?._id || "",   
-                    experience: job.experience || "",
-                    externalJob: job.externalJob || "",
-                    isFreelance: job.isFreelance || false,
-                    isActive: job.isActive ?? true,
-                    country: job.country || "",
-                    state: job.state || "",
-                    city: job.city || ""
-                });
-
-                // populate selected skills
-                setSelectedSkills((job.skills || []).map(skill => ({
-                    value: skill._id,
-                    label: skill.name
-                })));
-            }).catch(err => console.error(err));
-        }
-    }, [id]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         if (!validateForm()) return;
-        const selectedExp = experienceLevels.find(exp => exp._id === formData.experience);
+
         try {
             const submitData = {
-                ...formData,
-                experience: selectedExp ? selectedExp.name : formData.experience, // 👈 convert _id → name
+                jobTitle: formData.jobTitle,
+                description: formData.description,
+                salaryFrom: formData.salaryFrom || undefined,
+                salaryTo: formData.salaryTo || undefined,
+                salaryCurrency: formData.salaryCurrency || undefined,
+                salaryPeriod: formData.salaryPeriod || undefined,
+                mode: formData.mode,
+                hideSalary: formData.hideSalary,
+                careerLevel: formData.careerLevel || undefined,
+                functionalArea: formData.functionalArea || undefined,
+                jobType: formData.jobType || undefined,
+                jobShift: formData.jobShift || undefined,
+                positions: formData.positions ? Number(formData.positions) : undefined,
+                expiryDate: formData.expiryDate || undefined,
+                degreeLevel: formData.degreeLevel || undefined,
+                experience: formData.experience || undefined,
+                externalJob: formData.externalJob || undefined,
+                isFreelance: formData.isFreelance,
+                isActive: formData.isActive,
+                country: formData.country,
+                state: formData.state,
+                city: formData.city,
+                address: formData.address || undefined,
                 skills: selectedSkills.map(skill => skill.value),
                 postedByType: "superadmin",
-                 companyId: formData.companyId // ✅ Use selected companyId
+                companyId: formData.companyId
             };
 
             if (id) {
@@ -417,15 +502,27 @@ export default function PostAJobAdmin() {
                 // create new job
                 await axios.post("/job-post", submitData);
                 Swal.fire("Success", "Job created successfully", "success");
+                resetForm();
             }
 
             navigate("/admin-dashboard/job-post-list"); // redirect back to list
         } catch (err) {
-            console.error(err);
+            console.error("Submission error:", err);
             Swal.fire("Error", "Something went wrong", "error");
         }
     };
 
+    if (loading && id) {
+        return (
+            <Layout>
+                <div className="w-full mx-auto p-6">
+                    <div className="flex justify-center items-center h-64">
+                        <div className="text-lg">Loading job data...</div>
+                    </div>
+                </div>
+            </Layout>
+        );
+    }
 
     return (
         <Layout>
@@ -435,8 +532,7 @@ export default function PostAJobAdmin() {
 
                     <div className="space-y-4">
 
-
-                         <div>
+                        <div>
                             <label className="block text-sm font-medium mb-1">Company *</label>
                             <select
                                 name="companyId"
@@ -485,20 +581,6 @@ export default function PostAJobAdmin() {
                             {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
                         </div>
 
-                        {/* Benefits */}
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Benefits</label>
-                            <div className="h-32 border border-gray-300 rounded overflow-hidden">
-                                <textarea
-                                    name="benefits"
-                                    value={formData.benefits}
-                                    onChange={handleInputChange}
-                                    className="w-full h-full p-2 text-sm resize-none"
-                                    placeholder="Enter benefits..."
-                                />
-                            </div>
-                        </div>
-
                         {/* Required Skills */}
                         <div>
                             <label className="block text-sm font-medium mb-1">Required Skills</label>
@@ -510,80 +592,135 @@ export default function PostAJobAdmin() {
                                 placeholder="Select Required Skills"
                                 className="text-sm"
                             />
+                            {showOtherInput && (
+                                <div className="mt-2 flex gap-2">
+                                    <input
+                                        type="text"
+                                        value={customSkill}
+                                        onChange={(e) => setCustomSkill(e.target.value)}
+                                        placeholder="Enter custom skill"
+                                        className="flex-1 border border-gray-300 px-3 py-2 rounded text-sm"
+                                        onKeyPress={(e) => e.key === 'Enter' && handleAddCustomSkill()}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={handleAddCustomSkill}
+                                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm"
+                                    >
+                                        Add
+                                    </button>
+                                </div>
+                            )}
                         </div>
 
                         {/* Location */}
-                        <div className="space-y-4">
-                            {/* Location Section - FIXED */}
-                            <div>
-                                <label className="block text-sm font-medium mb-1">Location *</label>
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                    {/* Country */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Country * {loading.countries && "(Loading...)"}
-                                        </label>
-                                        <select
-                                            value={formData.country}
-                                            onChange={(e) => handleLocationChange('country', e.target.value)}
-                                            className={`w-full border rounded-lg px-3 py-2 ${errors.country ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
-                                                }`}
-                                            disabled={loading.countries}
-                                        >
-                                            <option value="">-- Select Country --</option>
-                                            {countries.map((country) => (
-                                                <option key={country._id} value={country.id}>
-                                                    {country.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                        {errors.country && <p className="text-red-500 text-xs mt-1">{errors.country}</p>}
-                                    </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1">Location *</label>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">Country *</label>
+                                    {/* <select
+                                        value={formData.country}
+                                        onChange={(e) => handleLocationChange('country', e.target.value)}
+                                        className={`w-full border rounded-lg px-3 py-2 ${errors.country ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
+                                            }`}
+                                    >
+                                        <option value="">-- Select Country --</option>
+                                        {countries.map((country) => (
+                                            <option key={country._id} value={country.id}>
+                                                {country.name}
+                                            </option>
+                                        ))}
+                                    </select> */}
+                                    <Select
+                                        isMulti
+                                        options={countryOptions}
+                                        value={countryOptions.filter(opt =>
+                                            formData.country.includes(opt.value)
+                                        )}
+                                        onChange={(selected) =>
+                                            handleMultiLocationChange("country", selected)
+                                        }
+                                        placeholder="Select Countries"
+                                    />
 
-                                    {/* State */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            State * {loading.states && "(Loading...)"}
-                                        </label>
-                                        <select
-                                            value={formData.state}
-                                            onChange={(e) => handleLocationChange('state', e.target.value)}
-                                            disabled={!formData.country || loading.states}
-                                            className={`w-full border rounded-lg px-3 py-2 ${errors.state ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
-                                                }`}
-                                        >
-                                            <option value="">-- Select State --</option>
-                                            {states.map((state) => (
-                                                <option key={state._id} value={state.id}>
-                                                    {state.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                        {errors.state && <p className="text-red-500 text-xs mt-1">{errors.state}</p>}
-                                    </div>
-
-                                    {/* City */}
-                                    <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            City * {loading.cities && "(Loading...)"}
-                                        </label>
-                                        <select
-                                            value={formData.city}
-                                            onChange={(e) => handleLocationChange('city', e.target.value)}
-                                            disabled={!formData.state || loading.cities}
-                                            className={`w-full border rounded-lg px-3 py-2 ${errors.city ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
-                                                }`}
-                                        >
-                                            <option value="">-- Select City --</option>
-                                            {cities.map((city) => (
-                                                <option key={city._id} value={city.id}>
-                                                    {city.name}
-                                                </option>
-                                            ))}
-                                        </select>
-                                        {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
-                                    </div>
+                                    {errors.country && <p className="text-red-500 text-xs mt-1">{errors.country}</p>}
                                 </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">State *</label>
+                                    {/* <select
+                                        value={formData.state}
+                                        onChange={(e) => handleLocationChange('state', e.target.value)}
+                                        disabled={!formData.country}
+                                        className={`w-full border rounded-lg px-3 py-2 ${errors.state ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
+                                            }`}
+                                    >
+                                        <option value="">-- Select State --</option>
+                                        {states.map((state) => (
+                                            <option key={state._id} value={state.id}>
+                                                {state.name}
+                                            </option>
+                                        ))}
+                                    </select> */}
+                                    <Select
+                                        isMulti
+                                        options={stateOptions}
+                                        value={stateOptions.filter(opt =>
+                                            formData.state.includes(opt.value)
+                                        )}
+                                        onChange={(selected) =>
+                                            handleMultiLocationChange("state", selected)
+                                        }
+                                        isDisabled={!formData.country.length}
+                                        placeholder="Select States"
+                                    />
+
+                                    {errors.state && <p className="text-red-500 text-xs mt-1">{errors.state}</p>}
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">City *</label>
+                                    {/* <select
+                                        value={formData.city}
+                                        onChange={(e) => handleLocationChange('city', e.target.value)}
+                                        disabled={!formData.state}
+                                        className={`w-full border rounded-lg px-3 py-2 ${errors.city ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-500"
+                                            }`}
+                                    >
+                                        <option value="">-- Select City --</option>
+                                        {cities.map((city) => (
+                                            <option key={city._id} value={city.id}>
+                                                {city.name}
+                                            </option>
+                                        ))}
+                                    </select> */}
+                                    <Select
+                                        isMulti
+                                        options={cityOptions}
+                                        value={cityOptions.filter(opt =>
+                                            formData.city.includes(opt.value)
+                                        )}
+                                        onChange={(selected) =>
+                                            handleMultiLocationChange("city", selected)
+                                        }
+                                        isDisabled={!formData.state.length}
+                                        placeholder="Select Cities"
+                                    />
+
+                                    {errors.city && <p className="text-red-500 text-xs mt-1">{errors.city}</p>}
+                                </div>
+                            </div>
+                            <div className="mt-4">
+                                <label className="block text-sm font-medium mb-1">Address</label>
+                                <textarea
+                                    name="address"
+                                    value={formData.address}
+                                    onChange={handleInputChange}
+                                    className="w-full border border-gray-300 px-3 py-2 rounded text-sm resize-none"
+                                    rows="3"
+                                    placeholder="Enter address details"
+                                />
                             </div>
                         </div>
 
@@ -657,14 +794,13 @@ export default function PostAJobAdmin() {
                         <div>
                             <label className="block text-2xl font-medium mb-5">Job Specifications</label>
                             <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Career Level *</label>
+                                {/* <div>
+                                    <label className="block text-sm font-medium mb-1">Career Level</label>
                                     <select
                                         name="careerLevel"
                                         value={formData.careerLevel}
                                         onChange={handleInputChange}
-                                        className={`w-full border px-3 py-2 rounded text-sm ${errors.careerLevel ? "border-red-500" : "border-gray-300"
-                                            }`}
+                                        className="w-full border border-gray-300 px-3 py-2 rounded text-sm"
                                     >
                                         <option value="">Select Career Level</option>
                                         {careerLevels.map((level) => (
@@ -673,36 +809,51 @@ export default function PostAJobAdmin() {
                                             </option>
                                         ))}
                                     </select>
-                                    {errors.careerLevel && <p className="text-red-500 text-xs mt-1">{errors.careerLevel}</p>}
+                                </div> */}
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Career Level</label>
+                                    <Select
+                                        isMulti
+                                        options={careerLevelOptions}
+                                        value={careerLevelOptions.filter(opt =>
+                                            formData.careerLevel.includes(opt.value)
+                                        )}
+                                        onChange={(selected) =>
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                careerLevel: selected ? selected.map(s => s.value) : []
+                                            }))
+                                        }
+                                        placeholder="Select Career Levels"
+                                    />
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">Functional Area *</label>
-                                    <select
-                                        name="functionalArea"
-                                        value={formData.functionalArea}
-                                        onChange={handleInputChange}
-                                        className={`w-full border px-3 py-2 rounded text-sm ${errors.functionalArea ? "border-red-500" : "border-gray-300"
-                                            }`}
-                                    >
-                                        <option value="">Select Functional Area</option>
-                                        {functionalAreas.map((area) => (
-                                            <option key={area._id} value={area._id}>
-                                                {area.name}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {errors.functionalArea && <p className="text-red-500 text-xs mt-1">{errors.functionalArea}</p>}
+                                    <label className="block text-sm font-medium mb-1">Functional Area</label>
+                                    <Select
+                                        isMulti
+                                        options={functionalAreaOptions}
+                                        value={functionalAreaOptions.filter(opt =>
+                                            formData.functionalArea.includes(opt.value)
+                                        )}
+                                        onChange={(selected) =>
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                functionalArea: selected ? selected.map(s => s.value) : []
+                                            }))
+                                        }
+                                        placeholder="Select Functional Areas"
+                                    />
                                 </div>
 
+
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">Job Type *</label>
+                                    <label className="block text-sm font-medium mb-1">Job Type</label>
                                     <select
                                         name="jobType"
                                         value={formData.jobType}
                                         onChange={handleInputChange}
-                                        className={`w-full border px-3 py-2 rounded text-sm ${errors.jobType ? "border-red-500" : "border-gray-300"
-                                            }`}
+                                        className="w-full border border-gray-300 px-3 py-2 rounded text-sm"
                                     >
                                         <option value="">Select Job Type</option>
                                         {jobTypes.map((job) => (
@@ -711,17 +862,15 @@ export default function PostAJobAdmin() {
                                             </option>
                                         ))}
                                     </select>
-                                    {errors.jobType && <p className="text-red-500 text-xs mt-1">{errors.jobType}</p>}
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">Job Shift *</label>
+                                    <label className="block text-sm font-medium mb-1">Job Shift</label>
                                     <select
                                         name="jobShift"
                                         value={formData.jobShift}
                                         onChange={handleInputChange}
-                                        className={`w-full border px-3 py-2 rounded text-sm ${errors.jobShift ? "border-red-500" : "border-gray-300"
-                                            }`}
+                                        className="w-full border border-gray-300 px-3 py-2 rounded text-sm"
                                     >
                                         <option value="">Select Job Shift</option>
                                         {jobShifts.map((shift) => (
@@ -730,21 +879,18 @@ export default function PostAJobAdmin() {
                                             </option>
                                         ))}
                                     </select>
-                                    {errors.jobShift && <p className="text-red-500 text-xs mt-1">{errors.jobShift}</p>}
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">Number of Positions *</label>
+                                    <label className="block text-sm font-medium mb-1">Number of Positions</label>
                                     <input
                                         type="number"
                                         name="positions"
                                         value={formData.positions}
                                         onChange={handleInputChange}
-                                        className={`w-full border px-3 py-2 rounded text-sm ${errors.positions ? "border-red-500" : "border-gray-300"
-                                            }`}
+                                        className="w-full border border-gray-300 px-3 py-2 rounded text-sm"
                                         placeholder="Number of Positions"
                                     />
-                                    {errors.positions && <p className="text-red-500 text-xs mt-1">{errors.positions}</p>}
                                 </div>
 
                                 <div>
@@ -758,13 +904,14 @@ export default function PostAJobAdmin() {
                                     />
                                 </div>
 
-                                <div>
+                                {/* <div>
                                     <label className="block text-sm font-medium mb-1">Required Degree Level</label>
                                     <select
                                         name="degreeLevel"
                                         value={formData.degreeLevel}
                                         onChange={handleInputChange}
-                                        className="w-full border border-gray-300 px-3 py-2 rounded text-sm">
+                                        className="w-full border border-gray-300 px-3 py-2 rounded text-sm"
+                                    >
                                         <option value="">Select Required Degree Level</option>
                                         {degreeLevels.map((degree) => (
                                             <option key={degree._id} value={degree._id}>
@@ -772,6 +919,26 @@ export default function PostAJobAdmin() {
                                             </option>
                                         ))}
                                     </select>
+                                </div> */}
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">
+                                        Required Degree Level
+                                    </label>
+
+                                    <Select
+                                        isMulti
+                                        options={degreeLevelOptions}
+                                        value={degreeLevelOptions.filter(opt =>
+                                            formData.degreeLevel.includes(opt.value)
+                                        )}
+                                        onChange={(selected) =>
+                                            setFormData(prev => ({
+                                                ...prev,
+                                                degreeLevel: selected ? selected.map(s => s.value) : []
+                                            }))
+                                        }
+                                        placeholder="Select Degree Levels"
+                                    />
                                 </div>
 
                                 <div>
@@ -784,7 +951,7 @@ export default function PostAJobAdmin() {
                                     >
                                         <option value="">Select Required Experience</option>
                                         {experienceLevels.map((exp) => (
-                                            <option key={exp._id} value={exp.name}>
+                                            <option key={exp._id} value={exp._id}>
                                                 {exp.name}
                                             </option>
                                         ))}
@@ -805,19 +972,23 @@ export default function PostAJobAdmin() {
                                     </select>
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">Mode</label>
+                                    <label className="block text-sm font-medium mb-1">Job Mode *</label>
                                     <select
                                         name="mode"
                                         value={formData.mode}
                                         onChange={handleInputChange}
-                                        className="w-full border border-gray-300 px-3 py-2 rounded text-sm"
+                                        className={`w-full border px-3 py-2 rounded text-sm ${errors.mode ? "border-red-500" : "border-gray-300"
+                                            }`}
                                     >
-                                        <option value="">Select Mode</option>
-                                        <option value="remote">Remote</option>
-                                        <option value="online">Online</option>
-                                        <option value="offline">Offline</option>
+                                        <option value="">Select Job Mode</option>
+                                        <option value="Work From Home">Work From Home</option>
+                                        <option value="Work From Office">Work From Office</option>
+                                        <option value="Hybrid">Hybrid</option>
                                     </select>
 
+                                    {errors.mode && (
+                                        <p className="text-red-500 text-xs mt-1">{errors.mode}</p>
+                                    )}
                                 </div>
 
                                 <div className="flex items-center gap-2">

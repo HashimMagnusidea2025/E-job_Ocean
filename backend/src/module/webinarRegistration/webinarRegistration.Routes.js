@@ -2,6 +2,7 @@ import express from 'express';
 
 
 import { CreateWebinarRegistration,importWebinarRegistrations,updateWebinarRegistration,deleteWebinarRegistration ,CreateOneToOneRegistration, updateOneToOneRegistration,deleteOneToOneRegistration,getWebinarRegistrationsList,getOneToOneRegistrationsList ,getWebinarRegistration,createGoogleEvent,getWebinarRegistrationById } from "./webinarRegistration.controller.js";
+
 import multer from "multer";
 import path from "path";
 
@@ -23,6 +24,7 @@ WebinarRegistrationRoute.get("/one-to-one", getOneToOneRegistrationsList);
 WebinarRegistrationRoute.post('/one-to-one',CreateOneToOneRegistration);
 WebinarRegistrationRoute.put('/one-to-one/update/:id',updateOneToOneRegistration);
 WebinarRegistrationRoute.delete('/one-to-one/delete/:id',deleteOneToOneRegistration);
+
 
 
 WebinarRegistrationRoute.get("/:id", getWebinarRegistrationById);

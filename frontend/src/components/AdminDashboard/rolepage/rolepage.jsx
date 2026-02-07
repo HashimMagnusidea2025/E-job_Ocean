@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import axios from "../../../utils/axios.js";
-import DataTable from "react-data-table-component";
+import {
+  useReactTable,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  flexRender,
+} from "@tanstack/react-table";
 import { FaEdit, FaTrash, FaToggleOn, FaToggleOff } from "react-icons/fa";
 import Swal from "sweetalert2";
 import Layout from "../../seekerDashboard/partials/layout.jsx";
@@ -8,10 +14,10 @@ import Layout from "../../seekerDashboard/partials/layout.jsx";
 export default function RolesPage() {
   const [roles, setRoles] = useState([]);
   const [filteredRoles, setFilteredRoles] = useState([]);
-  const [filterText, setFilterText] = useState("");
+  const [searchText, setSearchText] = useState("");
   const [name, setName] = useState("");
   const [permissions, setPermissions] = useState([]);
-  const [status, setStatus] = useState("active"); // NEW
+  const [status, setStatus] = useState("active"); 
   const [allPermissions, setAllPermissions] = useState([]);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingRoleId, setEditingRoleId] = useState(null);
@@ -37,13 +43,20 @@ export default function RolesPage() {
         alert("Failed to load permissions");
       });
   }, []);
+  
+  const handleSearch = (e) => {
+    const value = e.target.value.toLowerCase();
+    setSearchText(value);
 
-  useEffect(() => {
     const filtered = roles.filter((role) =>
-      role.name.toLowerCase().includes(filterText.toLowerCase())
+      role.name.toLowerCase().includes(value) ||
+      role.permissions.some(p => p.name.toLowerCase().includes(value)) ||
+      role.status.toLowerCase().includes(value)
     );
+
     setFilteredRoles(filtered);
-  }, [filterText, roles]);
+  };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -107,55 +120,84 @@ export default function RolesPage() {
     }
   };
 
+  const handleToggleStatus = async (id, currentStatus) => {
+    const newStatus = currentStatus === "active" ? "inactive" : "active";
+    try {
+      await axios.put(`/roles/${id}`, { status: newStatus });
+      Swal.fire("Updated!", `Role status changed to ${newStatus}`, "success");
+      fetchRoles();
+    } catch (err) {
+      Swal.fire("Error", err.response?.data?.message || err.message, "error");
+    }
+  };
+
   const columns = [
     {
-      name: "Role Name",
-      selector: (row) => row.name,
-      sortable: true,
+      header: "ID",
+      cell: ({ row }) => row.index + 1,
     },
     {
-      name: "Permissions",
-      selector: (row) =>
-        row.permissions.map((p) => p.name).join(", ") || "No permissions",
-      wrap: true,
+      accessorKey: "name",
+      header: "Role Name",
     },
-   {
-         name: "Status",
-         cell: (row) => (
-           <div className="flex items-center gap-2">
-             <span
-               className={`px-2 py-1 text-xs rounded text-white ${
-                 row.status === "active" ? "bg-green-500" : "bg-red-500"
-               }`}
-             >
-               {row.status}
-             </span>
-             <button onClick={() => handleToggleStatus(row._id, row.status)}>
-               {row.status === "active" ? (
-                 <FaToggleOn size={22} className="text-green-500" />
-               ) : (
-                 <FaToggleOff size={22} className="text-red-500" />
-               )}
-             </button>
-           </div>
-         ),
-       },
     {
-      name: "Actions",
-      cell: (row) => (
-        <div className="flex gap-3 text-lg">
-          <button onClick={() => handleEdit(row)} title="Edit">
-            <FaEdit size={20} className="text-blue-600 hover:text-blue-800" />
-          </button>
-          <button onClick={() => handleDelete(row._id)} title="Delete">
-            <FaTrash size={20} className="text-red-600 hover:text-red-800" />
+      header: "Permissions",
+      cell: ({ row }) =>
+        row.original.permissions.map((p) => p.name).join(", ") || "No permissions",
+    },
+    {
+      header: "Status",
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          <span
+            className={`px-2 py-1 text-xs rounded text-white ${
+              row.original.status === "active" ? "bg-green-500" : "bg-red-500"
+            }`}
+          >
+            {row.original.status}
+          </span>
+          <button onClick={() => handleToggleStatus(row.original._id, row.original.status)}>
+            {row.original.status === "active" ? (
+              <FaToggleOn size={22} className="text-green-500" />
+            ) : (
+              <FaToggleOff size={22} className="text-red-500" />
+            )}
           </button>
         </div>
       ),
-      ignoreRowClick: true,
-      
+    },
+    {
+      header: "Actions",
+      cell: ({ row }) => (
+        <div className="flex gap-3">
+          <button
+            onClick={() => handleEdit(row.original)}
+            className="text-blue-600"
+          >
+            <FaEdit size={20} />
+          </button>
+          <button
+            onClick={() => handleDelete(row.original._id)}
+            className="text-red-600"
+          >
+            <FaTrash size={20} />
+          </button>
+        </div>
+      ),
     },
   ];
+
+  const table = useReactTable({
+    data: filteredRoles,
+    columns,
+    state: {
+      globalFilter: searchText,
+    },
+    onGlobalFilterChange: setSearchText,
+    getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+  });
 
   return (
     <Layout>
@@ -184,24 +226,81 @@ export default function RolesPage() {
         <div className="mb-4">
           <input
             type="text"
-            placeholder="Search by role name..."
-            value={filterText}
-            onChange={(e) => setFilterText(e.target.value)}
+            placeholder="Search roles..."
+            value={searchText}
+            onChange={handleSearch}
             className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
           />
         </div>
 
         {/* Table */}
-        <div className="bg-white shadow-md rounded-xl p-4 overflow-x-auto">
-          <DataTable
-            title="All Roles"
-            columns={columns}
-            data={filteredRoles}
-            pagination
-            highlightOnHover
-            responsive
-            dense
-          />
+        <div className="bg-white rounded-lg shadow overflow-x-auto">
+          <table className="min-w-full border">
+            <thead className="bg-gray-100">
+              {table.getHeaderGroups().map(headerGroup => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map(header => (
+                    <th
+                      key={header.id}
+                      className="px-4 py-3 text-left text-sm font-semibold border"
+                    >
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+
+            <tbody>
+              {table.getRowModel().rows.map(row => (
+                <tr key={row.id} className="hover:bg-gray-50">
+                  {row.getVisibleCells().map(cell => (
+                    <td key={cell.id} className="px-4 py-2 border text-sm">
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+
+              {table.getRowModel().rows.length === 0 && (
+                <tr>
+                  <td colSpan={columns.length} className="text-center py-6 text-gray-500">
+                    No roles found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+
+          {/* Pagination */}
+          <div className="flex justify-between items-center p-4">
+            <button
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+              className="px-4 py-2 border rounded disabled:opacity-50"
+            >
+              Previous
+            </button>
+
+            <span className="text-sm">
+              Page {table.getState().pagination.pageIndex + 1} of{" "}
+              {table.getPageCount()}
+            </span>
+
+            <button
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+              className="px-4 py-2 border rounded disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
         </div>
 
         {/* Modal Form */}

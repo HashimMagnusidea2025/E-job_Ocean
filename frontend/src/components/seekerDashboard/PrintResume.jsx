@@ -12,7 +12,6 @@ const baseUrl = import.meta.env.VITE_BACKEND_URL
 export default function PrintResume() {
     const resumeRef = useRef();
 
-
     const handleDownloadPDF = async () => {
         const element = resumeRef.current;
         const canvas = await html2canvas(element, { scale: 2, useCORS: true });
@@ -38,12 +37,12 @@ export default function PrintResume() {
 
 
     const [seekerLocation, setSeekerLocation] = useState({ country: "", state: "", city: "" });
-    // Function to fetch location names for education
+    
     const fetchEducationLocationNames = async (edu) => {
         try {
             const locationNames = { city: "", state: "", country: "" };
 
-            // Fetch country name
+            
             if (edu.country) {
                 try {
                     const countryResponse = await axios.get(`/country/${edu.country}`);
@@ -52,7 +51,7 @@ export default function PrintResume() {
                     }
                 } catch (err) {
                     console.error("Error fetching country:", err);
-                    locationNames.country = edu.country; // Fallback to ID
+                    locationNames.country = edu.country; 
                 }
             }
 
@@ -64,12 +63,12 @@ export default function PrintResume() {
                     }
                 } catch (err) {
                     console.error("Error fetching country:", err);
-                    locationNames.state = edu.state; // Fallback to ID
+                    locationNames.state = edu.state; 
                 }
             }
 
 
-            // Fetch city name
+           
             if (edu.city) {
                 try {
                     const cityResponse = await axios.get(`/city/${edu.city}`);
@@ -78,7 +77,7 @@ export default function PrintResume() {
                     }
                 } catch (err) {
                     console.error("Error fetching city:", err);
-                    locationNames.city = edu.city; // Fallback to ID
+                    locationNames.city = edu.city; 
                 }
             }
 
@@ -91,12 +90,12 @@ export default function PrintResume() {
 
 
 
-    // Function to fetch location names for experience
+    
     const fetchExperienceLocationNames = async (exp) => {
         try {
             const locationNames = { city: "", state: "", country: "" };
 
-            // Fetch country name
+           
             if (exp.country) {
                 try {
                     const countryResponse = await axios.get(`/country/${exp.country}`);
@@ -105,7 +104,7 @@ export default function PrintResume() {
                     }
                 } catch (err) {
                     console.error("Error fetching country:", err);
-                    locationNames.country = exp.country; // Fallback to ID
+                    locationNames.country = exp.country;
                 }
             }
 
@@ -117,11 +116,11 @@ export default function PrintResume() {
                     }
                 } catch (err) {
                     console.error("Error fetching state:", err);
-                    locationNames.state = exp.state; // Fallback to ID
+                    locationNames.state = exp.state; 
                 }
             }
 
-            // Fetch city name
+            
             if (exp.city) {
                 try {
                     const cityResponse = await axios.get(`/city/${exp.city}`);
@@ -130,7 +129,7 @@ export default function PrintResume() {
                     }
                 } catch (err) {
                     console.error("Error fetching city:", err);
-                    locationNames.city = exp.city; // Fallback to ID
+                    locationNames.city = exp.city; 
                 }
             }
 
@@ -142,12 +141,12 @@ export default function PrintResume() {
     };
 
 
-    // Function to fetch seeker location names
+   
     const fetchSeekerLocationNames = async (seekerData) => {
         try {
             const locationNames = { country: "", state: "", city: "" };
 
-            // Fetch country name
+           
             if (seekerData.country) {
                 try {
                     const countryResponse = await axios.get(`/country/${seekerData.country}`);
@@ -156,7 +155,7 @@ export default function PrintResume() {
                     }
                 } catch (err) {
                     console.error("Error fetching country:", err);
-                    locationNames.country = seekerData.country; // Fallback to ID
+                    locationNames.country = seekerData.country; 
                 }
             }
 
@@ -168,11 +167,11 @@ export default function PrintResume() {
                     }
                 } catch (err) {
                     console.error("Error fetching state:", err);
-                    locationNames.state = seekerData.state; // Fallback to ID
+                    locationNames.state = seekerData.state; 
                 }
             }
 
-            // Fetch city name
+            
             if (seekerData.city) {
                 try {
                     const cityResponse = await axios.get(`/city/${seekerData.city}`);
@@ -181,7 +180,7 @@ export default function PrintResume() {
                     }
                 } catch (err) {
                     console.error("Error fetching city:", err);
-                    locationNames.city = seekerData.city; // Fallback to ID
+                    locationNames.city = seekerData.city; 
                 }
             }
 
@@ -192,12 +191,12 @@ export default function PrintResume() {
         }
     };
 
-    // Fetch all data on component mount
+    
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setLoading(true);
-                const token = localStorage.getItem('token'); // Or from context
+                const token = localStorage.getItem('token'); 
                 const config = {
                     headers: { Authorization: `Bearer ${token}` }
 
@@ -205,23 +204,23 @@ export default function PrintResume() {
                 };
 
 
-                // Fetch seeker information
+           
                 const seekerResponse = await axios.get('/seeker/me', config);
                 const seekerData = seekerResponse.data.data;
                 setSeekerInfo(seekerData);
                 console.log(seekerData);
 
 
-                // Fetch seeker location names
+               
                 const seekerLoc = await fetchSeekerLocationNames(seekerData);
                 setSeekerLocation(seekerLoc);
 
-                // Fetch experiences
+               
                 const expResponse = await axios.get('/build-Resume/experiences', config);
                 const experiencesData = expResponse.data.data;
                 setExperiences(experiencesData);
 
-                // Fetch educations
+               
                 const eduResponse = await axios.get('/build-Resume/educations', config);
                 const educationsData = eduResponse.data.data;
                 console.log(educationsData);
@@ -229,7 +228,7 @@ export default function PrintResume() {
                 setEducations(educationsData);
 
 
-                // Fetch location names for all educations
+               
                 const locationsMap = {};
                 for (let edu of educationsData) {
                     if (edu.isActive) {
@@ -240,7 +239,6 @@ export default function PrintResume() {
                 setEducationLocations(locationsMap);
 
 
-                // Fetch location names for all experiences
                 const expLocationsMap = {};
                 for (let exp of experiencesData) {
                     if (exp.isActive) {
@@ -250,16 +248,12 @@ export default function PrintResume() {
                 }
                 setExperienceLocations(expLocationsMap);
 
-
-                // Fetch skills
                 const skillsResponse = await axios.get('/build-Resume/skills', config);
                 setSkills(skillsResponse.data.data);
 
-                // Fetch languages
+               
                 const langResponse = await axios.get('/build-Resume/languages', config);
                 setLanguages(langResponse.data.data);
-
-
 
                 setLoading(false);
             } catch (err) {
@@ -271,11 +265,9 @@ export default function PrintResume() {
         fetchData();
     }, []);
 
-
-    // Helper function to get education location string
     const getEducationLocation = (edu) => {
         const location = educationLocations[edu._id];
-        if (!location) return `${edu.city},${edu.state}, ${edu.country}`; // Fallback to IDs if not loaded
+        if (!location) return `${edu.city},${edu.state}, ${edu.country}`;
 
         const locationParts = [
             location.city,

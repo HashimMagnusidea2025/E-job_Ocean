@@ -22,7 +22,7 @@ const JobSeekerRegister = () => {
 
         const roles = Array.isArray(res.data) ? res.data : res.data.roles || [];
 
-        // ✅ Find the seeker role
+        //  Find the seeker role
         const seekerRole = roles.find(
           (role) =>
             role.name?.toLowerCase() === "seeker" ||
